@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <map>
+#include <random>
 
 #include "charset.h"
 #include "mpdpp.h"
@@ -589,13 +590,33 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number, std::mt19937 &rng
 	{
 		StartSearch(true);
 		AddSearch(tag, *it++);
-		std::vector<std::string> paths;
+		std::vector<Song> songs;
+		std::set<std::string> album_artists;
 		MPD::SongIterator s = CommitSearchSongs(), end;
 		for (; s != end; ++s)
-			paths.push_back(s->getURI());
+		{
+			songs.push_back(*s);
+			// TODO: handle songs with many album artists
+			if (tag == MPD_TAG_ALBUM)
+				album_artists.insert(s->getAlbumArtist());
+		}
+		std::string selected_album_artist;
+		if (tag == MPD_TAG_ALBUM && album_artists.size() > 1)
+		{
+			// Treat (album, album artist) as the identifier when picking albums.
+			// So pick a single album artist.
+			std::uniform_int_distribution<size_t> udist(0, album_artists.size() - 1);
+			std::set<std::string>::const_iterator aait(album_artists.begin());
+			std::advance(aait, udist(rng));
+			selected_album_artist = *aait;
+		}
 		StartCommandsList();
-		for (const auto &path : paths)
-			AddSong(path);
+		for (const auto &song : songs)
+		{
+			if (tag != MPD_TAG_ALBUM || album_artists.size() <= 1 ||
+					song.getAlbumArtist() == selected_album_artist)
+				AddSong(song.getURI());
+		}
 		CommitCommandsList();
 	}
 	return true;
