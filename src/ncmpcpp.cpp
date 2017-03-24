@@ -54,6 +54,7 @@ namespace {
 
 std::ofstream errorlog;
 std::streambuf *cerr_buffer;
+std::streambuf *clog_buffer;
 
 volatile bool run_resize_screen = false;
 	
@@ -69,8 +70,9 @@ void sighandler(int sig)
 
 void do_at_exit()
 {
-	// restore old cerr buffer
+	// restore old cerr & clog buffers
 	std::cerr.rdbuf(cerr_buffer);
+	std::clog.rdbuf(clog_buffer);
 	errorlog.close();
 	Mpd.Disconnect();
 	NC::destroyScreen();
@@ -91,6 +93,9 @@ int main(int argc, char **argv)
 	
 	std::setlocale(LC_ALL, "");
 	std::locale::global(Charset::internalLocale());
+
+	// clog might be overriden in configure, so preserve the original buffer.
+	clog_buffer = std::clog.rdbuf();
 
 	if (!configure(argc, argv))
 		return 0;
