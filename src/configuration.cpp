@@ -24,6 +24,7 @@
 #include <boost/program_options.hpp>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
 
 #include "bindings.h"
 #include "configuration.h"
@@ -72,6 +73,7 @@ bool configure(int argc, char **argv)
 		xdg_config_home() + "ncmpcpp/config"
 	};
 
+	std::ofstream null_stream;
 	std::string bindings_path;
 	std::vector<std::string> config_paths;
 
@@ -88,12 +90,20 @@ bool configure(int argc, char **argv)
 		("slave-screen,S", po::value<std::string>()->value_name("SCREEN"), "specify the startup slave screen")
 		("help,?", "show help message")
 		("version,v", "display version information")
+		("quiet,q", "suppress logs and excess output")
 	;
 
 	po::variables_map vm;
 	try
 	{
 		po::store(po::parse_command_line(argc, argv, options), vm);
+
+		// suppress messages from std::clog
+		if (vm.count("quiet"))
+		{
+			null_stream.open("/dev/null");
+			std::clog.rdbuf(null_stream.rdbuf());
+		}
 
 		if (vm.count("help"))
 		{

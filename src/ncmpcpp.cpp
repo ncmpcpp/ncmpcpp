@@ -91,6 +91,7 @@ int main(int argc, char **argv)
 	
 	std::setlocale(LC_ALL, "");
 	std::locale::global(Charset::internalLocale());
+	std::streambuf *backup = std::clog.rdbuf();
 
 	if (!configure(argc, argv))
 		return 0;
@@ -246,5 +247,6 @@ int main(int argc, char **argv)
 			Statusbar::printf("Unexpected error: %1%", e.what());
 		}
 	}
+	std::clog.rdbuf(backup);
 	return 0;
 }
