@@ -54,7 +54,10 @@ int read_key(FILE *)
 		x = w->getX();
 		if (w->runPromptHook(rl_line_buffer, &done))
 		{
-			if (done)
+			// Do not end if readline is in one of its commands, e.g. searching
+			// through history, as it doesn't actually make readline exit and it
+			// becomes stuck in a loop.
+			if (!RL_ISSTATE(RL_STATE_DISPATCHING) && done)
 			{
 				rl_done = 1;
 				return EOF;
