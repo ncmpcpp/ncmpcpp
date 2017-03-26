@@ -126,11 +126,7 @@ void Scrollpad::clear()
 {
 	m_real_height = m_height;
 	m_buffer.clear();
-	werase(m_window);
-	delwin(m_window);
-	m_window = newpad(m_height, m_width);
-	setTimeout(m_window_timeout);
-	setColor(m_color);
+	Window::clear();
 }
 
 const std::string &Scrollpad::buffer()

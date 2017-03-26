@@ -483,6 +483,7 @@ Window::Window(size_t startx, size_t starty, size_t width, size_t height,
 	}
 	
 	m_window = newpad(m_height, m_width);
+	wtimeout(m_window, 0);
 
 	setBaseColor(color);
 	setColor(m_base_color);
@@ -719,6 +720,7 @@ void Window::refresh()
 void Window::clear()
 {
 	werase(m_window);
+	setColor(m_base_color);
 }
 
 void Window::bold(bool bold_state) const
