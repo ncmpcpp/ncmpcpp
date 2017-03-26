@@ -61,6 +61,17 @@ MPD::SongIterator getDatabaseIterator(MPD::Connection &mpd)
 		else
 			throw;
 	}
+	catch (MPD::ServerError &e)
+	{
+		// mopidy blacklists 'listallinfo' command by default and throws server
+		// error when it receives it. Work around that to prevent ncmpcpp from
+		// continuously retrying to send the command and looping.
+		if (strstr(e.what(), "listallinfo") != nullptr
+		    && strstr(e.what(), "disabled") != nullptr)
+			Statusbar::print("Unable to fetch the data, server refused to process 'listallinfo' command");
+		else
+			throw;
+	}
 	return result;
 }
 
