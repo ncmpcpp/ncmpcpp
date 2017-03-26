@@ -93,7 +93,7 @@ struct SortSongs {
 	std::ptrdiff_t m_offset;
 	
 public:
-	SortSongs(bool disc_only)
+	SortSongs(bool disc_only = false)
 	: m_cmp(std::locale(), Config.ignore_leading_the), m_offset(disc_only ? 2 : 0) { }
 	
 	bool operator()(const SongItem &a, const SongItem &b) {
@@ -690,25 +690,23 @@ bool MediaLibrary::addItemToPlaylist(bool play)
 			Mpd.AddSearch(Config.media_lib_primary_tag, Tags.current()->value().tag());
 			std::vector<MPD::Song> list(
 				std::make_move_iterator(Mpd.CommitSearchSongs()),
-				std::make_move_iterator(MPD::SongIterator())
-			);
+				std::make_move_iterator(MPD::SongIterator()));
+			std::sort(list.begin(), list.end(), SortSongs());
 			result = addSongsToPlaylist(list.begin(), list.end(), play, -1);
 			std::string tag_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));
 			Statusbar::printf("Songs with %1% \"%2%\" added%3%",
-				tag_type, Tags.current()->value().tag(), withErrors(result)
-			);
+				tag_type, Tags.current()->value().tag(), withErrors(result));
 		}
 		else if (isActiveWindow(Albums))
 		{
 			std::vector<MPD::Song> list(
 				std::make_move_iterator(getSongsFromAlbum(Albums.current()->value())),
-				std::make_move_iterator(MPD::SongIterator())
-			);
+				std::make_move_iterator(MPD::SongIterator()));
+			std::sort(list.begin(), list.end(), SortSongs());
 			result = addSongsToPlaylist(list.begin(), list.end(), play, -1);
 			Statusbar::printf("Songs from album \"%1%\" added%2%",
-				Albums.current()->value().entry().album(), withErrors(result)
-			);
+				Albums.current()->value().entry().album(), withErrors(result));
 		}
 	}
 	return result;
@@ -722,11 +720,12 @@ std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 		auto tag_handler = [&result](const std::string &tag) {
 			Mpd.StartSearch(true);
 			Mpd.AddSearch(Config.media_lib_primary_tag, tag);
+			size_t begin = result.size();
 			std::copy(
 				std::make_move_iterator(Mpd.CommitSearchSongs()),
 				std::make_move_iterator(MPD::SongIterator()),
-				std::back_inserter(result)
-			);
+				std::back_inserter(result));
+			std::sort(result.begin()+begin, result.end(), SortSongs());
 		};
 		bool any_selected = false;
 		for (auto &e : Tags)
@@ -762,9 +761,8 @@ std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 				std::copy(
 					std::make_move_iterator(Mpd.CommitSearchSongs()),
 					std::make_move_iterator(MPD::SongIterator()),
-					std::back_inserter(result)
-				);
-				std::sort(result.begin()+begin, result.end(), SortSongs(false));
+					std::back_inserter(result));
+				std::sort(result.begin()+begin, result.end(), SortSongs());
 			}
 		}
 		// if no item is selected, add songs from right column
@@ -777,7 +775,7 @@ std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 				std::make_move_iterator(MPD::SongIterator()),
 				std::back_inserter(result)
 			);
-			std::sort(result.begin()+begin, result.end(), SortSongs(false));
+			std::sort(result.begin()+begin, result.end(), SortSongs());
 		}
 	}
 	else if (isActiveWindow(Songs))
