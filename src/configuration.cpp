@@ -202,6 +202,7 @@ bool configure(int argc, char **argv)
 
 		// create directories
 		boost::filesystem::create_directory(Config.ncmpcpp_directory);
+		boost::filesystem::create_directory(Config.logs_directory);
 		boost::filesystem::create_directory(Config.lyrics_directory);
 
 		// try to get MPD connection details from environment variables

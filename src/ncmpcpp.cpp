@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 	atexit(do_at_exit);
 	
 	// redirect std::cerr output to ~/.ncmpcpp/error.log file
-	errorlog.open((Config.ncmpcpp_directory + "error.log").c_str(), std::ios::app);
+	errorlog.open((Config.logs_directory + "error.log").c_str(), std::ios::app);
 	cerr_buffer = std::cerr.rdbuf();
 	std::cerr.rdbuf(errorlog.rdbuf());
 	

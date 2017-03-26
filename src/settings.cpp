@@ -177,6 +177,21 @@ NC::Buffer buffer(const std::string &v)
 	return result;
 }
 
+std::string xdg_cache_home()
+{
+	std::string result;
+	const char *env_xdg_cache_home = getenv("XDG_CACHE_HOME");
+	if (env_xdg_cache_home == nullptr)
+		result = "~/.cache/";
+	else
+	{
+		result = env_xdg_cache_home;
+		if (!result.empty() && result.back() != '/')
+			result += "/";
+	}
+	return result;
+}
+
 void deprecated(const char *option, double version_removal, const char *advice)
 {
 	std::cerr << "WARNING: Variable '" << option
@@ -210,6 +225,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 
 	// keep the same order of variables as in configuration file
 	p.add("ncmpcpp_directory", &ncmpcpp_directory, "~/.ncmpcpp/", adjust_directory);
+	p.add("logs_directory", &logs_directory, xdg_cache_home() + "ncmpcpp/", adjust_directory);
 	p.add("lyrics_directory", &lyrics_directory, "~/.lyrics/", adjust_directory);
 	p.add<void>("mpd_host", nullptr, "localhost", [](std::string host) {
 			expand_home(host);

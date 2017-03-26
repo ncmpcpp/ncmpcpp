@@ -16,6 +16,13 @@
 #ncmpcpp_directory = ~/.ncmpcpp
 #
 ##
+## Directory for storing log files (like error.log).
+## It defaults to $XDG_CACHE_HOME/ncmpcpp.
+##
+#
+#logs_directory = ~/.cache/ncmpcpp
+#
+##
 ## Directory for storing downloaded lyrics. It
 ## defaults to ~/.lyrics since other MPD clients
 ## (eg. ncmpc) also use that location.

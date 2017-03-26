@@ -61,6 +61,9 @@ Directory for storing ncmpcpp related files. Changing it is useful if you want t
 .B lyrics_directory = PATH
 Directory for storing downloaded lyrics. It defaults to ~/.lyrics since other MPD clients (eg. ncmpc) also use that location.
 .TP
+.B logs_directory = PATH
+Directory for storing log files (like error.log). It defaults to $XDG_CACHE_HOME/ncmpcpp.
+.TP
 .B mpd_host = HOST
 Connect to MPD running on specified host/unix socket. When HOST starts with a '/', it is assumed to be a unix socket. Note: MPD_HOST environment variable overrides this setting.
 .TP
