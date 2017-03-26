@@ -73,7 +73,6 @@ bool configure(int argc, char **argv)
 		xdg_config_home() + "ncmpcpp/config"
 	};
 
-	std::ofstream null_stream;
 	std::string bindings_path;
 	std::vector<std::string> config_paths;
 
@@ -101,6 +100,7 @@ bool configure(int argc, char **argv)
 		// suppress messages from std::clog
 		if (vm.count("quiet"))
 		{
+			std::ofstream null_stream;
 			null_stream.open("/dev/null");
 			std::clog.rdbuf(null_stream.rdbuf());
 		}

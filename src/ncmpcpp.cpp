@@ -54,6 +54,7 @@ namespace {
 
 std::ofstream errorlog;
 std::streambuf *cerr_buffer;
+std::streambuf *clog_buffer = std::clog.rdbuf();
 
 volatile bool run_resize_screen = false;
 	
@@ -69,8 +70,9 @@ void sighandler(int sig)
 
 void do_at_exit()
 {
-	// restore old cerr buffer
+	// restore old cerr & clog buffers
 	std::cerr.rdbuf(cerr_buffer);
+	std::clog.rdbuf(clog_buffer);
 	errorlog.close();
 	Mpd.Disconnect();
 	NC::destroyScreen();
@@ -91,7 +93,6 @@ int main(int argc, char **argv)
 	
 	std::setlocale(LC_ALL, "");
 	std::locale::global(Charset::internalLocale());
-	std::streambuf *backup = std::clog.rdbuf();
 
 	if (!configure(argc, argv))
 		return 0;
@@ -247,6 +248,5 @@ int main(int argc, char **argv)
 			Statusbar::printf("Unexpected error: %1%", e.what());
 		}
 	}
-	std::clog.rdbuf(backup);
 	return 0;
 }
