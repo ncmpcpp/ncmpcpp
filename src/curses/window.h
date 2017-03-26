@@ -149,7 +149,7 @@ struct Color
 	friend struct Window;
 
 	static const short transparent;
-	static const short previous;
+	static const short current;
 
 	Color() : m_impl(0, 0, true, false) { }
 	Color(short foreground_value, short background_value,
@@ -183,7 +183,7 @@ struct Color
 private:
 	short foreground() const { return std::get<0>(m_impl); }
 	short background() const { return std::get<1>(m_impl); }
-	bool previousBackground() const { return background() == previous; }
+	bool currentBackground() const { return background() == current; }
 
 	std::tuple<short, short, bool, bool> m_impl;
 };

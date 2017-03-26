@@ -199,17 +199,17 @@ std::vector<int> color_pair_map;
 namespace NC {
 
 const short Color::transparent = -1;
-const short Color::previous = -2;
+const short Color::current = -2;
 
 Color Color::Default(0, 0, true, false);
-Color Color::Black(COLOR_BLACK, Color::previous);
-Color Color::Red(COLOR_RED, Color::previous);
-Color Color::Green(COLOR_GREEN, Color::previous);
-Color Color::Yellow(COLOR_YELLOW, Color::previous);
-Color Color::Blue(COLOR_BLUE, Color::previous);
-Color Color::Magenta(COLOR_MAGENTA, Color::previous);
-Color Color::Cyan(COLOR_CYAN, Color::previous);
-Color Color::White(COLOR_WHITE, Color::previous);
+Color Color::Black(COLOR_BLACK, Color::current);
+Color Color::Red(COLOR_RED, Color::current);
+Color Color::Green(COLOR_GREEN, Color::current);
+Color Color::Yellow(COLOR_YELLOW, Color::current);
+Color Color::Blue(COLOR_BLUE, Color::current);
+Color Color::Magenta(COLOR_MAGENTA, Color::current);
+Color Color::Cyan(COLOR_CYAN, Color::current);
+Color Color::White(COLOR_WHITE, Color::current);
 Color Color::End(0, 0, false, true);
 
 int Color::pairNumber() const
@@ -219,7 +219,7 @@ int Color::pairNumber() const
 		throw std::logic_error("'end' doesn't have a corresponding pair number");
 	else if (!isDefault())
 	{
-		if (!previousBackground())
+		if (!currentBackground())
 			result = (background() + 1) % COLORS;
 		result *= 256;
 		result += foreground() % COLORS;
@@ -270,8 +270,8 @@ std::istream &operator>>(std::istream &is, Color &c)
 			result = COLOR_WHITE;
 		else if (background && s == "transparent")
 			result = NC::Color::transparent;
-		else if (background && s == "previous")
-			result = NC::Color::previous;
+		else if (background && s == "current")
+			result = NC::Color::current;
 		else if (std::all_of(s.begin(), s.end(), isdigit))
 		{
 			result = atoi(s.c_str());
@@ -313,7 +313,7 @@ std::istream &operator>>(std::istream &is, Color &c)
 				c = Color(fg, bg);
 		}
 		else
-			c = Color(fg, NC::Color::previous);
+			c = Color(fg, NC::Color::current);
 	}
 	return is;
 }
@@ -571,7 +571,7 @@ void Window::setColor(Color c)
 		c = m_base_color;
 	if (c != Color::Default)
 	{
-		assert(!c.previousBackground());
+		assert(!c.currentBackground());
 		wcolor_set(m_window, c.pairNumber(), nullptr);
 	}
 	else
@@ -581,7 +581,7 @@ void Window::setColor(Color c)
 
 void Window::setBaseColor(const Color &color)
 {
-	if (color.previousBackground())
+	if (color.currentBackground())
 		m_base_color = Color(color.foreground(), Color::transparent);
 	else
 		m_base_color = color;
@@ -1316,7 +1316,7 @@ Window &Window::operator<<(const Color &c)
 	}
 	else
 	{
-		if (c.previousBackground())
+		if (c.currentBackground())
 		{
 			short background = m_color.isDefault()
 				? Color::transparent

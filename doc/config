@@ -495,6 +495,12 @@
 ## the bottom of the help screen for list of available colors
 ## and their numerical values.
 ##
+## What is more, there are two special values for the background
+## color: "transparent" and "current". The first one explicitly sets
+## the background to be transparent, while the second one allows you
+## to preserve current background color and change only the foreground
+## one. It's used implicitly when background color is not specified.
+##
 ## Moreover, it is possible to attach format information to
 ## selected color variables by appending to their end a
 ## colon followed by one or more format flags, e.g. black:b
@@ -506,7 +512,7 @@
 ## alternative_ui_separator_color.
 ##
 ## Note: due to technical limitations of older ncurses
-## versionw, if 256 colors are used there is a possibility
+## version, if 256 colors are used there is a possibility
 ## that you'll be able to use only colors with transparent
 ## background.
 #
