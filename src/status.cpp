@@ -737,11 +737,16 @@ void Status::Changes::flags()
 
 			if (!switch_state.empty())
 				*wHeader << NC::XY(COLS-switch_state.length()-3, 1)
+				         << Config.state_line_color
 				         << "["
+				         << NC::FormattedColor::End(Config.state_line_color)
 								 << Config.state_flags_color
 								 << switch_state
 				         << NC::FormattedColor::End(Config.state_flags_color)
-								 << "]";
+				         << Config.state_line_color
+								 << "]"
+				         << NC::FormattedColor::End(Config.state_line_color);
+
 			break;
 		case Design::Alternative:
 			switch_state += '[';
