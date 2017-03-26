@@ -60,9 +60,13 @@ private:
 	unsigned m_delimiter;
 };
 
-template <typename CharT> using SongTagMap = std::vector<
-	std::pair<SongTag, std::basic_string<CharT> >
->;
+template <typename CharT>
+using SongTagMap = std::vector<
+	std::pair<
+		SongTag,
+		std::basic_string<CharT>
+		>
+	>;
 
 enum class Result { Empty, Missing, Ok };
 

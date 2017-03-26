@@ -199,6 +199,36 @@ MPD::Song::GetFunction charToGetFunction(char c)
 	}
 }
 
+boost::optional<mpd_tag_type> getFunctionToTagType(MPD::Song::GetFunction f)
+{
+	if (f == &MPD::Song::getArtist)
+		return MPD_TAG_ARTIST;
+	else if (f == &MPD::Song::getTitle)
+		return MPD_TAG_TITLE;
+	else if (f == &MPD::Song::getAlbum)
+		return MPD_TAG_ALBUM;
+	else if (f == &MPD::Song::getAlbumArtist)
+		return MPD_TAG_ALBUM_ARTIST;
+	else if (f == &MPD::Song::getTrack)
+		return MPD_TAG_TRACK;
+	else if (f == &MPD::Song::getDate)
+		return MPD_TAG_DATE;
+	else if (f == &MPD::Song::getGenre)
+		return MPD_TAG_GENRE;
+	else if (f == &MPD::Song::getComposer)
+		return MPD_TAG_COMPOSER;
+	else if (f == &MPD::Song::getPerformer)
+		return MPD_TAG_PERFORMER;
+	else if (f == &MPD::Song::getComment)
+		return MPD_TAG_COMMENT;
+	else if (f == &MPD::Song::getDisc)
+		return MPD_TAG_DISC;
+	else if (f == &MPD::Song::getComment)
+		return MPD_TAG_COMMENT;
+	else
+		return boost::none;
+}
+
 std::string itemTypeToString(MPD::Item::Type type)
 {
 	std::string result;
