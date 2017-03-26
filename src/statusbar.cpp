@@ -195,18 +195,19 @@ bool Statusbar::Helpers::mainHook(const char *)
 	return true;
 }
 
-std::string Statusbar::Helpers::promptReturnOneOf(std::vector<std::string> values)
+char Statusbar::Helpers::promptReturnOneOf(const std::vector<char> &values)
 {
-	Statusbar::Helpers::ImmediatelyReturnOneOf prompt_hook(std::move(values));
-	NC::Window::ScopedPromptHook hook(*wFooter, prompt_hook);
-	int x = wFooter->getX(), y = wFooter->getY();
-	std::string result;
+	if (values.empty())
+		throw std::logic_error("empty vector of acceptable input");
+	NC::Key::Type result;
 	do
 	{
-		wFooter->goToXY(x, y);
-		result = wFooter->prompt();
+		wFooter->refresh();
+		result = wFooter->readKey();
+		if (result == NC::Key::Ctrl_C || result == NC::Key::Ctrl_G)
+			throw NC::PromptAborted();
 	}
-	while (!prompt_hook.isOneOf(result));
+	while (std::find(values.begin(), values.end(), result) == values.end());
 	return result;
 }
 

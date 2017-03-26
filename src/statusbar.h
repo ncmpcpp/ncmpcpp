@@ -69,8 +69,8 @@ void mpd();
 /// called each time user types another character while inside Window::getString
 bool mainHook(const char *);
 
-/// prompt and return one of the strings specified in the vector
-std::string promptReturnOneOf(std::vector<std::string> values);
+/// prompt and return one of the characters specified in the vector
+char promptReturnOneOf(const std::vector<char> &values);
 
 struct ImmediatelyReturnOneOf
 {

@@ -281,9 +281,9 @@ void confirmAction(const boost::format &description)
 	<< " [" << NC::Format::Bold << 'y' << NC::Format::NoBold
 	<< '/' << NC::Format::Bold << 'n' << NC::Format::NoBold
 	<< "] ";
-	auto answer = Statusbar::Helpers::promptReturnOneOf({"y", "n"});
-	if (answer == "n")
-		throw NC::PromptAborted(std::move(answer));
+	char answer = Statusbar::Helpers::promptReturnOneOf({'y', 'n'});
+	if (answer == 'n')
+		throw NC::PromptAborted(std::string(1, answer));
 }
 
 bool isMPDMusicDirSet()
@@ -2106,7 +2106,7 @@ void ToggleReplayGainMode::run()
 		<< "/" << NC::Format::Bold << 't' << NC::Format::NoBold << "rack"
 		<< "/" << NC::Format::Bold << 'a' << NC::Format::NoBold << "lbum"
 		<< "] ";
-		rgm = Statusbar::Helpers::promptReturnOneOf({"t", "a", "o"})[0];
+		rgm = Statusbar::Helpers::promptReturnOneOf({'t', 'a', 'o'});
 	}
 	switch (rgm)
 	{
@@ -2176,7 +2176,7 @@ void AddRandomItems::run()
 		<< "/" << "album" << NC::Format::Bold << 'A' << NC::Format::NoBold << "rtists"
 		<< "/" << "al" << NC::Format::Bold << 'b' << NC::Format::NoBold << "ums"
 		<< "] ";
-		rnd_type = Statusbar::Helpers::promptReturnOneOf({"s", "a", "A", "b"})[0];
+		rnd_type = Statusbar::Helpers::promptReturnOneOf({'s', 'a', 'A', 'b'});
 	}
 
 	mpd_tag_type tag_type = MPD_TAG_ARTIST;
@@ -2262,7 +2262,7 @@ void ToggleLibraryTagType::run()
 		<< "/" << NC::Format::Bold << 'c' << NC::Format::NoBold << "omposer"
 		<< "/" << NC::Format::Bold << 'p' << NC::Format::NoBold << "erformer"
 		<< "] ";
-		tag_type = Statusbar::Helpers::promptReturnOneOf({"a", "A", "y", "g", "c", "p"})[0];
+		tag_type = Statusbar::Helpers::promptReturnOneOf({'a', 'A', 'y', 'g', 'c', 'p'});
 	}
 	mpd_tag_type new_tagitem = charToTagType(tag_type);
 	if (new_tagitem != Config.media_lib_primary_tag)

@@ -132,9 +132,11 @@ const Type EoF      = Special | 279;
 /// @see Window::getString()
 struct PromptAborted : std::exception
 {
+	PromptAborted() { }
+
 	template <typename ArgT>
 	PromptAborted(ArgT &&prompt)
-	: m_prompt(std::forward<ArgT>(prompt)) { }
+		: m_prompt(std::forward<ArgT>(prompt)) { }
 
 	virtual const char *what() const noexcept override { return m_prompt.c_str(); }
 
