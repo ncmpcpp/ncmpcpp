@@ -1,4 +1,6 @@
 *.o
+GTAGS
+GRTAGS
 TAGS
 Makefile
 Makefile.in
