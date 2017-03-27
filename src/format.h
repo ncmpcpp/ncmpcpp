@@ -60,10 +60,18 @@ private:
 	unsigned m_delimiter;
 };
 
+inline bool operator==(const SongTag &lhs, const SongTag &rhs) {
+	return lhs.function() == rhs.function()
+		&& lhs.delimiter() == rhs.delimiter();
+}
+inline bool operator!=(const SongTag &lhs, const SongTag &rhs) {
+	return !(lhs == rhs);
+}
+
 template <typename CharT>
-using SongTagMap = std::vector<
+using TagVector = std::vector<
 	std::pair<
-		SongTag,
+		boost::optional<SongTag>,
 		std::basic_string<CharT>
 		>
 	>;
@@ -111,6 +119,9 @@ void print(const AST<CharT> &ast, NC::BasicBuffer<CharT> &buffer,
 
 template <typename CharT>
 std::basic_string<CharT> stringify(const AST<CharT> &ast, const MPD::Song *song);
+
+template <typename CharT>
+TagVector<CharT> flatten(const AST<CharT> &ast, const MPD::Song &song);
 
 AST<char> parse(const std::string &s, const unsigned flags = Flags::All);
 AST<wchar_t> parse(const std::wstring &ws, const unsigned flags = Flags::All);

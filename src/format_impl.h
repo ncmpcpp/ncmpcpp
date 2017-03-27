@@ -125,7 +125,8 @@ struct Printer: boost::static_visitor<Result>
 			if (st.delimiter() > 0)
 			{
 				// shorten date/length by simple truncation
-				if (st.function() == &MPD::Song::getDate || st.function() == &MPD::Song::getLength)
+				if (st.function() == &MPD::Song::getDate
+				    || st.function() == &MPD::Song::getLength)
 					tags.resize(st.delimiter());
 				else
 					tags = wideShorten(tags, st.delimiter());
@@ -137,7 +138,8 @@ struct Printer: boost::static_visitor<Result>
 			return Result::Missing;
 	}
 
-	// If all Empty -> Empty, if any Ok -> continue with Ok, if any Missing -> stop with Empty.
+	// If all Empty -> Empty, if any Ok -> continue with Ok, if any Missing ->
+	// stop with Empty.
 	Result operator()(const Group<CharT> &group)
 	{
 		auto visit = [this, &group] {
@@ -196,8 +198,8 @@ private:
 			result += s;
 		}
 	};
-	// when writing to a string, we should ignore all other
-	// properties. if this code is reached, throw an exception.
+	// When writing to a string, we should ignore all other properties. If this
+	// code is reached, throw an exception.
 	template <typename ValueT, typename SomeCharT>
 	struct output_<ValueT, std::basic_string<SomeCharT>> {
 		static void exec(std::basic_string<CharT> &, const ValueT &, const SongTag *) {
@@ -205,26 +207,27 @@ private:
 		}
 	};
 
-	// Specialization for SongTagMap.
+	// Specialization for TagVector.
 	template <typename SomeCharT, typename OtherCharT>
-	struct output_<std::basic_string<SomeCharT>, SongTagMap<OtherCharT> > {
+	struct output_<std::basic_string<SomeCharT>, TagVector<OtherCharT> > {
 		// Compile only if string types are the same.
 		static typename std::enable_if<
 			std::is_same<SomeCharT, OtherCharT>::value,
 			void
-		>::type exec(SongTagMap<OtherCharT> &acc,
+		>::type exec(TagVector<OtherCharT> &acc,
 		             const std::basic_string<SomeCharT> &s, const SongTag *st) {
-			if (st != nullptr) {
+			if (st != nullptr)
 				acc.emplace_back(*st, s);
-			}
+			else
+				acc.emplace_back(boost::none, s);
 		}
 	};
-	// When extracting tags from a song all the other properties should
-	// be ignored. If that's not the case, throw an exception.
+	// When extracting tags from a song all the other properties should be
+	// ignored. If that's not the case, throw an exception.
 	template <typename ValueT, typename SomeCharT>
-	struct output_<ValueT, SongTagMap<SomeCharT> > {
-		static void exec(SongTagMap<SomeCharT> &, const ValueT &, const SongTag *) {
-			throw std::logic_error("Non-string property can't be inserted into the SongTagMap");
+	struct output_<ValueT, TagVector<SomeCharT> > {
+		static void exec(TagVector<SomeCharT> &, const ValueT &, const SongTag *) {
+			throw std::logic_error("Non-string property can't be inserted into the TagVector");
 		}
 	};
 
@@ -283,10 +286,10 @@ std::basic_string<CharT> stringify(const AST<CharT> &ast, const MPD::Song *song)
 }
 
 template <typename CharT>
-SongTagMap<CharT> extractTags(const AST<CharT> &ast, const MPD::Song &song)
+TagVector<CharT> flatten(const AST<CharT> &ast, const MPD::Song &song)
 {
-	SongTagMap<CharT> result;
-	Printer<CharT, SongTagMap<CharT> > printer(result, &song, &result, Flags::Tag);
+	TagVector<CharT> result;
+	Printer<CharT, TagVector<CharT>> printer(result, &song, &result, Flags::Tag);
 	visit(printer, ast);
 	return result;
 }
