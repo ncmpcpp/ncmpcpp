@@ -29,7 +29,7 @@
 #ifdef HAVE_TAGLIB_H
 # include "fileref.h"
 # include "tag.h"
-# include "boost/lexical_cast.hpp"
+# include <boost/lexical_cast.hpp>
 #endif // HAVE_TAGLIB_H
 
 using Global::MainHeight;

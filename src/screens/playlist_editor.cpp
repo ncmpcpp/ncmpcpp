@@ -19,7 +19,6 @@
  ***************************************************************************/
 
 #include <algorithm>
-#include <boost/lambda/bind.hpp>
 #include <boost/optional.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <cassert>

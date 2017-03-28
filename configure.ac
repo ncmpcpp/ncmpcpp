@@ -3,13 +3,13 @@ AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE([subdir-objects])
 
-m4_include([m4/ax_lib_readline.m4])
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_PREREQ(2.59)
 
 AC_LANG_CPLUSPLUS
 AC_PROG_CXX
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 
 AC_ARG_ENABLE(outputs, AS_HELP_STRING([--enable-outputs], [Enable outputs screen @<:@default=no@:>@]), [outputs=$enableval], [outputs=no])
 AC_ARG_ENABLE(visualizer, AS_HELP_STRING([--enable-visualizer], [Enable music visualizer screen @<:@default=no@:>@]), [visualizer=$enableval], [visualizer=no])
@@ -50,78 +50,59 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[auto f = [](auto n) { return n*n; }; f(
 		AC_MSG_ERROR([[Your compiler doesn't seem to support generic lambda expressions, please upgrade (GCC >= 5)]])
 )
 
-dnl =============================
-dnl = setting boost environment =
-dnl =============================
-AS_IF([test -z "${BOOST_LIB_SUFFIX+x}"], [BOOST_LIB_SUFFIX=])
-AC_ARG_VAR([BOOST_LIB_SUFFIX], [Boost library name suffix [default=]])
+dnl ======================
+dnl = checking for boost =
+dnl ======================
+BOOST_REQUIRE([1.58])
+AC_SUBST(BOOST_CPPFLAGS)
+CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 
-dnl ======================================
-dnl = checking for various boost headers =
-dnl ======================================
-AC_CHECK_HEADERS([boost/bind.hpp], ,
-	AC_MSG_ERROR(boost/bind.hpp is missing))
-AC_CHECK_HEADERS([boost/lexical_cast.hpp], ,
-	AC_MSG_ERROR(boost/lexical_cast.hpp is missing))
-AC_CHECK_HEADERS([boost/algorithm/string.hpp], ,
-	AC_MSG_ERROR(boost/algorithm/string.hpp is missing))
+BOOST_STRING_ALGO
+BOOST_FORMAT
+BOOST_HASH
+BOOST_CONVERSION
+BOOST_MATH
+BOOST_OPTIONAL
+BOOST_RANGE
+BOOST_TOKENIZER
+BOOST_TUPLE
+BOOST_VARIANT
 
-dnl =================================
-dnl = checking for boost.filesystem =
-dnl =================================
-AC_CHECK_HEADERS([boost/filesystem.hpp], ,
-	AC_MSG_ERROR(boost/filesystem.hpp is missing)
-)
-AC_CHECK_LIB(boost_filesystem$BOOST_LIB_SUFFIX, main, LIBS="$LIBS -lboost_filesystem$BOOST_LIB_SUFFIX",
-	AC_MSG_ERROR([no boost.filesystem library found])
-)
-AC_CHECK_LIB(boost_system$BOOST_LIB_SUFFIX, main, LIBS="$LIBS -lboost_system$BOOST_LIB_SUFFIX",
-	AC_MSG_ERROR([no boost.system library found])
-)
+BOOST_DATE_TIME
+AC_SUBST(BOOST_DATE_TIME_LDFLAGS)
+AC_SUBST(BOOST_DATE_TIME_LIBS)
+LDFLAGS="$LDFLAGS $BOOST_DATE_TIME_LDFLAGS"
+LIBS="$LIBS $BOOST_DATE_TIME_LIBS"
 
-dnl =============================
-dnl = checking for boost.format =
-dnl =============================
-AC_CHECK_HEADERS([boost/format.hpp], ,
-	AC_MSG_ERROR(boost/format.hpp is missing)
-)
+BOOST_FILESYSTEM
+AC_SUBST(BOOST_FILESYSTEM_LDFLAGS)
+AC_SUBST(BOOST_FILESYSTEM_LIBS)
+LDFLAGS="$LDFLAGS $BOOST_FILESYSTEM_LDFLAGS"
+LIBS="$LIBS $BOOST_FILESYSTEM_LIBS"
 
-dnl =============================
-dnl = checking for boost.locale =
-dnl =============================
-AC_CHECK_HEADERS([boost/locale.hpp], ,
-	AC_MSG_ERROR(boost/locale.hpp is missing)
-)
-AC_CHECK_LIB(boost_locale$BOOST_LIB_SUFFIX, main, LIBS="$LIBS -lboost_locale$BOOST_LIB_SUFFIX",
-	AC_MSG_ERROR([no boost.locale library found])
-)
+BOOST_LOCALE
+AC_SUBST(BOOST_LOCALE_LDFLAGS)
+AC_SUBST(BOOST_LOCALE_LIBS)
+LDFLAGS="$LDFLAGS $BOOST_LOCALE_LDFLAGS"
+LIBS="$LIBS $BOOST_LOCALE_LIBS"
 
-dnl =================================
-dnl = checking for boost.posix_time =
-dnl =================================
-AC_CHECK_HEADERS([boost/date_time/posix_time/posix_time.hpp], ,
-	AC_MSG_ERROR(boost/date_time/posix_time/posix_time.hpp is missing)
-)
+BOOST_PROGRAM_OPTIONS
+AC_SUBST(BOOST_PROGRAM_OPTIONS_LDFLAGS)
+AC_SUBST(BOOST_PROGRAM_OPTIONS_LIBS)
+LDFLAGS="$LDFLAGS $BOOST_PROGRAM_OPTIONS_LDFLAGS"
+LIBS="$LIBS $BOOST_PROGRAM_OPTIONS_LIBS"
 
-dnl ======================================
-dnl = checking for boost.program_options =
-dnl ======================================
-AC_CHECK_HEADERS([boost/program_options.hpp], ,
-	AC_MSG_ERROR(boost/program_options.hpp is missing)
-)
-AC_CHECK_LIB(boost_program_options$BOOST_LIB_SUFFIX, main, LIBS="$LIBS -lboost_program_options$BOOST_LIB_SUFFIX",
-	AC_MSG_ERROR([no boost.program_options library found])
-)
+BOOST_REGEX
+AC_SUBST(BOOST_REGEX_LDFLAGS)
+AC_SUBST(BOOST_REGEX_LIBS)
+LDFLAGS="$LDFLAGS $BOOST_REGEX_LDFLAGS"
+LIBS="$LIBS $BOOST_REGEX_LIBS"
 
-dnl ============================
-dnl = checking for boost.regex =
-dnl ============================
-AC_CHECK_HEADERS([boost/regex.hpp], ,
-	AC_MSG_ERROR(boost/regex.hpp is missing)
-)
-AC_CHECK_LIB(boost_regex$BOOST_LIB_SUFFIX, main, LIBS="$LIBS -lboost_regex$BOOST_LIB_SUFFIX",
-	AC_MSG_ERROR([no boost.regex library found])
-)
+BOOST_THREAD
+AC_SUBST(BOOST_THREAD_LDFLAGS)
+AC_SUBST(BOOST_THREAD_LIBS)
+LDFLAGS+="$LDFLAGS $BOOST_THREAD_LDFLAGS"
+LIBS="$LIBS $BOOST_THREAD_LIBS"
 
 dnl ====================
 dnl = checking for icu =
@@ -143,17 +124,6 @@ PKG_CHECK_MODULES([ICU], [icu-uc], [
 		LIBS="$old_LIBS",
 	)
 ], [[]])
-
-dnl =============================
-dnl = checking for boost.thread =
-dnl =============================
-AC_DEFINE([BOOST_THREAD_VERSION], [3], [require boost.thread v3])
-AC_CHECK_HEADERS([boost/thread.hpp], ,
-	AC_MSG_ERROR([boost/thread.hpp is missing or your boost version is too old (boost.thread v3 is required)])
-)
-AC_CHECK_LIB(boost_thread$BOOST_LIB_SUFFIX, main, LIBS="$LIBS -lboost_thread$BOOST_LIB_SUFFIX",
-	AC_MSG_ERROR([no boost.thread library found])
-)
 
 dnl ================================
 dnl = checking for various headers =
