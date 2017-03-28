@@ -143,6 +143,13 @@ void showSongs(NC::Menu<T> &menu, const MPD::Song &s, const SongList &list, cons
 	if (!right_aligned.str().empty())
 	{
 		size_t x_off = menu.getWidth() - wideLength(ToWString(right_aligned.str()));
+		if (menu.isHighlighted() && list.currentS()->song() == &s)
+		{
+			if (menu.highlightSuffix() == Config.current_item_suffix)
+				x_off -= Config.current_item_suffix_length;
+			else
+				x_off -= Config.current_item_inactive_column_suffix_length;
+		}
 		if (is_now_playing)
 			x_off -= Config.now_playing_suffix_length;
 		if (is_selected)
@@ -164,6 +171,18 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const SongList &l
 	              is_in_playlist, discard_colors);
 
 	int menu_width = menu.getWidth();
+	if (menu.isHighlighted() && list.currentS()->song() == &s)
+	{
+		if (menu.highlightPrefix() == Config.current_item_prefix)
+			menu_width -= Config.current_item_prefix_length;
+		else
+			menu_width -= Config.current_item_inactive_column_prefix_length;
+
+		if (menu.highlightSuffix() == Config.current_item_suffix)
+			menu_width -= Config.current_item_suffix_length;
+		else
+			menu_width -= Config.current_item_inactive_column_suffix_length;
+	}
 	if (is_now_playing)
 	{
 		menu_width -= Config.now_playing_prefix_length;
@@ -343,7 +362,7 @@ void Display::Tags(NC::Menu<MPD::MutableSong> &menu)
 			menu << Charset::utf8ToLocale(s.getName())
 			     << Config.color2
 			     << " -> "
-			     << NC::FormattedColor::End(Config.color2)
+			     << NC::FormattedColor::End<>(Config.color2)
 			     << Charset::utf8ToLocale(s.getNewName());
 	}
 }

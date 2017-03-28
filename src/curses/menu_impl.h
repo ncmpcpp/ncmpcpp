@@ -39,16 +39,18 @@ Menu<ItemT>::Menu(size_t startx,
                   const std::string &title,
                   Color color,
                   Border border)
-	: Window(startx, starty, width, height, title, std::move(color), border)
+	: Window(startx, starty, width, height, title, color, border)
 	, m_item_displayer(nullptr)
 	, m_filter_predicate(nullptr)
 	, m_beginning(0)
 	, m_highlight(0)
-	, m_highlight_color(m_base_color)
 	, m_highlight_enabled(true)
 	, m_cyclic_scroll_enabled(false)
 	, m_autocenter_cursor(false)
 {
+	auto fc = FormattedColor(m_base_color, {Format::Reverse});
+	m_highlight_prefix << fc;
+	m_highlight_suffix << FormattedColor::End<>(fc);
 	m_items = &m_all_items;
 }
 
@@ -59,11 +61,12 @@ Menu<ItemT>::Menu(const Menu &rhs)
 	, m_filter_predicate(rhs.m_filter_predicate)
 	, m_beginning(rhs.m_beginning)
 	, m_highlight(rhs.m_highlight)
-	, m_highlight_color(rhs.m_highlight_color)
 	, m_highlight_enabled(rhs.m_highlight_enabled)
 	, m_cyclic_scroll_enabled(rhs.m_cyclic_scroll_enabled)
 	, m_autocenter_cursor(rhs.m_autocenter_cursor)
 	, m_drawn_position(rhs.m_drawn_position)
+	, m_highlight_prefix(rhs.m_highlight_prefix)
+	, m_highlight_suffix(rhs.m_highlight_suffix)
 	, m_selected_prefix(rhs.m_selected_prefix)
 	, m_selected_suffix(rhs.m_selected_suffix)
 {
@@ -83,11 +86,12 @@ Menu<ItemT>::Menu(Menu &&rhs)
 	, m_filtered_items(std::move(rhs.m_filtered_items))
 	, m_beginning(rhs.m_beginning)
 	, m_highlight(rhs.m_highlight)
-	, m_highlight_color(rhs.m_highlight_color)
 	, m_highlight_enabled(rhs.m_highlight_enabled)
 	, m_cyclic_scroll_enabled(rhs.m_cyclic_scroll_enabled)
 	, m_autocenter_cursor(rhs.m_autocenter_cursor)
 	, m_drawn_position(rhs.m_drawn_position)
+	, m_highlight_prefix(std::move(rhs.m_highlight_prefix))
+	, m_highlight_suffix(std::move(rhs.m_highlight_suffix))
 	, m_selected_prefix(std::move(rhs.m_selected_prefix))
 	, m_selected_suffix(std::move(rhs.m_selected_suffix))
 {
@@ -107,11 +111,12 @@ Menu<ItemT> &Menu<ItemT>::operator=(Menu rhs)
 	std::swap(m_filtered_items, rhs.m_filtered_items);
 	std::swap(m_beginning, rhs.m_beginning);
 	std::swap(m_highlight, rhs.m_highlight);
-	std::swap(m_highlight_color, rhs.m_highlight_color);
 	std::swap(m_highlight_enabled, rhs.m_highlight_enabled);
 	std::swap(m_cyclic_scroll_enabled, rhs.m_cyclic_scroll_enabled);
 	std::swap(m_autocenter_cursor, rhs.m_autocenter_cursor);
 	std::swap(m_drawn_position, rhs.m_drawn_position);
+	std::swap(m_highlight_prefix, rhs.m_highlight_prefix);
+	std::swap(m_highlight_suffix, rhs.m_highlight_suffix);
 	std::swap(m_selected_prefix, rhs.m_selected_prefix);
 	std::swap(m_selected_suffix, rhs.m_selected_suffix);
 	if (rhs.m_items == &rhs.m_all_items)
@@ -211,10 +216,7 @@ void Menu<ItemT>::refresh()
 			continue;
 		}
 		if (m_highlight_enabled && m_drawn_position == m_highlight)
-		{
-			*this << Format::Reverse;
-			*this << m_highlight_color;
-		}
+			*this << m_highlight_prefix;
 		if ((*m_items)[m_drawn_position].isSelected())
 			*this << m_selected_prefix;
 		*this << NC::TermManip::ClearToEOL;
@@ -223,10 +225,7 @@ void Menu<ItemT>::refresh()
 		if ((*m_items)[m_drawn_position].isSelected())
 			*this << m_selected_suffix;
 		if (m_highlight_enabled && m_drawn_position == m_highlight)
-		{
-			*this << Color::End;
-			*this << Format::NoReverse;
-		}
+			*this << m_highlight_suffix;
 	}
 	Window::refresh();
 }

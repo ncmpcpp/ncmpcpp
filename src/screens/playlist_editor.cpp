@@ -71,7 +71,7 @@ PlaylistEditor::PlaylistEditor()
 	RightColumnWidth = COLS-LeftColumnWidth-1;
 	
 	Playlists = NC::Menu<MPD::Playlist>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Playlists" : "", Config.main_color, NC::Border());
-	Playlists.setHighlightColor(Config.active_column_color);
+	setHighlightFixes(Playlists);
 	Playlists.cyclicScrolling(Config.use_cyclic_scrolling);
 	Playlists.centeredCursor(Config.centered_cursor);
 	Playlists.setSelectedPrefix(Config.selected_item_prefix);
@@ -81,7 +81,7 @@ PlaylistEditor::PlaylistEditor()
 	});
 	
 	Content = NC::Menu<MPD::Song>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Content" : "", Config.main_color, NC::Border());
-	Content.setHighlightColor(Config.main_highlight_color);
+	setHighlightInactiveColumnFixes(Content);
 	Content.cyclicScrolling(Config.use_cyclic_scrolling);
 	Content.centeredCursor(Config.centered_cursor);
 	Content.setSelectedPrefix(Config.selected_item_prefix);
@@ -431,10 +431,10 @@ void PlaylistEditor::previousColumn()
 {
 	if (isActiveWindow(Content))
 	{
-		Content.setHighlightColor(Config.main_highlight_color);
+		setHighlightInactiveColumnFixes(Content);
 		w->refresh();
 		w = &Playlists;
-		Playlists.setHighlightColor(Config.active_column_color);
+		setHighlightFixes(Playlists);
 	}
 }
 
@@ -453,10 +453,10 @@ void PlaylistEditor::nextColumn()
 {
 	if (isActiveWindow(Playlists))
 	{
-		Playlists.setHighlightColor(Config.main_highlight_color);
+		setHighlightInactiveColumnFixes(Playlists);
 		w->refresh();
 		w = &Content;
-		Content.setHighlightColor(Config.active_column_color);
+		setHighlightFixes(Content);
 	}
 }
 

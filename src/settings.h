@@ -98,12 +98,14 @@ struct Configuration
 	NC::Buffer now_playing_prefix;
 	NC::Buffer now_playing_suffix;
 	NC::Buffer modified_item_prefix;
+	NC::Buffer current_item_prefix;
+	NC::Buffer current_item_suffix;
+	NC::Buffer current_item_inactive_column_prefix;
+	NC::Buffer current_item_inactive_column_suffix;
 
 	NC::Color header_color;
 	NC::Color main_color;
 	NC::Color statusbar_color;
-	NC::Color main_highlight_color;
-	NC::Color active_column_color;
 
 	NC::FormattedColor color1;
 	NC::FormattedColor color2;
@@ -194,6 +196,10 @@ struct Configuration
 	size_t selected_item_suffix_length;
 	size_t now_playing_prefix_length;
 	size_t now_playing_suffix_length;
+	size_t current_item_prefix_length;
+	size_t current_item_suffix_length;
+	size_t current_item_inactive_column_prefix_length;
+	size_t current_item_inactive_column_suffix_length;
 
 	ScreenType startup_screen_type;
 	boost::optional<ScreenType> startup_slave_screen_type;

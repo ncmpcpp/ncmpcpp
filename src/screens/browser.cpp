@@ -135,7 +135,7 @@ Browser::Browser()
 , m_current_directory("/")
 {
 	w = NC::Menu<MPD::Item>(0, MainStartY, COLS, MainHeight, Config.browser_display_mode == DisplayMode::Columns && Config.titles_visibility ? Display::Columns(COLS) : "", Config.main_color, NC::Border());
-	w.setHighlightColor(Config.main_highlight_color);
+	setHighlightFixes(w);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
 	w.setSelectedPrefix(Config.selected_item_prefix);

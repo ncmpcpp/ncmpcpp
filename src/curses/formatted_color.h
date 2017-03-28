@@ -23,22 +23,37 @@
 
 #include <boost/optional.hpp>
 #include <boost/range/adaptor/reversed.hpp>
-#include "window.h"
+#include "curses/window.h"
+#include "utility/storage_kind.h"
 
 namespace NC {
 
 struct FormattedColor
 {
+	template <StorageKind storage = StorageKind::Reference>
 	struct End
 	{
-		End(const FormattedColor &fc)
+		explicit End(const FormattedColor &fc)
 			: m_fc(fc)
 		{ }
 
 		const FormattedColor &base() const { return m_fc; }
 
+		template <StorageKind otherStorage>
+		bool operator==(const End<otherStorage> &rhs) const
+		{
+			return m_fc == rhs.m_fc;
+		}
+
+		explicit operator End<StorageKind::Value>() const
+		{
+			return End<StorageKind::Value>(m_fc);
+		}
+
 	private:
-		const FormattedColor &m_fc;
+		typename std::conditional<storage == StorageKind::Reference,
+		                          const FormattedColor &,
+		                          FormattedColor>::type m_fc;
 	};
 
 	typedef std::vector<Format> Formats;
@@ -55,6 +70,12 @@ private:
 	Formats m_formats;
 };
 
+inline bool operator==(const FormattedColor &lhs, const FormattedColor &rhs)
+{
+	return lhs.color() == rhs.color()
+		&& lhs.formats() == rhs.formats();
+}
+
 std::istream &operator>>(std::istream &is, FormattedColor &fc);
 
 template <typename OutputStreamT>
@@ -66,8 +87,9 @@ OutputStreamT &operator<<(OutputStreamT &os, const FormattedColor &fc)
 	return os;
 }
 
-template <typename OutputStreamT>
-OutputStreamT &operator<<(OutputStreamT &os, const FormattedColor::End &rfc)
+template <typename OutputStreamT, StorageKind storage>
+OutputStreamT &operator<<(OutputStreamT &os,
+                          const FormattedColor::End<storage> &rfc)
 {
 	if (rfc.base().color() != Color::Default)
 		os << Color::End;

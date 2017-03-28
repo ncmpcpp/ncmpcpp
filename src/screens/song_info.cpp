@@ -100,12 +100,12 @@ void SongInfo::PrepareSong(const MPD::Song &s)
 		  << Config.color1
 		  << key
 		  << ":"
-		  << NC::FormattedColor::End(Config.color1)
+		  << NC::FormattedColor::End<>(Config.color1)
 		  << NC::Format::NoBold
 		  << " "
 		  << Config.color2
 		  << value
-		  << NC::FormattedColor::End(Config.color2)
+		  << NC::FormattedColor::End<>(Config.color2)
 		  << "\n";
 	};
 

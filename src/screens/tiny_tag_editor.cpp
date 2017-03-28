@@ -52,7 +52,8 @@ TinyTagEditor *myTinyTagEditor;
 TinyTagEditor::TinyTagEditor()
 : Screen(NC::Menu<NC::Buffer>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border()))
 {
-	w.setHighlightColor(Config.main_highlight_color);
+	w.setHighlightPrefix(Config.current_item_prefix);
+	w.setHighlightSuffix(Config.current_item_suffix);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
 	w.setItemDisplayer([](NC::Menu<NC::Buffer> &menu) {
@@ -228,12 +229,12 @@ bool TinyTagEditor::getTags()
 		    << Config.color1
 		    << key
 		    << ":"
-		    << NC::FormattedColor::End(Config.color1)
+		    << NC::FormattedColor::End<>(Config.color1)
 		    << NC::Format::NoBold
 		    << " "
 		    << Config.color2
 		    << value
-		    << NC::FormattedColor::End(Config.color2);
+		    << NC::FormattedColor::End<>(Config.color2);
 	};
 
 	print_key_value(w[0].value(), "Filename", itsEdited.getName());

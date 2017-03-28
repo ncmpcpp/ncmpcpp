@@ -221,7 +221,7 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 		w << NC::XY(x, base_y+y)
 		  << c
 		  << Config.visualizer_chars[0]
-		  << NC::FormattedColor::End(c);
+		  << NC::FormattedColor::End<>(c);
 	};
 
 	int32_t point_y, prev_point_y = 0;
@@ -299,7 +299,7 @@ void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offse
 			w << NC::XY(x, y)
 			  << c
 			  << Config.visualizer_chars[1]
-			  << NC::FormattedColor::End(c);
+			  << NC::FormattedColor::End<>(c);
 		}
 	}
 }
@@ -342,7 +342,7 @@ void Visualizer::DrawSoundEllipse(int16_t *buf, ssize_t samples, size_t, size_t 
 		w << NC::XY(half_width + x, half_height + y)
 		  << c
 		  << Config.visualizer_chars[0]
-		  << NC::FormattedColor::End(c);
+		  << NC::FormattedColor::End<>(c);
 	}
 }
 
@@ -381,7 +381,7 @@ void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, s
 		w << NC::XY(left_half_width + x, top_half_height + y)
 		  << c
 		  << Config.visualizer_chars[1]
-		  << NC::FormattedColor::End(c);
+		  << NC::FormattedColor::End<>(c);
 	}
 }
 
@@ -428,7 +428,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 			w << NC::XY(x, y)
 			  << c
 			  << Config.visualizer_chars[1]
-			  << NC::FormattedColor::End(c);
+			  << NC::FormattedColor::End<>(c);
 		}
 	}
 }

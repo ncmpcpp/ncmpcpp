@@ -69,7 +69,7 @@ void Progressbar::draw(unsigned int elapsed, unsigned int time)
 	}
 	else
 		mvwhline(wFooter->raw(), 0, 0, 0, pb_width);
-	*wFooter << NC::FormattedColor::End(Config.progressbar_color);
+	*wFooter << NC::FormattedColor::End<>(Config.progressbar_color);
 	if (time)
 	{
 		*wFooter << Config.progressbar_elapsed_color;
@@ -78,7 +78,7 @@ void Progressbar::draw(unsigned int elapsed, unsigned int time)
 			*wFooter << Config.progressbar[0];
 		if (howlong < wFooter->getWidth())
 			*wFooter << Config.progressbar[1];
-		*wFooter << NC::FormattedColor::End(Config.progressbar_elapsed_color);
+		*wFooter << NC::FormattedColor::End<>(Config.progressbar_elapsed_color);
 	}
 }
 

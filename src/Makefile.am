@@ -91,6 +91,7 @@ noinst_HEADERS = \
 	utility/option_parser.h \
 	utility/readline.h \
 	utility/scoped_value.h \
+	utility/storage_kind.h \
 	utility/shared_resource.h \
 	utility/string.h \
 	utility/type_conversions.h \

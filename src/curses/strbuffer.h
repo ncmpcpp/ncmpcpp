@@ -24,7 +24,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/variant.hpp>
 #include <map>
-#include "window.h"
+#include "curses/formatted_color.h"
+#include "curses/window.h"
 
 namespace NC {
 
@@ -40,6 +41,11 @@ template <typename CharT> class BasicBuffer
 		
 		size_t id() const { return m_id; }
 
+		bool operator==(const Property &rhs) const
+		{
+			return m_id == rhs.m_id && m_impl == rhs.m_impl;
+		}
+
 		template <typename OutputStreamT>
 		friend OutputStreamT &operator<<(OutputStreamT &os, const Property &p)
 		{
@@ -48,7 +54,11 @@ template <typename CharT> class BasicBuffer
 		}
 		
 	private:
-		boost::variant<Color, Format> m_impl;
+		boost::variant<Color,
+		               Format,
+		               FormattedColor,
+		               FormattedColor::End<StorageKind::Value>
+		               > m_impl;
 		size_t m_id;
 	};
 	
@@ -131,18 +141,18 @@ public:
 		return *this;
 	}
 	
-	BasicBuffer<CharT> &operator<<(Color color)
+	BasicBuffer<CharT> &operator<<(const Color &color)
 	{
 		addProperty(m_string.size(), color);
 		return *this;
 	}
 	
-	BasicBuffer<CharT> &operator<<(Format format)
+	BasicBuffer<CharT> &operator<<(const Format &format)
 	{
 		addProperty(m_string.size(), format);
 		return *this;
 	}
-	
+
 	// static variadic initializer. used instead of a proper constructor because
 	// it's too polymorphic and would end up invoked as a copy/move constructor.
 	template <typename... Args>
@@ -168,6 +178,14 @@ private:
 
 typedef BasicBuffer<char> Buffer;
 typedef BasicBuffer<wchar_t> WBuffer;
+
+template <typename CharT>
+bool operator==(const BasicBuffer<CharT> &lhs, const BasicBuffer<CharT> &rhs)
+{
+	return lhs.str() == rhs.str()
+		&& lhs.properties() == rhs.properties();
+}
+
 
 template <typename OutputStreamT, typename CharT>
 OutputStreamT &operator<<(OutputStreamT &os, const BasicBuffer<CharT> &buffer)

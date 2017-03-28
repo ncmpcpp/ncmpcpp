@@ -26,6 +26,7 @@
 #include "charset.h"
 #include "display.h"
 #include "global.h"
+#include "helpers.h"
 #include "settings.h"
 #include "status.h"
 #include "statusbar.h"
@@ -43,7 +44,7 @@ Outputs::Outputs()
 {
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
-	w.setHighlightColor(Config.main_highlight_color);
+	setHighlightFixes(w);
 	w.setItemDisplayer([](NC::Menu<MPD::Output> &menu) {
 			auto &output = menu.drawn()->value();
 			if (output.enabled())

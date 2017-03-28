@@ -630,7 +630,7 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 				         << NC::TermManip::ClearToEOL
 				         << Config.player_state_color
 				         << ps
-				         << NC::FormattedColor::End(Config.player_state_color)
+				         << NC::FormattedColor::End<>(Config.player_state_color)
 				         << " ";
 				writeCyclicBuffer(
 					np_song, *wFooter, playing_song_scroll_begin,
@@ -638,7 +638,7 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 				*wFooter << NC::XY(wFooter->getWidth()-tracklength.length(), 1)
 				         << Config.statusbar_time_color
 				         << tracklength
-				         << NC::FormattedColor::End(Config.statusbar_time_color);
+				         << NC::FormattedColor::End<>(Config.statusbar_time_color);
 			}
 			break;
 		case Design::Alternative:
@@ -681,7 +681,7 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 				         << NC::TermManip::ClearToEOL
 				         << Config.statusbar_time_color
 				         << tracklength
-				         << NC::FormattedColor::End(Config.statusbar_time_color);
+				         << NC::FormattedColor::End<>(Config.statusbar_time_color);
 
 			*wHeader << NC::XY(first_start, 0);
 
@@ -692,7 +692,7 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			         << NC::TermManip::ClearToEOL
 			         << Config.player_state_color
 			         << ps
-			         << NC::FormattedColor::End(Config.player_state_color)
+			         << NC::FormattedColor::End<>(Config.player_state_color)
 			         << NC::XY(second_start, 1);
 
 			writeCyclicBuffer(second, *wHeader, second_line_scroll_begin,
@@ -701,7 +701,7 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 			*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0)
 			         << Config.volume_color
 			         << VolumeState
-			         << NC::FormattedColor::End(Config.volume_color);
+			         << NC::FormattedColor::End<>(Config.volume_color);
 
 			flags();
 	}
@@ -733,19 +733,19 @@ void Status::Changes::flags()
 
 			*wHeader << Config.state_line_color;
 			mvwhline(wHeader->raw(), 1, 0, 0, COLS);
-			*wHeader << NC::FormattedColor::End(Config.state_line_color);
+			*wHeader << NC::FormattedColor::End<>(Config.state_line_color);
 
 			if (!switch_state.empty())
 				*wHeader << NC::XY(COLS-switch_state.length()-3, 1)
 				         << Config.state_line_color
 				         << "["
-				         << NC::FormattedColor::End(Config.state_line_color)
+				         << NC::FormattedColor::End<>(Config.state_line_color)
 								 << Config.state_flags_color
 								 << switch_state
-				         << NC::FormattedColor::End(Config.state_flags_color)
+				         << NC::FormattedColor::End<>(Config.state_flags_color)
 				         << Config.state_line_color
 								 << "]"
-				         << NC::FormattedColor::End(Config.state_line_color);
+				         << NC::FormattedColor::End<>(Config.state_line_color);
 
 			break;
 		case Design::Alternative:
@@ -760,12 +760,12 @@ void Status::Changes::flags()
 			*wHeader << NC::XY(COLS-switch_state.length(), 1)
 			         << Config.state_flags_color
 			         << switch_state
-			         << NC::FormattedColor::End(Config.state_flags_color);
+			         << NC::FormattedColor::End<>(Config.state_flags_color);
 			if (!Config.header_visibility) // in this case also draw separator
 			{
 				*wHeader << Config.alternative_ui_separator_color;
 				mvwhline(wHeader->raw(), 2, 0, 0, COLS);
-				*wHeader << NC::FormattedColor::End(Config.alternative_ui_separator_color);
+				*wHeader << NC::FormattedColor::End<>(Config.alternative_ui_separator_color);
 			}
 			break;
 	}
@@ -797,7 +797,7 @@ void Status::Changes::mixer()
 	*wHeader << NC::XY(wHeader->getWidth()-VolumeState.length(), 0)
 	         << Config.volume_color
 	         << VolumeState
-	         << NC::FormattedColor::End(Config.volume_color);
+	         << NC::FormattedColor::End<>(Config.volume_color);
 	wHeader->refresh();
 }
 

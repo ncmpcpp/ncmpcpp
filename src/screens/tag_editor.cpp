@@ -133,7 +133,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	SetDimensions(0, COLS);
 	
 	Dirs = new NC::Menu< std::pair<std::string, std::string> >(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Directories" : "", Config.main_color, NC::Border());
-	Dirs->setHighlightColor(Config.active_column_color);
+	setHighlightFixes(*Dirs);
 	Dirs->cyclicScrolling(Config.use_cyclic_scrolling);
 	Dirs->centeredCursor(Config.centered_cursor);
 	Dirs->setItemDisplayer([](NC::Menu<std::pair<std::string, std::string>> &menu) {
@@ -141,7 +141,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	});
 	
 	TagTypes = new NC::Menu<std::string>(MiddleColumnStartX, MainStartY, MiddleColumnWidth, MainHeight, Config.titles_visibility ? "Tag types" : "", Config.main_color, NC::Border());
-	TagTypes->setHighlightColor(Config.main_highlight_color);
+	setHighlightInactiveColumnFixes(*TagTypes);
 	TagTypes->cyclicScrolling(Config.use_cyclic_scrolling);
 	TagTypes->centeredCursor(Config.centered_cursor);
 	TagTypes->setItemDisplayer([](NC::Menu<std::string> &menu) {
@@ -165,7 +165,7 @@ TagEditor::TagEditor() : FParser(0), FParserHelper(0), FParserLegend(0), FParser
 	TagTypes->addItem("Save");
 	
 	Tags = new TagsWindow(NC::Menu<MPD::MutableSong>(RightColumnStartX, MainStartY, RightColumnWidth, MainHeight, Config.titles_visibility ? "Tags" : "", Config.main_color, NC::Border()));
-	Tags->setHighlightColor(Config.main_highlight_color);
+	setHighlightInactiveColumnFixes(*Tags);
 	Tags->cyclicScrolling(Config.use_cyclic_scrolling);
 	Tags->centeredCursor(Config.centered_cursor);
 	Tags->setSelectedPrefix(Config.selected_item_prefix);
@@ -554,7 +554,7 @@ void TagEditor::runAction()
 		for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 			*FParserLegend << Config.color2
 			               << " * "
-			               << NC::FormattedColor::End(Config.color2)
+			               << NC::FormattedColor::End<>(Config.color2)
 			               << (*it)->getName()
 			               << "\n";
 		FParserLegend->flush();
@@ -639,11 +639,11 @@ void TagEditor::runAction()
 					*FParserPreview << file
 					                << Config.color2
 					                << " -> "
-					                << NC::FormattedColor::End(Config.color2);
+					                << NC::FormattedColor::End<>(Config.color2);
 					if (new_file.empty())
 						*FParserPreview << Config.empty_tags_color
 						                << Config.empty_tag
-						                << NC::FormattedColor::End(Config.empty_tags_color);
+						                << NC::FormattedColor::End<>(Config.empty_tags_color);
 					else
 						*FParserPreview << new_file << extension;
 					*FParserPreview << "\n\n";
@@ -810,11 +810,11 @@ void TagEditor::runAction()
 			if (success)
 			{
 				Statusbar::print("Tags updated");
-				TagTypes->setHighlightColor(Config.main_highlight_color);
+				setHighlightInactiveColumnFixes(*TagTypes);
 				TagTypes->reset();
 				w->refresh();
 				w = Dirs;
-				Dirs->setHighlightColor(Config.active_column_color);
+				setHighlightFixes(*Dirs);
 				Mpd.UpdateDirectory(getSharedDirectory(Tags->beginV(), Tags->endV()));
 			}
 			else
@@ -878,17 +878,17 @@ void TagEditor::previousColumn()
 {
 	if (w == Tags)
 	{
-		Tags->setHighlightColor(Config.main_highlight_color);
+		setHighlightInactiveColumnFixes(*Tags);
 		w->refresh();
 		w = TagTypes;
-		TagTypes->setHighlightColor(Config.active_column_color);
+		setHighlightFixes(*TagTypes);
 	}
 	else if (w == TagTypes)
 	{
-		TagTypes->setHighlightColor(Config.main_highlight_color);
+		setHighlightInactiveColumnFixes(*TagTypes);
 		w->refresh();
 		w = Dirs;
-		Dirs->setHighlightColor(Config.active_column_color);
+		setHighlightFixes(*Dirs);
 	}
 	else if (w == FParserHelper)
 	{
@@ -922,17 +922,17 @@ void TagEditor::nextColumn()
 {
 	if (w == Dirs)
 	{
-		Dirs->setHighlightColor(Config.main_highlight_color);
+		setHighlightInactiveColumnFixes(*Dirs);
 		w->refresh();
 		w = TagTypes;
-		TagTypes->setHighlightColor(Config.active_column_color);
+		setHighlightFixes(*TagTypes);
 	}
 	else if (w == TagTypes && TagTypes->choice() < 13 && !Tags->empty())
 	{
-		TagTypes->setHighlightColor(Config.main_highlight_color);
+		setHighlightInactiveColumnFixes(*TagTypes);
 		w->refresh();
 		w = Tags;
-		Tags->setHighlightColor(Config.active_column_color);
+		setHighlightFixes(*Tags);
 	}
 	else if (w == FParser)
 	{

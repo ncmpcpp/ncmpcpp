@@ -69,7 +69,7 @@ SelectedItemsAdder::SelectedItemsAdder()
 	);
 	m_playlist_selector.cyclicScrolling(Config.use_cyclic_scrolling);
 	m_playlist_selector.centeredCursor(Config.centered_cursor);
-	m_playlist_selector.setHighlightColor(Config.main_highlight_color);
+	setHighlightFixes(m_playlist_selector);
 	m_playlist_selector.setItemDisplayer(DisplayComponent);
 	
 	m_position_selector = Component(
@@ -83,7 +83,7 @@ SelectedItemsAdder::SelectedItemsAdder()
 	);
 	m_position_selector.cyclicScrolling(Config.use_cyclic_scrolling);
 	m_position_selector.centeredCursor(Config.centered_cursor);
-	m_position_selector.setHighlightColor(Config.main_highlight_color);
+	setHighlightFixes(m_position_selector);
 	m_position_selector.setItemDisplayer(DisplayComponent);
 	
 	m_position_selector.addItem(Entry("At the end of playlist",

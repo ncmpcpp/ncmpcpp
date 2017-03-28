@@ -175,7 +175,7 @@ size_t SearchEngine::SearchButton = 15;
 SearchEngine::SearchEngine()
 : Screen(NC::Menu<SEItem>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border()))
 {
-	w.setHighlightColor(Config.main_highlight_color);
+	setHighlightFixes(w);
 	w.cyclicScrolling(Config.use_cyclic_scrolling);
 	w.centeredCursor(Config.centered_cursor);
 	w.setItemDisplayer(std::bind(Display::SEItems, ph::_1, std::cref(w)));
@@ -351,10 +351,10 @@ void SearchEngine::runAction()
 				<< NC::Format::Bold
 				<< Config.color1
 				<< "Search results: "
-				<< NC::FormattedColor::End(Config.color1)
+				<< NC::FormattedColor::End<>(Config.color1)
 				<< Config.color2
 				<< "Found " << found << (found > 1 ? " songs" : " song")
-				<< NC::FormattedColor::End(Config.color2)
+				<< NC::FormattedColor::End<>(Config.color2)
 				<< NC::Format::NoBold;
 			w.insertSeparator(ResetButton+3);
 				Statusbar::print("Searching finished");

@@ -29,9 +29,10 @@
 #include <memory>
 #include <set>
 
+#include "curses/formatted_color.h"
+#include "curses/strbuffer.h"
+#include "curses/window.h"
 #include "utility/const.h"
-#include "strbuffer.h"
-#include "window.h"
 
 namespace NC {
 
@@ -367,11 +368,13 @@ struct Menu: Window, List
 	/// Note that the passed variable is not deleted along with menu object.
 	/// @param b pointer to buffer that contains the suffix
 	void setSelectedSuffix(const Buffer &b) { m_selected_suffix = b; }
-	
-	/// Sets custom color of highlighted position
-	/// @param col custom color
-	void setHighlightColor(Color color) { m_highlight_color = std::move(color); }
-	
+
+	void setHighlightPrefix(const Buffer &b) { m_highlight_prefix = b; }
+	void setHighlightSuffix(const Buffer &b) { m_highlight_suffix = b; }
+
+	const Buffer &highlightPrefix() const { return m_highlight_prefix; }
+	const Buffer &highlightSuffix() const { return m_highlight_suffix; }
+
 	/// @return state of highlighting
 	bool isHighlighted() { return m_highlight_enabled; }
 	
@@ -496,14 +499,16 @@ private:
 	size_t m_beginning;
 	size_t m_highlight;
 	
-	Color m_highlight_color;
 	bool m_highlight_enabled;
 	bool m_cyclic_scroll_enabled;
 	
 	bool m_autocenter_cursor;
 	
 	size_t m_drawn_position;
-	
+
+	Buffer m_highlight_prefix;
+	Buffer m_highlight_suffix;
+
 	Buffer m_selected_prefix;
 	Buffer m_selected_suffix;
 };

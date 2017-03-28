@@ -497,7 +497,7 @@ void ShowTag(BufferT &buf, const std::string &tag)
 	if (tag.empty())
 		buf << Config.empty_tags_color
 		    << Config.empty_tag
-		    << NC::FormattedColor::End(Config.empty_tags_color);
+		    << NC::FormattedColor::End<>(Config.empty_tags_color);
 	else
 		buf << tag;
 }
@@ -507,6 +507,20 @@ inline NC::Buffer ShowTag(const std::string &tag)
 	NC::Buffer result;
 	ShowTag(result, tag);
 	return result;
+}
+
+template <typename T>
+void setHighlightFixes(NC::Menu<T> &m)
+{
+	m.setHighlightPrefix(Config.current_item_prefix);
+	m.setHighlightSuffix(Config.current_item_suffix);
+}
+
+template <typename T>
+void setHighlightInactiveColumnFixes(NC::Menu<T> &m)
+{
+	m.setHighlightPrefix(Config.current_item_inactive_column_prefix);
+	m.setHighlightSuffix(Config.current_item_inactive_column_suffix);
 }
 
 inline const char *withErrors(bool success)

@@ -189,7 +189,7 @@ MediaLibrary::MediaLibrary()
 	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
 	
 	Tags = NC::Menu<PrimaryTag>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? tagTypeToString(Config.media_lib_primary_tag) + "s" : "", Config.main_color, NC::Border());
-	Tags.setHighlightColor(Config.active_column_color);
+	setHighlightFixes(Tags);
 	Tags.cyclicScrolling(Config.use_cyclic_scrolling);
 	Tags.centeredCursor(Config.centered_cursor);
 	Tags.setSelectedPrefix(Config.selected_item_prefix);
@@ -203,7 +203,7 @@ MediaLibrary::MediaLibrary()
 	});
 	
 	Albums = NC::Menu<AlbumEntry>(itsMiddleColStartX, MainStartY, itsMiddleColWidth, MainHeight, Config.titles_visibility ? "Albums" : "", Config.main_color, NC::Border());
-	Albums.setHighlightColor(Config.main_highlight_color);
+	setHighlightInactiveColumnFixes(Albums);
 	Albums.cyclicScrolling(Config.use_cyclic_scrolling);
 	Albums.centeredCursor(Config.centered_cursor);
 	Albums.setSelectedPrefix(Config.selected_item_prefix);
@@ -213,7 +213,7 @@ MediaLibrary::MediaLibrary()
 	});
 	
 	Songs = NC::Menu<MPD::Song>(itsRightColStartX, MainStartY, itsRightColWidth, MainHeight, Config.titles_visibility ? "Songs" : "", Config.main_color, NC::Border());
-	Songs.setHighlightColor(Config.main_highlight_color);
+	setHighlightInactiveColumnFixes(Songs);
 	Songs.cyclicScrolling(Config.use_cyclic_scrolling);
 	Songs.centeredCursor(Config.centered_cursor);
 	Songs.setSelectedPrefix(Config.selected_item_prefix);
@@ -814,17 +814,17 @@ void MediaLibrary::previousColumn()
 {
 	if (isActiveWindow(Songs))
 	{
-		Songs.setHighlightColor(Config.main_highlight_color);
+		setHighlightInactiveColumnFixes(Songs);
 		w->refresh();
 		w = &Albums;
-		Albums.setHighlightColor(Config.active_column_color);
+		setHighlightFixes(Albums);
 	}
 	else if (isActiveWindow(Albums) && !hasTwoColumns)
 	{
-		Albums.setHighlightColor(Config.main_highlight_color);
+		setHighlightInactiveColumnFixes(Albums);
 		w->refresh();
 		w = &Tags;
-		Tags.setHighlightColor(Config.active_column_color);
+		setHighlightFixes(Tags);
 	}
 }
 
@@ -850,17 +850,17 @@ void MediaLibrary::nextColumn()
 {
 	if (isActiveWindow(Tags))
 	{
-		Tags.setHighlightColor(Config.main_highlight_color);
+		setHighlightInactiveColumnFixes(Tags);
 		w->refresh();
 		w = &Albums;
-		Albums.setHighlightColor(Config.active_column_color);
+		setHighlightFixes(Albums);
 	}
 	else if (isActiveWindow(Albums))
 	{
-		Albums.setHighlightColor(Config.main_highlight_color);
+		setHighlightInactiveColumnFixes(Albums);
 		w->refresh();
 		w = &Songs;
-		Songs.setHighlightColor(Config.active_column_color);
+		setHighlightFixes(Songs);
 	}
 }
 

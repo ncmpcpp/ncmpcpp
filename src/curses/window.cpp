@@ -510,6 +510,7 @@ Window::Window(const Window &rhs)
 , m_reverse_counter(rhs.m_reverse_counter)
 , m_alt_charset_counter(rhs.m_alt_charset_counter)
 {
+	setColor(m_color);
 }
 
 Window::Window(Window &&rhs)

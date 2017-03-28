@@ -121,6 +121,18 @@ Now playing song format for the first line in alternative user interface header 
 .B alternative_header_second_line_format = TEXT
 Now playing song format for the second line in alternative user interface header window.
 .TP
+.B current_item_prefix = TEXT
+Prefix for currently selected item.
+.TP
+.B current_item_suffix = TEXT
+Suffix for currently selected item.
+.TP
+.B current_item_inactive_column_prefix = TEXT
+Prefix for currently selected item in the inactive column.
+.TP
+.B current_item_inactive_column_suffix = TEXT
+Suffix for currently selected item in the inactive column.
+.TP
 .B now_playing_prefix = TEXT
 Prefix for currently playing song.
 .TP
@@ -378,9 +390,6 @@ One of colors used in Song info, Tiny tag editor and Search engine.
 .B color2 = COLOR
 One of colors used in Song info, Tiny tag editor and Search engine.
 .TP
-.B main_window_highlight_color = COLOR
-Color of main window's highlight.
-.TP
 .B progressbar_color = COLOR
 Color of progressbar.
 .TP
@@ -398,9 +407,6 @@ Color of player state shown in statusbar.
 .TP
 .B alternative_ui_separator_color = COLOR
 Color of separators used in alternative user interface.
-.TP
-.B active_column_color = COLOR
-Color of active column's highlight.
 .TP
 .B window_border_color = BORDER
 Border color of pop-up windows. If set to 'none', no border will be shown.

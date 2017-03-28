@@ -94,8 +94,7 @@ void ArtistInfo::beautifyOutput(NC::Scrollpad &w)
 {
 	w.setProperties(NC::Format::Bold, "\n\nSimilar artists:\n", NC::Format::NoBold, 0);
 	w.setProperties(NC::Format::Bold, "\n\nSimilar tags:\n", NC::Format::NoBold, 0);
-	w.setProperties(Config.color2.color(), "\n * ", NC::Color::End, 0,
-	                boost::regex::literal);
+	w.setProperties(Config.color2, "\n * ", boost::regex::literal);
 }
 
 Service::Result ArtistInfo::processData(const std::string &data)

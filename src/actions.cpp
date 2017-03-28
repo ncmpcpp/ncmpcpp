@@ -2977,7 +2977,7 @@ void seek(SearchDirection sd)
 				*wFooter << NC::XY(wFooter->getWidth()-tracklength.length(), 1)
 				         << Config.statusbar_time_color
 				         << tracklength
-				         << NC::FormattedColor::End(Config.statusbar_time_color);
+				         << NC::FormattedColor::End<>(Config.statusbar_time_color);
 				break;
 			case Design::Alternative:
 				if (Config.display_remaining_time)
@@ -2992,7 +2992,7 @@ void seek(SearchDirection sd)
 				*wHeader << NC::XY(0, 0)
 				         << Config.statusbar_time_color
 				         << tracklength
-				         << NC::FormattedColor::End(Config.statusbar_time_color)
+				         << NC::FormattedColor::End<>(Config.statusbar_time_color)
 				         << " ";
 				wHeader->refresh();
 				break;

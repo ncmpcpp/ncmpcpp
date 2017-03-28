@@ -35,6 +35,8 @@
 # include <langinfo.h>
 #endif
 
+namespace ph = std::placeholders;
+
 Configuration Config;
 
 namespace {
@@ -177,12 +179,29 @@ NC::Buffer buffer(const std::string &v)
 	return result;
 }
 
-void deprecated(const char *option, double version_removal, const char *advice)
+NC::Buffer buffer_wlength(const NC::Buffer *target,
+                          size_t &wlength,
+                          const std::string &v)
+{
+	// Compatibility layer between highlight color and new highlight prefix and
+	// suffix. Basically, for older configurations if highlight color is provided,
+	// we don't want to override it with default prefix and suffix.
+	if (target == nullptr || target->empty())
+	{
+		NC::Buffer result = buffer(v);
+		wlength = wideLength(ToWString(result.str()));
+		return result;
+	}
+	else
+		return *target;
+}
+
+void deprecated(const char *option, double version_removal, const std::string &advice)
 {
 	std::cerr << "WARNING: Variable '" << option
 	          << "' is deprecated and will be removed in "
 	          << version_removal;
-	if (advice)
+	if (!advice.empty())
 		std::cerr << " (" << advice << ")";
 	std::cerr << ".\n";
 }
@@ -193,6 +212,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 {
 	option_parser p;
 
+	// Deprecated options.
 	p.add<void>("visualizer_sample_multiplier", nullptr, "", [](std::string v) {
 			if (!v.empty())
 				deprecated(
@@ -206,6 +226,40 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 					"progressbar_boldness",
 					0.9,
 					"use extended progressbar_color and progressbar_elapsed_color instead");
+		});
+
+	p.add<void>("main_window_highlight_color", nullptr, "", [this](std::string v) {
+			if (!v.empty())
+			{
+				const std::string current_item_prefix_str = "$(" + v + ")$r";
+				const std::string current_item_suffix_str = "$/r$(end)";
+				current_item_prefix = buffer_wlength(
+					nullptr,
+					current_item_prefix_length,
+					current_item_prefix_str);
+				current_item_suffix = buffer_wlength(
+					nullptr,
+					current_item_suffix_length,
+					current_item_suffix_str);
+				deprecated(
+					"main_window_highlight_color",
+					0.9,
+					"set current_item_prefix = \""
+					+ current_item_prefix_str
+					+ "\" and current_item_suffix = \""
+					+ current_item_suffix_str
+					+ "\" to preserve current behavior");
+			};
+		});
+	p.add<void>("active_column_color", nullptr, "", [this](std::string v) {
+			if (!v.empty())
+			{
+				deprecated(
+					"active_column_color",
+					0.9,
+					"replaced by current_item_inactive_column_prefix"
+					" and current_item_inactive_column_suffix");
+			};
 		});
 
 	// keep the same order of variables as in configuration file
@@ -280,31 +334,49 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 		      return Format::parse(ToWString(std::move(v)),
 		                           Format::Flags::All ^ Format::Flags::OutputSwitch);
 	});
-	p.add("now_playing_prefix", &now_playing_prefix,
-	      "$b", [this](std::string v) {
-		      NC::Buffer result = buffer(v);
-		      now_playing_prefix_length = wideLength(ToWString(result.str()));
-		      return result;
-	});
-	p.add("now_playing_suffix", &now_playing_suffix,
-	      "$/b", [this](std::string v) {
-		      NC::Buffer result = buffer(v);
-		      now_playing_suffix_length = wideLength(ToWString(result.str()));
-		      return result;
-	});
+	p.add("current_item_prefix", &current_item_prefix, "$(yellow)$r",
+	      std::bind(buffer_wlength,
+	                &current_item_prefix,
+	                std::ref(current_item_prefix_length),
+	                ph::_1));
+	p.add("current_item_suffix", &current_item_suffix, "$/r$(end)",
+	      std::bind(buffer_wlength,
+	                &current_item_suffix,
+	                std::ref(current_item_suffix_length),
+	                ph::_1));
+	p.add("current_item_inactive_column_prefix", &current_item_inactive_column_prefix,
+	      "$(white)$r",
+	      std::bind(buffer_wlength,
+	                &current_item_inactive_column_prefix,
+	                std::ref(current_item_inactive_column_prefix_length),
+	                ph::_1));
+	p.add("current_item_inactive_column_suffix", &current_item_inactive_column_suffix,
+	      "$/r$(end)",
+	      std::bind(buffer_wlength,
+	                &current_item_inactive_column_suffix,
+	                std::ref(current_item_inactive_column_suffix_length),
+	                ph::_1));
+	p.add("now_playing_prefix", &now_playing_prefix, "$b",
+	      std::bind(buffer_wlength,
+	                nullptr,
+	                std::ref(now_playing_prefix_length),
+	                ph::_1));
+	p.add("now_playing_suffix", &now_playing_suffix, "$/b",
+	      std::bind(buffer_wlength,
+	                nullptr,
+	                std::ref(now_playing_suffix_length),
+	                ph::_1));
 	p.add("browser_playlist_prefix", &browser_playlist_prefix, "$2playlist$9 ", buffer);
-	p.add("selected_item_prefix", &selected_item_prefix,
-	      "$6", [this](std::string v) {
-		      NC::Buffer result = buffer(v);
-		      selected_item_prefix_length = wideLength(ToWString(result.str()));
-		      return result;
-	      });
-	p.add("selected_item_suffix", &selected_item_suffix,
-	      "$9", [this](std::string v) {
-		      NC::Buffer result = buffer(v);
-		      selected_item_suffix_length = wideLength(ToWString(result.str()));
-		      return result;
-	      });
+	p.add("selected_item_prefix", &selected_item_prefix, "$6",
+	      std::bind(buffer_wlength,
+	                nullptr,
+	                std::ref(selected_item_prefix_length),
+	                ph::_1));
+	p.add("selected_item_suffix", &selected_item_suffix, "$9",
+	      std::bind(buffer_wlength,
+	                nullptr,
+	                std::ref(selected_item_suffix_length),
+	                ph::_1));
 	p.add("modified_item_prefix", &modified_item_prefix, "$3>$9 ", buffer);
 	p.add("song_window_title_format", &song_window_title_format,
 	      "{%a - }{%t}|{%f}", [](std::string v) {
@@ -506,14 +578,12 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("main_window_color", &main_color, "yellow");
 	p.add("color1", &color1, "white");
 	p.add("color2", &color2, "green");
-	p.add("main_window_highlight_color", &main_highlight_color, "yellow");
 	p.add("progressbar_color", &progressbar_color, "black:b");
 	p.add("progressbar_elapsed_color", &progressbar_elapsed_color, "green:b");
 	p.add("statusbar_color", &statusbar_color, "default");
 	p.add("statusbar_time_color", &statusbar_time_color, "default:b");
 	p.add("player_state_color", &player_state_color, "default:b");
 	p.add("alternative_ui_separator_color", &alternative_ui_separator_color, "black:b");
-	p.add("active_column_color", &active_column_color, "red");
 	p.add("window_border_color", &window_border, "green", verbose_lexical_cast<NC::Color>);
 	p.add("active_window_border", &active_window_border, "red",
 	      verbose_lexical_cast<NC::Color>);

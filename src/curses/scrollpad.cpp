@@ -22,12 +22,14 @@
 #include <boost/regex.hpp>
 #include <iostream>
 
-#include "scrollpad.h"
+#include "curses/scrollpad.h"
+#include "utility/storage_kind.h"
 
 namespace {
 
-template <typename PropT>
-bool regexSearch(NC::Buffer &buf, PropT begin, const std::string &ws, PropT end, boost::regex::flag_type flags, size_t id)
+template <typename BeginT, typename EndT>
+bool regexSearch(NC::Buffer &buf, const BeginT &begin, const std::string &ws,
+                 const EndT &end, boost::regex::flag_type flags, size_t id)
 {
 	try {
 		boost::regex rx(ws, flags);
@@ -269,14 +271,27 @@ void Scrollpad::reset()
 	m_beginning = 0;
 }
 
-bool Scrollpad::setProperties(Color begin, const std::string &s, Color end, size_t flags, size_t id)
+bool Scrollpad::setProperties(const Color &begin, const std::string &s,
+                              const Color &end, size_t flags, size_t id)
 {
 	return regexSearch(m_buffer, std::move(begin), s, std::move(end), id, flags);
 }
 
-bool Scrollpad::setProperties(Format begin, const std::string &s, Format end, size_t flags, size_t id)
+bool Scrollpad::setProperties(const Format &begin, const std::string &s,
+                              const Format &end, size_t flags, size_t id)
 {
 	return regexSearch(m_buffer, begin, s, end, flags, id);
+}
+
+bool Scrollpad::setProperties(const FormattedColor &fc, const std::string &s,
+                              size_t flags, size_t id)
+{
+	return regexSearch(m_buffer,
+	                   fc,
+	                   s,
+	                   FormattedColor::End<StorageKind::Value>(fc),
+	                   flags,
+	                   id);
 }
 
 void Scrollpad::removeProperties(size_t id)
