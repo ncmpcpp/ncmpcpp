@@ -373,6 +373,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			else
 				invalid_value(v);
 		});
+	p.add("media_library_albums_split_by_date", &media_library_albums_split_by_date, "yes", yes_no);
 	p.add("default_find_mode", &wrapped_search, "wrapped", [](std::string v) {
 			if (v == "wrapped")
 				return true;

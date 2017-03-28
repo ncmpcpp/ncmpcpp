@@ -170,6 +170,7 @@ struct Configuration
 	bool generate_win32_compatible_filenames;
 	bool ask_for_locked_screen_width_part;
 	bool allow_for_physical_item_deletion;
+	bool media_library_albums_split_by_date;
 	bool startup_slave_screen_focus;
 
 	unsigned mpd_connection_timeout;

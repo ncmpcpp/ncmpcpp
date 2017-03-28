@@ -30,6 +30,7 @@ ncmpcpp-0.8 (????-??-??)
 * Disable autocenter mode while searching and filtering.
 * Added '--quiet' comand line argument that supresses messages shown at startup.
 * Multiple songs in Media library are now added to playlist in the same order they are displayed.
+* Added configuration options 'media_library_albums_split_by_date' that determines whether albums in media library should be split by date.
 
 ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.

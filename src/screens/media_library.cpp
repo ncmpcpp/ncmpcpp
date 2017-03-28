@@ -62,6 +62,13 @@ size_t itsRightColStartX;
 typedef MediaLibrary::PrimaryTag PrimaryTag;
 typedef MediaLibrary::AlbumEntry AlbumEntry;
 
+std::string Date_(std::string date)
+{
+	if (!Config.media_library_albums_split_by_date)
+		date.clear();
+	return date;
+}
+
 MPD::SongIterator getSongsFromAlbum(const AlbumEntry &album)
 {
 	Mpd.StartSearch(true);
@@ -69,7 +76,8 @@ MPD::SongIterator getSongsFromAlbum(const AlbumEntry &album)
 	if (!album.isAllTracksEntry())
 	{
 		Mpd.AddSearch(MPD_TAG_ALBUM, album.entry().album());
-		Mpd.AddSearch(MPD_TAG_DATE, album.entry().date());
+		if (Config.media_library_albums_split_by_date)
+			Mpd.AddSearch(MPD_TAG_DATE, album.entry().date());
 	}
 	return Mpd.CommitSearchSongs();
 }
@@ -290,7 +298,10 @@ void MediaLibrary::update()
 				unsigned idx = 0;
 				while (!(tag = s->get(Config.media_lib_primary_tag, idx++)).empty())
 				{
-					auto key = std::make_tuple(std::move(tag), s->getAlbum(), s->getDate());
+					auto key = std::make_tuple(
+						std::move(tag),
+						s->getAlbum(),
+						Date_(s->getDate()));
 					auto it = albums.find(key);
 					if (it == albums.end())
 						albums[std::move(key)] = s->getMTime();
@@ -378,7 +389,7 @@ void MediaLibrary::update()
 				std::map<std::tuple<std::string, std::string>, time_t> albums;
 				for (MPD::SongIterator s = Mpd.CommitSearchSongs(), end; s != end; ++s)
 				{
-					auto key = std::make_tuple(s->getAlbum(), s->getDate());
+					auto key = std::make_tuple(s->getAlbum(), Date_(s->getDate()));
 					auto it = albums.find(key);
 					if (it == albums.end())
 						albums[std::move(key)] = s->getMTime();
@@ -422,15 +433,9 @@ void MediaLibrary::update()
 		m_songs_update_request = false;
 		sunfilter_songs.set(ReapplyFilter::Yes, true);
 		auto &album = Albums.current()->value();
-		Mpd.StartSearch(true);
-		Mpd.AddSearch(Config.media_lib_primary_tag, album.entry().tag());
-		if (!album.isAllTracksEntry())
-		{
-			Mpd.AddSearch(MPD_TAG_ALBUM, album.entry().album());
-			Mpd.AddSearch(MPD_TAG_DATE, album.entry().date());
-		}
 		size_t idx = 0;
-		for (MPD::SongIterator s = Mpd.CommitSearchSongs(), end; s != end; ++s, ++idx)
+		for (MPD::SongIterator s = getSongsFromAlbum(album), end;
+		     s != end; ++s, ++idx)
 		{
 			if (idx < Songs.size())
 				Songs[idx].value() = std::move(*s);
@@ -755,8 +760,9 @@ std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 				else
 					Mpd.AddSearch(Config.media_lib_primary_tag,
 					              Tags.current()->value().tag());
-					Mpd.AddSearch(MPD_TAG_ALBUM, sc.entry().album());
-				Mpd.AddSearch(MPD_TAG_DATE, sc.entry().date());
+				Mpd.AddSearch(MPD_TAG_ALBUM, sc.entry().album());
+				if (Config.media_library_albums_split_by_date)
+					Mpd.AddSearch(MPD_TAG_DATE, sc.entry().date());
 				size_t begin = result.size();
 				std::copy(
 					std::make_move_iterator(Mpd.CommitSearchSongs()),
@@ -771,7 +777,7 @@ std::vector<MPD::Song> MediaLibrary::getSelectedSongs()
 		{
 			size_t begin = result.size();
 			std::copy(
-				std::make_move_iterator(getSongsFromAlbum(Albums.current()->value().entry())),
+				std::make_move_iterator(getSongsFromAlbum(Albums.current()->value())),
 				std::make_move_iterator(MPD::SongIterator()),
 				std::back_inserter(result)
 			);
@@ -1013,9 +1019,10 @@ void MediaLibrary::locateSong(const MPD::Song &s)
 			// The album could not be found, insert it if in two column mode.
 			// See comment about tags not found above. This is the equivalent
 			// for two column mode.
-			Albums.addItem(AlbumEntry(
-				Album(primary_tag, s.getAlbum(), s.getDate(), s.getMTime())
-			));
+			Albums.addItem(AlbumEntry(Album(primary_tag,
+			                                s.getAlbum(),
+			                                Date_(s.getDate()),
+			                                s.getMTime())));
 			std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
 			Albums.refresh();
 			MoveToAlbum(Albums, primary_tag, s);
@@ -1126,8 +1133,8 @@ bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, c
 
 	auto equals_fun_argument = [&](AlbumEntry &e) {
 		return (!hasTwoColumns || e.entry().tag() == primary_tag)
-		    && e.entry().album() == album
-		    && e.entry().date() == date;
+		&& e.entry().album() == album
+		&& (!Config.media_library_albums_split_by_date || e.entry().date() == date);
 	};
 
 	if (equals_fun_argument(*albums.currentV()))
