@@ -30,6 +30,7 @@
 #include "configuration.h"
 #include "config.h"
 #include "mpdpp.h"
+#include "format_impl.h"
 #include "settings.h"
 #include "utility/string.h"
 

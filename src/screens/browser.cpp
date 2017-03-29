@@ -38,6 +38,7 @@
 #include "screens/tag_editor.h"
 #include "title.h"
 #include "tags.h"
+#include "format_impl.h"
 #include "helpers/song_iterator_maker.h"
 #include "utility/comparators.h"
 #include "utility/string.h"

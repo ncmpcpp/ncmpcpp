@@ -34,6 +34,7 @@
 #include "status.h"
 #include "statusbar.h"
 #include "screens/tag_editor.h"
+#include "format_impl.h"
 #include "helpers/song_iterator_maker.h"
 #include "utility/functional.h"
 #include "utility/comparators.h"

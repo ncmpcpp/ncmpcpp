@@ -34,6 +34,7 @@
 #include "screens/media_library.h"
 #include "status.h"
 #include "statusbar.h"
+#include "format_impl.h"
 #include "helpers/song_iterator_maker.h"
 #include "utility/comparators.h"
 #include "utility/functional.h"
