@@ -26,9 +26,6 @@ if test "$clock" = "yes"; then
 	AC_DEFINE([ENABLE_CLOCK], [1], [enables clock screen])
 fi
 
-# OSX needs at least 500 for ncursesw specific functions
-CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700"
-
 dnl ================================
 dnl = checking for -std=c++14 flag =
 dnl ================================
