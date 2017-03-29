@@ -45,7 +45,7 @@ void DisplayComponent(SelectedItemsAdder::Component &menu)
 bool EntryMatcher(const Regex::Regex &rx, const NC::Menu<SelectedItemsAdder::Entry>::Item &item)
 {
 	if (!item.isSeparator())
-		return Regex::search(item.value().item(), rx);
+		return Regex::search(item.value().item(), rx, Config.ignore_diacritics);
 	else
 		return false;
 }

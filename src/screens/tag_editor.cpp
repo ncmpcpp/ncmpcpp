@@ -1191,12 +1191,12 @@ bool DirEntryMatcher(const Regex::Regex &rx, const std::pair<std::string, std::s
 {
 	if (dir.first == "." || dir.first == "..")
 		return filter;
-	return Regex::search(dir.first, rx);
+	return Regex::search(dir.first, rx, Config.ignore_diacritics);
 }
 
 bool SongEntryMatcher(const Regex::Regex &rx, const MPD::MutableSong &s)
 {
-	return Regex::search(SongToString(s), rx);
+	return Regex::search(SongToString(s), rx, Config.ignore_diacritics);
 }
 
 }

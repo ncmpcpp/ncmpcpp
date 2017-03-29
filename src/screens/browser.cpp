@@ -734,7 +734,7 @@ bool browserEntryMatcher(const Regex::Regex &rx, const MPD::Item &item, bool fil
 {
 	if (isItemParentDirectory(item))
 		return filter;
-	return Regex::search(itemToString(item), rx);
+	return Regex::search(itemToString(item), rx, Config.ignore_diacritics);
 }
 
 }

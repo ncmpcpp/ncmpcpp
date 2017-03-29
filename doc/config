@@ -421,10 +421,17 @@
 #regular_expressions = perl
 #
 ##
-## Note: If below is enabled, ncmpcpp will ignore leading "The" word while
+## Note: if below is enabled, ncmpcpp will ignore leading "The" word while
 ## sorting items in browser, tags in media library, etc.
 ##
 #ignore_leading_the = no
+#
+##
+## Note: if below is enabled, ncmpcpp will ignore diacritics while searching and
+## filtering lists. This takes an effect only if boost was compiled with ICU
+## support.
+##
+#ignore_diacritics = no
 #
 #block_search_constraints_change_if_items_found = yes
 #

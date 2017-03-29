@@ -108,7 +108,7 @@ dnl ====================
 dnl = checking for icu =
 dnl ====================
 AH_TEMPLATE([BOOST_REGEX_ICU], [boost.regex was compiled with ICU support])
-PKG_CHECK_MODULES([ICU], [icu-uc], [
+PKG_CHECK_MODULES([ICU], [icu-i18n icu-uc], [
 	old_CPPFLAGS="$CPPFLAGS"
 	old_LIBS="$LIBS"
 	AC_SUBST(ICU_CFLAGS)

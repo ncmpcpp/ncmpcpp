@@ -154,6 +154,7 @@ struct Configuration
 	bool display_bitrate;
 	bool display_remaining_time;
 	bool ignore_leading_the;
+	bool ignore_diacritics;
 	bool block_search_constraints_change;
 	bool use_console_editor;
 	bool use_cyclic_scrolling;

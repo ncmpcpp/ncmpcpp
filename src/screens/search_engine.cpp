@@ -517,36 +517,36 @@ void SearchEngine::Search()
 		{
 			if (!rx[0].empty())
 				any_found =
-				   Regex::search(s->getArtist(), rx[0])
-				|| Regex::search(s->getAlbumArtist(), rx[0])
-				|| Regex::search(s->getTitle(), rx[0])
-				|| Regex::search(s->getAlbum(), rx[0])
-				|| Regex::search(s->getName(), rx[0])
-				|| Regex::search(s->getComposer(), rx[0])
-				|| Regex::search(s->getPerformer(), rx[0])
-				|| Regex::search(s->getGenre(), rx[0])
-				|| Regex::search(s->getDate(), rx[0])
-				|| Regex::search(s->getComment(), rx[0]);
+					   Regex::search(s->getArtist(), rx[0], Config.ignore_diacritics)
+					|| Regex::search(s->getAlbumArtist(), rx[0], Config.ignore_diacritics)
+					|| Regex::search(s->getTitle(), rx[0], Config.ignore_diacritics)
+					|| Regex::search(s->getAlbum(), rx[0], Config.ignore_diacritics)
+					|| Regex::search(s->getName(), rx[0], Config.ignore_diacritics)
+					|| Regex::search(s->getComposer(), rx[0], Config.ignore_diacritics)
+					|| Regex::search(s->getPerformer(), rx[0], Config.ignore_diacritics)
+					|| Regex::search(s->getGenre(), rx[0], Config.ignore_diacritics)
+					|| Regex::search(s->getDate(), rx[0], Config.ignore_diacritics)
+					|| Regex::search(s->getComment(), rx[0], Config.ignore_diacritics);
 			if (found && !rx[1].empty())
-				found = Regex::search(s->getArtist(), rx[1]);
+				found = Regex::search(s->getArtist(), rx[1], Config.ignore_diacritics);
 			if (found && !rx[2].empty())
-				found = Regex::search(s->getAlbumArtist(), rx[2]);
+				found = Regex::search(s->getAlbumArtist(), rx[2], Config.ignore_diacritics);
 			if (found && !rx[3].empty())
-				found = Regex::search(s->getTitle(), rx[3]);
+				found = Regex::search(s->getTitle(), rx[3], Config.ignore_diacritics);
 			if (found && !rx[4].empty())
-				found = Regex::search(s->getAlbum(), rx[4]);
+				found = Regex::search(s->getAlbum(), rx[4], Config.ignore_diacritics);
 			if (found && !rx[5].empty())
-				found = Regex::search(s->getName(), rx[5]);
+				found = Regex::search(s->getName(), rx[5], Config.ignore_diacritics);
 			if (found && !rx[6].empty())
-				found = Regex::search(s->getComposer(), rx[6]);
+				found = Regex::search(s->getComposer(), rx[6], Config.ignore_diacritics);
 			if (found && !rx[7].empty())
-				found = Regex::search(s->getPerformer(), rx[7]);
+				found = Regex::search(s->getPerformer(), rx[7], Config.ignore_diacritics);
 			if (found && !rx[8].empty())
-				found = Regex::search(s->getGenre(), rx[8]);
+				found = Regex::search(s->getGenre(), rx[8], Config.ignore_diacritics);
 			if (found && !rx[9].empty())
-				found = Regex::search(s->getDate(), rx[9]);
+				found = Regex::search(s->getDate(), rx[9], Config.ignore_diacritics);
 			if (found && !rx[10].empty())
-				found = Regex::search(s->getComment(), rx[10]);
+				found = Regex::search(s->getComment(), rx[10], Config.ignore_diacritics);
 		}
 		else // match only if values are equal
 		{
@@ -616,7 +616,7 @@ bool SEItemEntryMatcher(const Regex::Regex &rx, const NC::Menu<SEItem>::Item &it
 {
 	if (item.isSeparator() || !item.value().isSong())
 		return filter;
-	return Regex::search(SEItemToString(item.value()), rx);
+	return Regex::search(SEItemToString(item.value()), rx, Config.ignore_diacritics);
 }
 
 }
