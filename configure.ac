@@ -53,7 +53,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[auto f = [](auto n) { return n*n; }; f(
 dnl ======================
 dnl = checking for boost =
 dnl ======================
-BOOST_REQUIRE([1.58])
+BOOST_REQUIRE([1.60])
 AC_SUBST(BOOST_CPPFLAGS)
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 
