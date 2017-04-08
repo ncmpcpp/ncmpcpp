@@ -207,8 +207,14 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist,
 	Result result;
 	result.first = false;
 	
-	std::string search_str = "site:";
-	search_str += Curl::escape(siteKeyword());
+	std::string search_str;
+	if (siteKeyword() != nullptr)
+	{
+		search_str += "site:";
+		search_str += Curl::escape(siteKeyword());
+	}
+	else
+		search_str = "lyrics";
 	search_str += "+";
 	search_str += Curl::escape(artist);
 	search_str += "+";

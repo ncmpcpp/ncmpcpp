@@ -161,7 +161,7 @@ struct InternetLyricsFetcher : public GoogleLyricsFetcher
 	virtual Result fetch(const std::string &artist, const std::string &title) override;
 	
 protected:
-	virtual const char *siteKeyword() const override { return "lyrics"; }
+	virtual const char *siteKeyword() const override { return nullptr; }
 	virtual const char *regex() const override { return ""; }
 	
 	virtual bool isURLOk(const std::string &url) override;
