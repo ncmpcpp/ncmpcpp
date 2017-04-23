@@ -22,7 +22,6 @@
 #define NCMPCPP_WINDOW_H
 
 #define NCURSES_NOMACROS 1
-#define NCURSES_WIDECHAR 1
 
 #include "config.h"
 

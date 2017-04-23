@@ -108,7 +108,9 @@ PKG_CHECK_MODULES([ICU], [icu-i18n icu-uc], [
 	CPPFLAGS="$CPPFLAGS $ICU_CFLAGS"
 	LIBS="$LIBS $ICU_LIBS"
 	AC_MSG_CHECKING([whether boost.regex was compiled with ICU support])
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <boost/regex/icu.hpp>]], [[boost::u32regex rx = boost::make_u32regex("foo"); if (boost::u32regex_search("foobar", rx)) { }]])],
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([
+    #include <boost/regex/icu.hpp>
+    ], [boost::u32regex rx = boost::make_u32regex("foo"); if (boost::u32regex_search("foobar", rx)) { }])],
 	AC_MSG_RESULT([yes])
 		AC_DEFINE([BOOST_REGEX_ICU], [1]),
 	AC_MSG_RESULT([no])
@@ -160,8 +162,14 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw], [
 		AC_MSG_ERROR([missing curses.h header])
 	)
   AC_CHECK_LIB(ncursesw, initscr, , AC_MSG_ERROR([ncursesw doesn't provide initscr]))
-  AC_CHECK_LIB(ncursesw, waddwstr, , AC_MSG_ERROR([ncursesw doesn't provide waddwstr]))
-  AC_CHECK_LIB(ncursesw, waddnwstr, , AC_MSG_ERROR([ncursesw doesn't provide waddnwstr]))
+  AC_MSG_CHECKING([whether curses.h exposes wide-char functions by default])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([
+    #include <curses.h>
+    ], [waddnwstr(stdscr, L"123", 3)])],
+	AC_MSG_RESULT([yes]),
+	AC_MSG_RESULT([no])
+		CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED",
+	)
 ],
 	AC_MSG_ERROR([ncursesw is required!])
 )
