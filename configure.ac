@@ -26,9 +26,7 @@ if test "$clock" = "yes"; then
 	AC_DEFINE([ENABLE_CLOCK], [1], [enables clock screen])
 fi
 
-dnl ================================
-dnl = checking for -std=c++14 flag =
-dnl ================================
+# -std=c++14
 AC_MSG_CHECKING([whether compiler supports -std=c++14])
 old_CXXFLAGS="$CXXFLAGS"
 CXXFLAGS="-std=c++14"
@@ -40,9 +38,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])],
 )
 CXXFLAGS="$old_CXXFLAGS $std_cpp14"
 
-dnl ===================================================
-dnl = checking for generic lambda expressions support =
-dnl ===================================================
+# generic lambda expressions support
 AC_MSG_CHECKING([whether compiler supports generic lambda expressions])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[auto f = [](auto n) { return n*n; }; f(7);]])],
 	AC_MSG_RESULT([yes]),
@@ -50,9 +46,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[auto f = [](auto n) { return n*n; }; f(
 		AC_MSG_ERROR([[Your compiler doesn't seem to support generic lambda expressions, please upgrade (GCC >= 5)]])
 )
 
-dnl ======================
-dnl = checking for boost =
-dnl ======================
+# boost
 BOOST_REQUIRE([1.60])
 AC_SUBST(BOOST_CPPFLAGS)
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
@@ -104,9 +98,7 @@ AC_SUBST(BOOST_THREAD_LIBS)
 LDFLAGS+="$LDFLAGS $BOOST_THREAD_LDFLAGS"
 LIBS="$LIBS $BOOST_THREAD_LIBS"
 
-dnl ====================
-dnl = checking for icu =
-dnl ====================
+# icu
 AH_TEMPLATE([BOOST_REGEX_ICU], [boost.regex was compiled with ICU support])
 PKG_CHECK_MODULES([ICU], [icu-i18n icu-uc], [
 	old_CPPFLAGS="$CPPFLAGS"
@@ -125,15 +117,11 @@ PKG_CHECK_MODULES([ICU], [icu-i18n icu-uc], [
 	)
 ], [[]])
 
-dnl ================================
-dnl = checking for various headers =
-dnl ================================
+# various headers
 AC_CHECK_HEADERS([netinet/tcp.h netinet/in.h], , AC_MSG_ERROR(vital headers missing))
 AC_CHECK_HEADERS([langinfo.h], , AC_MSG_WARN(locale detection disabled))
 
-dnl ==============================
-dnl = checking for libmpdclient2 =
-dnl ==============================
+# libmpdclient2
 PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.8], [
 	AC_SUBST(libmpdclient_CFLAGS)
 	AC_SUBST(libmpdclient_LIBS)
@@ -147,9 +135,7 @@ PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.8], [
 	AC_MSG_ERROR([libmpdclient >= 2.8 is required!])
 )
 
-dnl =========================
-dnl = checking for readline =
-dnl =========================
+# readline
 AX_LIB_READLINE
 if test "$ax_cv_lib_readline" = "no"; then
   AC_MSG_ERROR([no readline compatible library found])
@@ -158,16 +144,12 @@ if test "$ax_cv_lib_readline_history" = "no"; then
   AC_MSG_WARN([readline library has no history functionality])
 fi
 
-dnl ========================
-dnl = checking for pthread =
-dnl ========================
+# pthread
 AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread",
 	AC_MSG_ERROR([pthread library is required])
 )
 
-dnl =========================
-dnl = checking for ncursesw =
-dnl =========================
+# ncursesw
 PKG_CHECK_MODULES([ncursesw], [ncursesw], [
 	AC_SUBST(ncursesw_CFLAGS)
 	AC_SUBST(ncursesw_LIBS)
@@ -184,9 +166,7 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw], [
 	AC_MSG_ERROR([ncursesw is required!])
 )
 
-dnl ======================
-dnl = checking for fftw3 =
-dnl ======================
+# fftw3
 if test "$visualizer" = "yes" ; then
 	if test "$fftw" != "no" ; then
 		PKG_CHECK_MODULES([fftw3], [fftw3 >= 3], [
@@ -209,9 +189,7 @@ if test "$visualizer" = "yes" ; then
 	AC_DEFINE([ENABLE_VISUALIZER], [1], [enables music visualizer screen])
 fi
 
-dnl ========================
-dnl = checking for libcurl =
-dnl ========================
+# libcurl
 PKG_CHECK_MODULES([libcurl], [libcurl], [
 	AC_SUBST(libcurl_CFLAGS)
 	AC_SUBST(libcurl_LIBS)
@@ -225,9 +203,7 @@ PKG_CHECK_MODULES([libcurl], [libcurl], [
 	AC_MSG_ERROR([libcurl is required!])
 )
 
-dnl =======================
-dnl = checking for taglib =
-dnl =======================
+# taglib
 if test "$taglib" != "no" ; then
 	AC_PATH_PROG(TAGLIB_CONFIG, taglib-config)
 	if test "$TAGLIB_CONFIG" != "" ; then
