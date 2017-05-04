@@ -80,6 +80,9 @@ SortPlaylistDialog::SortPlaylistDialog()
 	w.addItem(Entry(std::make_pair("Filename", &MPD::Song::getURI),
 		std::bind(&Self::moveSortOrderHint, this)
 	));
+	w.addItem(Entry(std::make_pair("Length", &MPD::Song::getLength),
+		std::bind(&Self::moveSortOrderHint, this)
+	));
 	w.addSeparator();
 	w.addItem(Entry(std::make_pair("Sort", static_cast<MPD::Song::GetFunction>(0)),
 		std::bind(&Self::sort, this)
@@ -227,6 +230,6 @@ void SortPlaylistDialog::cancel() const
 
 void SortPlaylistDialog::setDimensions()
 {
-	m_height = std::min(size_t(17), Global::MainHeight);
+	m_height = std::min(size_t(19), Global::MainHeight);
 	m_width = 30;
 }
