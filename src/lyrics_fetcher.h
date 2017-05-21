@@ -29,7 +29,9 @@
 struct LyricsFetcher
 {
 	typedef std::pair<bool, std::string> Result;
-	
+
+	virtual ~LyricsFetcher() { }
+
 	virtual const char *name() const = 0;
 	virtual Result fetch(const std::string &artist, const std::string &title);
 	

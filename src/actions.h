@@ -189,7 +189,9 @@ extern size_t FooterStartY;
 struct BaseAction
 {
 	BaseAction(Type type_, const char *name_): m_name(name_), m_type(type_) { }
-	
+
+	virtual ~BaseAction() { }
+
 	const std::string &name() const { return m_name; }
 	Type type() const { return m_type; }
 	
