@@ -78,7 +78,7 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist,
 	boost::replace_all(url, "%title%", Curl::escape(title));
 	
 	std::string data;
-	CURLcode code = Curl::perform(data, url);
+	CURLcode code = Curl::perform(data, url, "", true);
 	
 	if (code != CURLE_OK)
 	{
@@ -87,7 +87,7 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist,
 	}
 	
 	auto lyrics = getContent(regex(), data);
-	
+
 	if (lyrics.empty() || notLyrics(data))
 	{
 		result.second = msgNotFound;
