@@ -58,6 +58,7 @@ struct Configuration
 	bool read(const std::vector<std::string> &config_paths, bool ignore_errors);
 
 	std::string ncmpcpp_directory;
+	std::string log_directory;
 	std::string lyrics_directory;
 
 	std::string mpd_music_dir;
