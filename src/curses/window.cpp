@@ -214,6 +214,10 @@ Color Color::End(0, 0, false, true);
 
 int Color::pairNumber() const
 {
+	// Fallback if color is unavailable
+	if (color_pair_map.empty())
+		return 0;
+
 	int result = 0;
 	if (isEnd())
 		throw std::logic_error("'end' doesn't have a corresponding pair number");
