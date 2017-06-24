@@ -301,7 +301,7 @@
 #
 #discard_colors_if_item_is_selected = yes
 #
-#show_duplicate_tags = true
+#show_duplicate_tags = yes
 #
 #incremental_seeking = yes
 #
