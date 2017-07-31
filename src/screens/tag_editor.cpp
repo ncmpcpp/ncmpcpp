@@ -1062,7 +1062,7 @@ void GetPatternList()
 			while (std::getline(input, line))
 				if (!line.empty())
 					Patterns.push_back(line);
-				input.close();
+			input.close();
 		}
 	}
 }
@@ -1164,14 +1164,14 @@ std::string ParseFilename(MPD::MutableSong &s, std::string mask, bool preview)
 			if (*j == '_')
 				*j = ' ';
 			
-			if (!preview)
-			{
-				MPD::MutableSong::SetFunction set = IntoSetFunction(it->first);
-				if (set)
-					s.setTags(set, it->second);
-			}
-			else
-				result << "%" << it->first << ": " << it->second << "\n";
+		if (!preview)
+		{
+			MPD::MutableSong::SetFunction set = IntoSetFunction(it->first);
+			if (set)
+				s.setTags(set, it->second);
+		}
+		else
+			result << "%" << it->first << ": " << it->second << "\n";
 	}
 	return result.str();
 }
