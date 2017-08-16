@@ -115,12 +115,22 @@ public:
 			if (ret != 0)
 				return ret < 0;
 		}
-		try {
-			int ret = boost::lexical_cast<int>(a.getTags(&MPD::Song::getTrackNumber))
-			        - boost::lexical_cast<int>(b.getTags(&MPD::Song::getTrackNumber));
-			return ret < 0;
-		} catch (boost::bad_lexical_cast &) {
-			return a.getTrackNumber() < b.getTrackNumber();
+		// Sort by track number if track numbers are different
+		if( a.getTags(&MPD::Song::getTrackNumber) != b.getTags(&MPD::Song::getTrackNumber) ) {
+			try {
+				int ret = boost::lexical_cast<int>(a.getTags(&MPD::Song::getTrackNumber))
+					- boost::lexical_cast<int>(b.getTags(&MPD::Song::getTrackNumber));
+
+				// If track numbers are equal, fall back to lexical ordering of track name.
+				if( ret != 0 ) 
+					return ret < 0;
+			} catch (boost::bad_lexical_cast &) {
+				return a.getTrackNumber() < b.getTrackNumber();
+			}
+		}
+		// Otherwise fall back to lexical sorting of track names.
+		else {
+				return a.getTags(&MPD::Song::getName) < b.getTags(&MPD::Song::getName);
 		}
 	}
 };
