@@ -2,6 +2,7 @@ ncmpcpp-0.8.1 (????-??-??)
 * Setting 'colors_enabled' to 'no' no longer results in a crash.
 * Using '--quiet' command line argument no longer results in a crash.
 * If songs in media library have no track numbers, sort them by name.
+* Fixed a situation in which songs added to playlist from media library or playlist editor screens would not be immediately marked as such.
 
 ncmpcpp-0.8 (2017-05-21)
 * Configuration variable 'execute_on_player_state_change' was added.

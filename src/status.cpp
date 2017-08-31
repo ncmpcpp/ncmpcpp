@@ -439,6 +439,17 @@ void Status::Changes::playlist(unsigned previous_version)
 
 	myPlaylist->reloadTotalLength();
 	myPlaylist->reloadRemaining();
+
+	// When we're in multi-column screens, it might happen that songs visible on
+	// the screen are added, but they will not be immediately marked as such
+	// because the window that contains them is not the active one at the moment,
+	// so we need to refresh them manually.
+	if (isVisible(myLibrary)
+	    && !myLibrary->isActiveWindow(myLibrary->Songs))
+		myLibrary->Songs.refresh();
+	if (isVisible(myPlaylistEditor)
+	    && !myPlaylistEditor->isActiveWindow(myPlaylistEditor->Content))
+		myPlaylistEditor->Content.refresh();
 }
 
 void Status::Changes::storedPlaylists()
