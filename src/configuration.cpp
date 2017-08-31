@@ -39,9 +39,18 @@ namespace po = boost::program_options;
 using std::cerr;
 using std::cout;
 
+class null_streambuf : public std::basic_streambuf<char>
+{
+	std::streamsize xsputn(const char_type *s, std::streamsize n) override
+	{
+		return 0;
+	}
+};
+
 namespace {
 
 const char *env_home;
+null_streambuf null_stream;
 
 std::string xdg_config_home()
 {
@@ -106,9 +115,7 @@ bool configure(int argc, char **argv)
 		// suppress messages from std::clog
 		if (vm.count("quiet"))
 		{
-			std::ofstream null_stream;
-			null_stream.open("/dev/null");
-			std::clog.rdbuf(null_stream.rdbuf());
+			std::clog.rdbuf(&null_stream);
 		}
 
 		if (vm.count("help"))
