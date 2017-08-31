@@ -109,19 +109,26 @@ public:
 		return (*this)(a.value(), b.value());
 	}
 	bool operator()(const MPD::Song &a, const MPD::Song &b) {
+		int ret;
 		for (auto get = GetFuns.begin()+m_offset; get != GetFuns.end(); ++get) {
-			int ret = m_cmp(a.getTags(*get),
-			                b.getTags(*get));
+			ret = m_cmp(a.getTags(*get),
+			            b.getTags(*get));
 			if (ret != 0)
 				return ret < 0;
 		}
+
+		// Sort by track numbers.
 		try {
-			int ret = boost::lexical_cast<int>(a.getTags(&MPD::Song::getTrackNumber))
-			        - boost::lexical_cast<int>(b.getTags(&MPD::Song::getTrackNumber));
-			return ret < 0;
+			ret = boost::lexical_cast<int>(a.getTags(&MPD::Song::getTrackNumber))
+			    - boost::lexical_cast<int>(b.getTags(&MPD::Song::getTrackNumber));
 		} catch (boost::bad_lexical_cast &) {
-			return a.getTrackNumber() < b.getTrackNumber();
+			ret = a.getTrackNumber().compare(b.getTrackNumber());
 		}
+		if (ret != 0)
+			return ret < 0;
+
+		// If there are no track numbers, sort by name.
+		return a.getName() < b.getName();
 	}
 };
 
