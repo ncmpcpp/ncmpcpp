@@ -105,11 +105,7 @@ bool configure(int argc, char **argv)
 
 		// suppress messages from std::clog
 		if (vm.count("quiet"))
-		{
-			std::ofstream null_stream;
-			null_stream.open("/dev/null");
-			std::clog.rdbuf(null_stream.rdbuf());
-		}
+			std::clog.rdbuf(nullptr);
 
 		if (vm.count("help"))
 		{

@@ -1,5 +1,6 @@
 ncmpcpp-0.8.1 (????-??-??)
 * Setting 'colors_enabled' to 'no' no longer results in a crash.
+* Using '--quiet' command line argument no longer results in a crash.
 
 ncmpcpp-0.8 (2017-05-21)
 * Configuration variable 'execute_on_player_state_change' was added.
