@@ -127,8 +127,9 @@ public:
 		if (ret != 0)
 			return ret < 0;
 
-		// If there are no track numbers, sort by name.
-		return a.getName() < b.getName();
+		// If track numbers are equal, sort by the display format.
+		return Format::stringify<char>(Config.song_library_format, &a)
+		     < Format::stringify<char>(Config.song_library_format, &b);
 	}
 };
 
