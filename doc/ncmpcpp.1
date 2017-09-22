@@ -9,37 +9,39 @@ ncmpcpp is an ncurses client for MPD (Music Player Daemon), inspired by ncmpc.
 
 Read more about MPD at http://www.musicpd.org
 .SH "OPTIONS"
-.B \-h, \-\-host
+Mandatory arguments to long options are mandatory for short options too.
+.TP
+\fB\-h\fR, \fB\-\-host\fR=\fIHOST\fR
 Connect to server at host [localhost]
 .TP
-.B \-p, \-\-port
+\fB\-p\fR, \fB\-\-port\fR=\fIPORT\fR
 Connect to server at port [6600]
 .TP
-.B \-\-current-song
+\fB\-\-current-song\fR[=\fIFORMAT\fR]
 Print current song using given format and exit
 .TP
-.B \-c, \-\-config
+\fB\-c\fR, \fB\-\-config\fR=\fIFILE\fR
 Specify configuration file(s)
 .TP
-.B \-\-ignore-config-errors
+\fB\-\-ignore-config-errors\fR
 Ignore unknown and invalid options in configuration files
 .TP
-.B \-c, \-\-bindings
+\fB\-c\fR, \fB\-\-bindings\fR=\fIFILE\fR
 Specify bindings file(s)
 .TP
-.B \-s, \-\-screen <name>
+\fB\-s\fR, \fB\-\-screen <name>\fR
 Specify the startup screen (<name> may be: help, playlist, browser, search_engine, media_library, playlist_editor, tag_editor, outputs, visualizer, clock)
 .TP
-.B \-S, \-\-slave-screen <name>
+\fB\-S\fR, \fB\-\-slave-screen <name>\fR
 Specify the startup slave screen (<name> may be: help, playlist, browser, search_engine, media_library, playlist_editor, tag_editor, outputs, visualizer, clock)
 .TP
-.B \-q, \-\-quiet
+\fB\-q\fR, \fB\-\-quiet\fR
 Suppress logs and excess output
 .TP
-.B \-?, \-\-help
+\fB\-?\fR, \fB\-\-help\fR
 Display help.
 .TP
-.B \-v, \-\-version
+\fB\-v\fR, \fB\-\-version\fR
 Display version information.
 
 .SH "CONFIGURATION"
