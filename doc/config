@@ -442,6 +442,8 @@
 #
 #block_search_constraints_change_if_items_found = yes
 #
+#append_search_constraint = no
+#
 #mouse_support = yes
 #
 #mouse_list_scroll_whole_page = yes

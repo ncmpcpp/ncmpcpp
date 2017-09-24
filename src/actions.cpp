@@ -3020,7 +3020,11 @@ void findItem(const SearchDirection direction)
 	assert(w != nullptr);
 	assert(w->allowsSearching());
 	
-	std::string constraint = w->searchConstraint();
+	std::string constraint;
+	
+	if (Config.append_search_constraint)
+		constraint = w->searchConstraint();
+	
 	try
 	{
 		ScopedValue<bool> disabled_autocenter_mode(Config.autocenter_mode, false);

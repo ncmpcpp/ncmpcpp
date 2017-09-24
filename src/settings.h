@@ -158,6 +158,7 @@ struct Configuration
 	bool ignore_leading_the;
 	bool ignore_diacritics;
 	bool block_search_constraints_change;
+	bool append_search_constraint;
 	bool use_console_editor;
 	bool use_cyclic_scrolling;
 	bool ask_before_clearing_playlists;
