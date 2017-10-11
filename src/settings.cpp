@@ -541,6 +541,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("ignore_diacritics", &ignore_diacritics, "no", yes_no);
 	p.add("block_search_constraints_change_if_items_found",
 	      &block_search_constraints_change, "yes", yes_no);
+	p.add("append_search_constraint", &append_search_constraint, "no", yes_no);
 	p.add("mouse_support", &mouse_support, "yes", yes_no);
 	p.add("mouse_list_scroll_whole_page", &mouse_list_scroll_whole_page, "yes", yes_no);
 	p.add("empty_tag_marker", &empty_tag, "<empty>");
