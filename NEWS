@@ -1,4 +1,4 @@
-ncmpcpp-0.8.1 (????-??-??)
+ncmpcpp-0.8.1 (2017-10-11)
 * Setting 'colors_enabled' to 'no' no longer results in a crash.
 * Using '--quiet' command line argument no longer results in a crash.
 * If songs in media library have no track numbers, sort them by their display format.
