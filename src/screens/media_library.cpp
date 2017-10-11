@@ -99,20 +99,18 @@ struct SortSongs {
 	static const std::array<MPD::Song::GetFunction, 3> GetFuns;
 	
 	LocaleStringComparison m_cmp;
-	std::ptrdiff_t m_offset;
-	
+
 public:
-	SortSongs(bool disc_only = false)
-	: m_cmp(std::locale(), Config.ignore_leading_the), m_offset(disc_only ? 2 : 0) { }
+	SortSongs()
+	: m_cmp(std::locale(), Config.ignore_leading_the) { }
 	
 	bool operator()(const SongItem &a, const SongItem &b) {
 		return (*this)(a.value(), b.value());
 	}
 	bool operator()(const MPD::Song &a, const MPD::Song &b) {
 		int ret;
-		for (auto get = GetFuns.begin()+m_offset; get != GetFuns.end(); ++get) {
-			ret = m_cmp(a.getTags(*get),
-			            b.getTags(*get));
+		for (auto get : GetFuns) {
+			ret = m_cmp(a.getTags(get), b.getTags(get));
 			if (ret != 0)
 				return ret < 0;
 		}
@@ -453,7 +451,7 @@ void MediaLibrary::update()
 		};
 		if (idx < Songs.size())
 			Songs.resizeList(idx);
-		std::sort(Songs.begin(), Songs.end(), SortSongs(!album.isAllTracksEntry()));
+		std::sort(Songs.begin(), Songs.end(), SortSongs());
 	}
 }
 
