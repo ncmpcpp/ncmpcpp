@@ -68,6 +68,7 @@ enum class Type
 	Next,
 	Pause,
 	Stop,
+	Play,
 	ExecuteCommand,
 	SavePlaylist,
 	MoveSortOrderUp,
@@ -515,12 +516,21 @@ struct Pause: BaseAction
 	Pause(): BaseAction(Type::Pause, "pause") { }
 	
 private:
+	virtual bool canBeRun() override;
 	virtual void run() override;
 };
 
 struct Stop: BaseAction
 {
 	Stop(): BaseAction(Type::Stop, "stop") { }
+	
+private:
+	virtual void run() override;
+};
+
+struct Play: BaseAction
+{
+	Play(): BaseAction(Type::Play, "play") { }
 	
 private:
 	virtual void run() override;

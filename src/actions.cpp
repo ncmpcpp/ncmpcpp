@@ -804,6 +804,11 @@ void NextSong::run()
 	Mpd.Next();
 }
 
+bool Pause::canBeRun()
+{
+	return Status::State::player() != MPD::psStop;
+}
+
 void Pause::run()
 {
 	Mpd.Toggle();
@@ -843,6 +848,11 @@ void SavePlaylist::run()
 void Stop::run()
 {
 	Mpd.Stop();
+}
+
+void Play::run()
+{
+	Mpd.Play();
 }
 
 void ExecuteCommand::run()
@@ -2734,6 +2744,7 @@ void populateActions()
 	insert_action(new Actions::NextSong());
 	insert_action(new Actions::Pause());
 	insert_action(new Actions::Stop());
+	insert_action(new Actions::Play());
 	insert_action(new Actions::ExecuteCommand());
 	insert_action(new Actions::SavePlaylist());
 	insert_action(new Actions::MoveSortOrderUp());
