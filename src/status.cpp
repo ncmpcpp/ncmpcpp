@@ -594,6 +594,8 @@ void Status::Changes::elapsedTime(bool update_elapsed)
 		if (Statusbar::isUnlocked() && Config.statusbar_visibility)
 			*wFooter << NC::XY(0, 1)
 			         << NC::TermManip::ClearToEOL;
+		if (Progressbar::isUnlocked())
+			Progressbar::draw(0, 0);
 		return;
 	}
 
