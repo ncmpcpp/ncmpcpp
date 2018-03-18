@@ -314,6 +314,8 @@ std::wstring keyToWString(const NC::Key::Type key)
 		result += L"Left";
 	else if (key == NC::Key::Right)
 		result += L"Right";
+	else if (key == NC::Key::EoF)
+		result += L"EoF";
 	else if (key >= NC::Key::F1 && key <= NC::Key::F9)
 	{
 		result += L"F";
