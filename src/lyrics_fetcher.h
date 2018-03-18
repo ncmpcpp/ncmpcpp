@@ -98,7 +98,7 @@ struct LyricsmaniaFetcher : public GoogleLyricsFetcher
 	virtual const char *name() const override { return "lyricsmania.com"; }
 	
 protected:
-	virtual const char *regex() const override { return "<div class=\"lyrics-body\".*?</strong>(.*?)</div>"; }
+	virtual const char *regex() const override { return "<div class=\"lyrics-body\".*?</div>(.*?)</div>"; }
 };
 
 struct Sing365Fetcher : public GoogleLyricsFetcher
@@ -106,7 +106,7 @@ struct Sing365Fetcher : public GoogleLyricsFetcher
 	virtual const char *name() const override { return "sing365.com"; }
 	
 protected:
-	virtual const char *regex() const override { return "<div class=\"content\">.*?</script>(.*?)<script>"; }
+	virtual const char *regex() const override { return "<div class=\"content\">.*?</script></div>(.*?)<script>"; }
 };
 
 struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
