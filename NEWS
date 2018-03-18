@@ -2,6 +2,7 @@ ncmpcpp-0.8.2 (????-??-??)
 * Help screen: fixed display of EoF keycode
 * Fixed possible integer overflow when resizing screen
 * Fixed fetching lyrics from lyricsmania.com, metrolyrics.com and sing365.com
+* Search engine now properly interacts with filtering
 
 ncmpcpp-0.8.1 (2017-10-11)
 * Setting 'colors_enabled' to 'no' no longer results in a crash.

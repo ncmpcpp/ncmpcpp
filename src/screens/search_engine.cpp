@@ -243,6 +243,7 @@ void SearchEngine::mouseButtonPressed(MEVENT me)
 
 bool SearchEngine::allowsSearching()
 {
+	ScopedUnfilteredMenu<SEItem> sunfilter(ReapplyFilter::Yes, w);
 	return w.rbegin()->value().isSong();
 }
 
@@ -425,6 +426,7 @@ void SearchEngine::reset()
 {
 	for (size_t i = 0; i < ConstraintsNumber; ++i)
 		itsConstraints[i].clear();
+	w.clearFilter();
 	w.reset();
 	Prepare();
 	Statusbar::print("Search state reset");
