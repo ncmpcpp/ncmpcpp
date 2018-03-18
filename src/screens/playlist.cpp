@@ -95,12 +95,11 @@ void Playlist::resize()
 	{
 		case DisplayMode::Columns:
 			if (Config.titles_visibility)
-			{
 				w.setTitle(Display::Columns(w.getWidth()));
-				break;
-			}
+			break;
 		case DisplayMode::Classic:
 			w.setTitle("");
+			break;
 	}
 
 	hasToBeResized = 0;
