@@ -119,7 +119,12 @@ std::vector<std::string> LyricsFetcher::getContent(const char *regex_,
 	auto first = boost::sregex_iterator(data.begin(), data.end(), rx);
 	auto last = boost::sregex_iterator();
 	for (; first != last; ++first)
-		result.push_back(first->str(1));
+	{
+		std::string content;
+		for (size_t i = 1; i < first->size(); ++i)
+			content += first->str(i);
+		result.push_back(std::move(content));
+	}
 	return result;
 }
 
