@@ -219,7 +219,7 @@ void resizeScreen(bool reload_main_window)
 		getch();
 	}
 
-	MainHeight = LINES-(Config.design == Design::Alternative ? 7 : 4);
+	MainHeight = std::max(LINES-(Config.design == Design::Alternative ? 7 : 4), 0);
 
 	validateScreenSize();
 
@@ -258,7 +258,7 @@ void setWindowsDimensions()
 	using Global::MainHeight;
 	
 	MainStartY = Config.design == Design::Alternative ? 5 : 2;
-	MainHeight = LINES-(Config.design == Design::Alternative ? 7 : 4);
+	MainHeight = std::max(LINES-(Config.design == Design::Alternative ? 7 : 4), 0);
 	
 	if (!Config.header_visibility)
 	{
