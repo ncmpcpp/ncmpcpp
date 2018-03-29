@@ -278,6 +278,7 @@ void Lyrics::fetch(const MPD::Song &s)
 	{
 		stopDownload();
 		w.clear();
+		w.reset();
 		m_song = s;
 		if (loadLyrics(w, lyricsFilename(m_song)))
 		{
