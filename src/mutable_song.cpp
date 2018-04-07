@@ -59,6 +59,11 @@ std::string MutableSong::getDate(unsigned idx) const
 	return getTag(MPD_TAG_DATE, [this, idx](){ return Song::getDate(idx); }, idx);
 }
 
+std::string MutableSong::getOriginalDate(unsigned idx) const
+{
+	return getTag(MPD_TAG_ORIGINAL_DATE, [this, idx](){ return Song::getOriginalDate(idx); }, idx);
+}
+
 std::string MutableSong::getGenre(unsigned idx) const
 {
 	return getTag(MPD_TAG_GENRE, [this, idx](){ return Song::getGenre(idx); }, idx);
@@ -112,6 +117,11 @@ void MutableSong::setTrack(const std::string &value, unsigned idx)
 void MutableSong::setDate(const std::string &value, unsigned idx)
 {
 	replaceTag(MPD_TAG_DATE, Song::getDate(idx), value, idx);
+}
+
+void MutableSong::setOriginalDate(const std::string &value, unsigned idx)
+{
+	replaceTag(MPD_TAG_ORIGINAL_DATE, Song::getOriginalDate(idx), value, idx);
 }
 
 void MutableSong::setGenre(const std::string &value, unsigned idx)

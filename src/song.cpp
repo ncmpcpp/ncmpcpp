@@ -160,6 +160,12 @@ std::string Song::getDate(unsigned idx) const
 	return get(MPD_TAG_DATE, idx);
 }
 
+std::string Song::getOriginalDate(unsigned idx) const
+{
+	assert(m_song);
+	return get(MPD_TAG_ORIGINAL_DATE, idx);
+}
+
 std::string Song::getGenre(unsigned idx) const
 {
 	assert(m_song);

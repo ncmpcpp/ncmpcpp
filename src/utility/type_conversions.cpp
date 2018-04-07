@@ -82,6 +82,8 @@ std::string tagTypeToString(mpd_tag_type tag)
 			return "Genre";
 		case MPD_TAG_DATE:
 			return "Date";
+		case MPD_TAG_ORIGINAL_DATE:
+			return "OriginalDate";
 		case MPD_TAG_COMPOSER:
 			return "Composer";
 		case MPD_TAG_PERFORMER:
@@ -113,6 +115,8 @@ MPD::MutableSong::SetFunction tagTypeToSetFunction(mpd_tag_type tag)
 			return &MPD::MutableSong::setGenre;
 		case MPD_TAG_DATE:
 			return &MPD::MutableSong::setDate;
+		case MPD_TAG_ORIGINAL_DATE:
+			return &MPD::MutableSong::setOriginalDate;
 		case MPD_TAG_COMPOSER:
 			return &MPD::MutableSong::setComposer;
 		case MPD_TAG_PERFORMER:
@@ -213,6 +217,8 @@ boost::optional<mpd_tag_type> getFunctionToTagType(MPD::Song::GetFunction f)
 		return MPD_TAG_TRACK;
 	else if (f == &MPD::Song::getDate)
 		return MPD_TAG_DATE;
+	else if (f == &MPD::Song::getOriginalDate)
+		return MPD_TAG_ORIGINAL_DATE;
 	else if (f == &MPD::Song::getGenre)
 		return MPD_TAG_GENRE;
 	else if (f == &MPD::Song::getComposer)

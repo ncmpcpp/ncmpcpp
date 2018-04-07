@@ -88,6 +88,7 @@ void readID3v2Tags(mpd_song *s, TagLib::ID3v2::Tag *tag)
 	readFrame(frames["TPE2"], "AlbumArtist");
 	readFrame(frames["TALB"], "Album");
 	readFrame(frames["TDRC"], "Date");
+	readFrame(frames["TDOR"], "OriginalDate");
 	readFrame(frames["TRCK"], "Track");
 	readFrame(frames["TCON"], "Genre");
 	readFrame(frames["TCOM"], "Composer");
@@ -108,6 +109,7 @@ void readXiphComments(mpd_song *s, TagLib::Ogg::XiphComment *tag)
 	readField(fields["ALBUMARTIST"], "AlbumArtist");
 	readField(fields["ALBUM"], "Album");
 	readField(fields["DATE"], "Date");
+	readField(fields["ORIGINALDATE"], "OriginalDate");
 	readField(fields["TRACKNUMBER"], "Track");
 	readField(fields["GENRE"], "Genre");
 	readField(fields["COMPOSER"], "Composer");

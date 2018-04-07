@@ -436,6 +436,8 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 				return MPD_TAG_ALBUM_ARTIST;
 			else if (v == "date")
 				return MPD_TAG_DATE;
+			else if (v == "original_date")
+				return MPD_TAG_ORIGINAL_DATE;
 			else if (v == "genre")
 				return MPD_TAG_GENRE;
 			else if (v == "composer")

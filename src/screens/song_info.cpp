@@ -39,18 +39,19 @@ SongInfo *mySongInfo;
 
 const SongInfo::Metadata SongInfo::Tags[] =
 {
- { "Title",        &MPD::Song::getTitle,       &MPD::MutableSong::setTitle       },
- { "Artist",       &MPD::Song::getArtist,      &MPD::MutableSong::setArtist      },
- { "Album Artist", &MPD::Song::getAlbumArtist, &MPD::MutableSong::setAlbumArtist },
- { "Album",        &MPD::Song::getAlbum,       &MPD::MutableSong::setAlbum       },
- { "Date",         &MPD::Song::getDate,        &MPD::MutableSong::setDate        },
- { "Track",        &MPD::Song::getTrack,       &MPD::MutableSong::setTrack       },
- { "Genre",        &MPD::Song::getGenre,       &MPD::MutableSong::setGenre       },
- { "Composer",     &MPD::Song::getComposer,    &MPD::MutableSong::setComposer    },
- { "Performer",    &MPD::Song::getPerformer,   &MPD::MutableSong::setPerformer   },
- { "Disc",         &MPD::Song::getDisc,        &MPD::MutableSong::setDisc        },
- { "Comment",      &MPD::Song::getComment,     &MPD::MutableSong::setComment     },
- { 0,              0,                          0                                 }
+ { "Title",         &MPD::Song::getTitle,        &MPD::MutableSong::setTitle        },
+ { "Artist",        &MPD::Song::getArtist,       &MPD::MutableSong::setArtist       },
+ { "Album Artist",  &MPD::Song::getAlbumArtist,  &MPD::MutableSong::setAlbumArtist  },
+ { "Album",         &MPD::Song::getAlbum,        &MPD::MutableSong::setAlbum        },
+ { "Date",          &MPD::Song::getDate,         &MPD::MutableSong::setDate         },
+ { "Original Date", &MPD::Song::getOriginalDate, &MPD::MutableSong::setOriginalDate },
+ { "Track",         &MPD::Song::getTrack,        &MPD::MutableSong::setTrack        },
+ { "Genre",         &MPD::Song::getGenre,        &MPD::MutableSong::setGenre        },
+ { "Composer",      &MPD::Song::getComposer,     &MPD::MutableSong::setComposer     },
+ { "Performer",     &MPD::Song::getPerformer,    &MPD::MutableSong::setPerformer    },
+ { "Disc",          &MPD::Song::getDisc,         &MPD::MutableSong::setDisc         },
+ { "Comment",       &MPD::Song::getComment,      &MPD::MutableSong::setComment      },
+ { 0,               0,                           0                                  }
 };
 
 SongInfo::SongInfo()

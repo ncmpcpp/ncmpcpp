@@ -65,6 +65,7 @@ struct Song
 	virtual std::string getTrack(unsigned idx = 0) const;
 	virtual std::string getTrackNumber(unsigned idx = 0) const;
 	virtual std::string getDate(unsigned idx = 0) const;
+	virtual std::string getOriginalDate(unsigned idx = 0) const;
 	virtual std::string getGenre(unsigned idx = 0) const;
 	virtual std::string getComposer(unsigned idx = 0) const;
 	virtual std::string getPerformer(unsigned idx = 0) const;
