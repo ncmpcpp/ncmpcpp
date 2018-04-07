@@ -144,6 +144,8 @@ mpd_tag_type charToTagType(char c)
 			return MPD_TAG_ALBUM;
 		case 'y':
 			return MPD_TAG_DATE;
+		case 'Y':
+			return MPD_TAG_ORIGINAL_DATE;
 		case 'n':
 			return MPD_TAG_TRACK;
 		case 'g':
@@ -182,6 +184,8 @@ MPD::Song::GetFunction charToGetFunction(char c)
 			return &MPD::Song::getAlbum;
 		case 'y':
 			return &MPD::Song::getDate;
+		case 'Y':
+			return &MPD::Song::getOriginalDate;
 		case 'n':
 			return &MPD::Song::getTrackNumber;
 		case 'N':

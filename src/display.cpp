@@ -57,6 +57,8 @@ const wchar_t *toColumnName(char c)
 			return L"Album";
 		case 'y':
 			return L"Date";
+		case 'Y':
+			return L"Original Date";
 		case 'n': case 'N':
 			return L"Track";
 		case 'g':
