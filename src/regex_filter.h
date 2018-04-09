@@ -100,7 +100,7 @@ inline bool search(const std::basic_string<CharT> &s,
 		if (ignore_diacritics)
 		{
 			auto us = icu::UnicodeString::fromUTF8(
-				StringPiece(convertString<char, CharT>::apply(s)));
+				icu::StringPiece(convertString<char, CharT>::apply(s)));
 			StripDiacritics::convert(us);
 			return boost::u32regex_search(us, rx);
 		}
