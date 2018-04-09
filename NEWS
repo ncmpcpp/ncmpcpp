@@ -5,6 +5,7 @@ ncmpcpp-0.8.2 (????-??-??)
 * Search engine now properly interacts with filtering
 * Fixed redraw of separator after interface switch while MPD was stopped
 * Reset position of a window when fetching lyrics
+* Fixed compilation with ICU >= 61.
 
 ncmpcpp-0.8.1 (2017-10-11)
 * Setting 'colors_enabled' to 'no' no longer results in a crash.

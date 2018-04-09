@@ -42,12 +42,12 @@ namespace {
 
 struct StripDiacritics
 {
-	static void convert(UnicodeString &s)
+	static void convert(icu::UnicodeString &s)
 	{
 		if (m_converter == nullptr)
 		{
-			ErrorCode result;
-			m_converter = Transliterator::createInstance(
+			icu::ErrorCode result;
+			m_converter = icu::Transliterator::createInstance(
 				"NFD; [:M:] Remove; NFC", UTRANS_FORWARD, result);
 			if (result.isFailure())
 				throw std::runtime_error(
@@ -58,10 +58,10 @@ struct StripDiacritics
 	}
 
 private:
-	static Transliterator *m_converter;
+	static icu::Transliterator *m_converter;
 };
 
-Transliterator *StripDiacritics::m_converter;
+icu::Transliterator *StripDiacritics::m_converter;
 
 #endif // BOOST_REGEX_ICU
 
@@ -99,7 +99,7 @@ inline bool search(const std::basic_string<CharT> &s,
 #ifdef BOOST_REGEX_ICU
 		if (ignore_diacritics)
 		{
-			auto us = UnicodeString::fromUTF8(
+			auto us = icu::UnicodeString::fromUTF8(
 				StringPiece(convertString<char, CharT>::apply(s)));
 			StripDiacritics::convert(us);
 			return boost::u32regex_search(us, rx);
