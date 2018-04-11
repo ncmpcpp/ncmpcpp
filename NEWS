@@ -1,4 +1,4 @@
-ncmpcpp-0.8.2 (????-??-??)
+ncmpcpp-0.8.2 (2018-04-11)
 * Help screen: fixed display of EoF keycode
 * Fixed possible integer overflow when resizing screen
 * Fixed fetching lyrics from lyricsmania.com, metrolyrics.com and sing365.com
