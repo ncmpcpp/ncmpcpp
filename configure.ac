@@ -124,7 +124,7 @@ AC_CHECK_HEADERS([netinet/tcp.h netinet/in.h], , AC_MSG_ERROR(vital headers miss
 AC_CHECK_HEADERS([langinfo.h], , AC_MSG_WARN(locale detection disabled))
 
 # libmpdclient2
-PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.8], [
+PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.14], [
 	AC_SUBST(libmpdclient_CFLAGS)
 	AC_SUBST(libmpdclient_LIBS)
 	CPPFLAGS="$CPPFLAGS $libmpdclient_CFLAGS"
@@ -134,7 +134,7 @@ PKG_CHECK_MODULES([libmpdclient], [libmpdclient >= 2.8], [
 		AC_MSG_ERROR([missing mpd/client.h header])
 	)
 ],
-	AC_MSG_ERROR([libmpdclient >= 2.8 is required!])
+	AC_MSG_ERROR([libmpdclient >= 2.14 is required!])
 )
 
 # readline
