@@ -164,6 +164,7 @@ void writeID3v2Tags(const MPD::MutableSong &s, TagLib::ID3v2::Tag *tag)
 	writeID3v2("TPE2", tagList(s, &MPD::Song::getAlbumArtist));
 	writeID3v2("TALB", tagList(s, &MPD::Song::getAlbum));
 	writeID3v2("TDRC", tagList(s, &MPD::Song::getDate));
+	writeID3v2("TDOR", tagList(s, &MPD::Song::getOriginalDate));
 	writeID3v2("TRCK", tagList(s, &MPD::Song::getTrack));
 	writeID3v2("TCON", tagList(s, &MPD::Song::getGenre));
 	writeID3v2("TCOM", tagList(s, &MPD::Song::getComposer));
@@ -192,6 +193,7 @@ void writeXiphComments(const MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag)
 	writeXiph("ALBUMARTIST", tagList(s, &MPD::Song::getAlbumArtist));
 	writeXiph("ALBUM", tagList(s, &MPD::Song::getAlbum));
 	writeXiph("DATE", tagList(s, &MPD::Song::getDate));
+	writeXiph("ORIGINALDATE", tagList(s, &MPD::Song::getOriginalDate));
 	writeXiph("TRACKNUMBER", tagList(s, &MPD::Song::getTrack));
 	writeXiph("GENRE", tagList(s, &MPD::Song::getGenre));
 	writeXiph("COMPOSER", tagList(s, &MPD::Song::getComposer));
