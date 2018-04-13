@@ -329,12 +329,10 @@ void Lyrics::edit()
 	if (Config.use_console_editor)
 	{
 		command = "/bin/sh -c \"" + Config.external_editor + " \\\"" + filename + "\\\"\"";
+		NC::pauseScreen();
 		res = system(command.c_str());
+		NC::unpauseScreen();
 		fetch(m_song);
-		// Reset ncurses state to refresh the screen.
-		endwin();
-		initscr();
-		curs_set(0);
 	}
 	else
 	{

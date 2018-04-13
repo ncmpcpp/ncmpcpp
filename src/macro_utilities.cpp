@@ -21,6 +21,7 @@
 #include "bindings.h"
 #include "global.h"
 #include "macro_utilities.h"
+#include "curses/window.h"
 #include "utility/string.h"
 #include "utility/wide_string.h"
 
@@ -87,7 +88,10 @@ RunExternalCommand::RunExternalCommand(std::string &&command)
 void RunExternalCommand::run()
 {
 	GNUC_UNUSED int res;
+
+	NC::pauseScreen();
 	res = std::system(m_command.c_str());
+	NC::unpauseScreen();
 }
 
 }

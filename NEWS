@@ -1,4 +1,5 @@
 ncmpcpp-0.9 (????-??-??)
+* Restore curses window after running external command
 
 ncmpcpp-0.8.2 (2018-04-11)
 * Help screen: fixed display of EoF keycode

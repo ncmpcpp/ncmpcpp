@@ -443,6 +443,17 @@ void initScreen(bool enable_colors, bool enable_mouse)
 	rl_startup_hook = rl::add_base;
 }
 
+void pauseScreen()
+{
+	def_prog_mode();
+	endwin();
+}
+
+void unpauseScreen()
+{
+	refresh();
+}
+
 void destroyScreen()
 {
 	Mouse::disable();

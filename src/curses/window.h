@@ -219,6 +219,12 @@ void disable();
 /// @param enable_colors enables colors
 void initScreen(bool enable_colors, bool enable_mouse);
 
+/// Pauses the screen (e.g. for running an external command)
+void pauseScreen();
+
+/// Unpauses the screen
+void unpauseScreen();
+
 /// Destroys the screen
 void destroyScreen();
 
