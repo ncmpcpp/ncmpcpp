@@ -127,6 +127,7 @@
 ## %t - title
 ## %b - album
 ## %y - date
+## %Y - original date
 ## %n - track number (01/12 -> 01)
 ## %N - full track info (01/12 -> 01/12)
 ## %g - genre
@@ -329,7 +330,7 @@
 #
 #data_fetching_delay = yes
 #
-## Available values: artist, album_artist, date, genre, composer, performer.
+## Available values: artist, album_artist, date, original_date, genre, composer, performer.
 ##
 #media_library_primary_tag = artist
 #

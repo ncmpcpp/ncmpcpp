@@ -230,7 +230,7 @@ Default user interface used by ncmpcpp at start.
 .B data_fetching_delay = yes/no
 If enabled, there will be a 250ms delay between refreshing position in media library or playlist editor and fetching appropriate data from MPD. This limits data fetched from the server and is particularly useful if ncmpcpp is connected to a remote host.
 .TP
-.B media_library_primary_tag = artist/album_artist/date/genre/composer/performer
+.B media_library_primary_tag = artist/album_artist/date/original_date/genre/composer/performer
 Default tag type for leftmost column in media library.
 .TP
 .B media_library_albums_split_by_date = yes/no
@@ -432,6 +432,7 @@ For song format you can use:
  %t - title
  %b - album
  %y - date
+ %Y - original date
  %n - track number (01/12 -> 01)
  %N - full track info (01/12 -> 01/12)
  %g - genre
