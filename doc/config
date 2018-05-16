@@ -14,10 +14,11 @@
 #ncmpcpp_directory = ~/.ncmpcpp
 #
 ##
-## Directory for storing log files (like error.log).
+## Directory for storing log files (like error.log). It defaults to
+## $XDG_DATA_HOME/ncmpcpp.
 ##
 #
-#log_directory = ~/.ncmpcpp
+#log_directory = ~/.local/share/ncmpcpp
 #
 ##
 ## Directory for storing downloaded lyrics. It defaults to ~/.lyrics since other

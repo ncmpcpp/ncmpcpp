@@ -41,6 +41,11 @@ Configuration Config;
 
 namespace {
 
+std::string xdg_data_home()
+{
+	return getEnvironment("XDG_DATA_HOME", "~/.local/share") + "/";
+}
+
 std::vector<Column> generate_columns(const std::string &format)
 {
 	std::vector<Column> result;
@@ -264,7 +269,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 
 	// keep the same order of variables as in configuration file
 	p.add("ncmpcpp_directory", &ncmpcpp_directory, "~/.ncmpcpp/", adjust_directory);
-	p.add("log_directory", &log_directory, "~/.ncmpcpp/", adjust_directory);
+	p.add("log_directory", &log_directory, xdg_data_home() + "ncmpcpp/", adjust_directory);
 	p.add("lyrics_directory", &lyrics_directory, "~/.lyrics/", adjust_directory);
 	p.add<void>("mpd_host", nullptr, "localhost", [](std::string host) {
 			expand_home(host);
