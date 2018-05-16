@@ -541,5 +541,7 @@ std::string Timestamp(time_t t);
 std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width);
 void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,
                        size_t width, const std::wstring &separator);
+std::string getEnvironment(const std::string &name,
+                           const std::string &fallback);
 
 #endif // NCMPCPP_HELPERS_H
