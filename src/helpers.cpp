@@ -218,3 +218,12 @@ void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,
 	else
 		w << buf;
 }
+
+std::string getEnvironment(const std::string &name, const std::string &fallback)
+{
+	std::string result = fallback;
+	const char *env = getenv(name.c_str());
+	if (env != nullptr)
+		result = env;
+	return result;
+}

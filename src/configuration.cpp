@@ -29,6 +29,7 @@
 #include "bindings.h"
 #include "configuration.h"
 #include "config.h"
+#include "helpers.h"
 #include "mpdpp.h"
 #include "format_impl.h"
 #include "settings.h"
@@ -45,17 +46,7 @@ const char *env_home;
 
 std::string xdg_config_home()
 {
-	std::string result;
-	const char *env_xdg_config_home = getenv("XDG_CONFIG_HOME");
-	if (env_xdg_config_home == nullptr)
-		result = "~/.config/";
-	else
-	{
-		result = env_xdg_config_home;
-		if (!result.empty() && result.back() != '/')
-			result += "/";
-	}
-	return result;
+	return getEnvironment("XDG_CONFIG_HOME", "~/.config") + "/";
 }
 
 }
