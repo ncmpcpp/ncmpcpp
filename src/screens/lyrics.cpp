@@ -122,7 +122,7 @@ boost::optional<std::string> downloadLyrics(
 	const MPD::Song &s,
 	std::shared_ptr<Shared<NC::Buffer>> shared_buffer,
 	std::shared_ptr<std::atomic<bool>> download_stopper,
-	LyricsFetcher *current_fetcher)
+	LyricsFetcher *current_fetcher, bool *save_lyrics)
 {
 	std::string s_artist = s.getArtist();
 	std::string s_title  = s.getTitle();
@@ -156,6 +156,7 @@ boost::optional<std::string> downloadLyrics(
 		}
 		LyricsFetcher::Result result_;
 		if(fetcher_->type() == LyricsFetcher::FetchType::FILENAME){
+			*save_lyrics = false;
 			result_ = dynamic_cast<FileLyricFetcher*>(fetcher_)->fetch(full_path);
 		}
 		else
@@ -200,6 +201,7 @@ boost::optional<std::string> downloadLyrics(
 Lyrics::Lyrics()
 	: Screen(NC::Scrollpad(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border()))
 	, m_refresh_window(false)
+	, m_save_lyrics(true)
 	, m_scroll_begin(0)
 	, m_fetcher(nullptr)
 { }
@@ -232,10 +234,14 @@ void Lyrics::update()
 			{
 				w.clear();
 				w << Charset::utf8ToLocale(*lyrics);
-				std::string filename = lyricsFilename(m_song);
-				if (!saveLyrics(filename, *lyrics))
-					Statusbar::printf("Couldn't save lyrics as \"%1%\": %2%",
-					                  filename, strerror(errno));
+				if(m_save_lyrics){
+					std::string filename = lyricsFilename(m_song);
+					if (!saveLyrics(filename, *lyrics))
+						Statusbar::printf("Couldn't save lyrics as \"%1%\": %2%",
+										  filename, strerror(errno));
+				}
+				else
+					m_save_lyrics = true;
 			}
 			else
 				w << "\nLyrics were not found.\n";
@@ -301,7 +307,7 @@ void Lyrics::fetch(const MPD::Song &s)
 			m_worker = boost::async(
 				boost::launch::async,
 				std::bind(downloadLyrics,
-				          m_song, m_shared_buffer, m_download_stopper, m_fetcher));
+				          m_song, m_shared_buffer, m_download_stopper, m_fetcher, &m_save_lyrics));
 		}
 	}
 }
@@ -407,9 +413,13 @@ void Lyrics::fetchInBackground(const MPD::Song &s, bool notify_)
 			}
 			if (!cs.song().empty())
 			{
-				auto lyrics = downloadLyrics(cs.song(), nullptr, nullptr, m_fetcher);
-				if (lyrics)
-					saveLyrics(lyrics_file, *lyrics);
+				auto lyrics = downloadLyrics(cs.song(), nullptr, nullptr, m_fetcher, &m_save_lyrics);
+				if (lyrics){
+					if(m_save_lyrics)
+						saveLyrics(lyrics_file, *lyrics);
+					else
+						m_save_lyrics = false;
+				}
 			}
 		}
 	};
