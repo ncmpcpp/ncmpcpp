@@ -28,6 +28,10 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
+#include <mpegfile.h>
+#include <unsynchronizedlyricsframe.h>
+#include <id3v2frame.h>
+#include <id3v2tag.h>
 
 #include "charset.h"
 #include "lyrics_fetcher.h"
@@ -60,6 +64,8 @@ std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher)
 		fetcher = std::make_unique<TekstowoFetcher>();
 	else if (s == "internet")
 		fetcher = std::make_unique<InternetLyricsFetcher>();
+	else if (s == "file")
+		fetcher = std::make_unique<FileLyricFetcher>();
 	else
 		is.setstate(std::ios::failbit);
 	return is;
@@ -142,6 +148,32 @@ void LyricsFetcher::postProcess(std::string &data) const
 	});
 	data = boost::algorithm::join(lines, "\n");
 	boost::trim(data);
+}
+
+/***********************************************************************/
+
+LyricsFetcher::Result FileLyricFetcher::fetch(const std::string &filepath)
+{
+	Result result;
+	result.first = false;
+
+	TagLib::MPEG::File file(filepath.c_str());
+	if(!file.isOpen()){
+		result.second = "Can't open file" + filepath;
+	}
+	TagLib::ID3v2::FrameList frames = file.ID3v2Tag()->frameListMap()["USLT"];
+	if(!frames.isEmpty()){
+		TagLib::ID3v2::UnsynchronizedLyricsFrame *frame = 
+			dynamic_cast<TagLib::ID3v2::UnsynchronizedLyricsFrame*>(frames.front());
+		if(frame) {
+			result.second = frame->text().to8Bit();
+			result.first = true;
+		}
+	}
+	else
+		result.second = "The file doesn't have a lyrics frame";
+
+	return result;
 }
 
 /***********************************************************************/

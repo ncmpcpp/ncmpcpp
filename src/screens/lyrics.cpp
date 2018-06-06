@@ -126,6 +126,10 @@ boost::optional<std::string> downloadLyrics(
 {
 	std::string s_artist = s.getArtist();
 	std::string s_title  = s.getTitle();
+	std::string full_path;
+	if (s.isFromDatabase())
+		full_path += Config.mpd_music_dir;
+	full_path += s.getURI();
 	// If artist or title is empty, use filename. This should give reasonable
 	// results for google search based lyrics fetchers.
 	if (s_artist.empty() || s_title.empty())
@@ -139,7 +143,7 @@ boost::optional<std::string> downloadLyrics(
 			s_title.resize(dot);
 	}
 
-	auto fetch_lyrics = [&](auto &fetcher_) {
+	auto fetch_lyrics = [&](auto *fetcher_) {
 		{
 			if (shared_buffer)
 			{
@@ -150,7 +154,12 @@ boost::optional<std::string> downloadLyrics(
 				     << NC::Format::NoBold << "... ";
 			}
 		}
-		auto result_ = fetcher_->fetch(s_artist, s_title);
+		LyricsFetcher::Result result_;
+		if(fetcher_->type() == LyricsFetcher::FetchType::FILENAME){
+			result_ = dynamic_cast<FileLyricFetcher*>(fetcher_)->fetch(full_path);
+		}
+		else
+			result_ = fetcher_->fetch(s_artist, s_title);
 		if (result_.first == false)
 		{
 			if (shared_buffer)
@@ -172,7 +181,7 @@ boost::optional<std::string> downloadLyrics(
 		{
 			if (download_stopper && download_stopper->load())
 				return boost::none;
-			fetcher_result = fetch_lyrics(fetcher);
+			fetcher_result = fetch_lyrics(fetcher.get());
 			if (fetcher_result.first)
 				break;
 		}
