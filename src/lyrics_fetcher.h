@@ -28,11 +28,16 @@
 
 struct LyricsFetcher
 {
+	enum class FetchType{
+		URL,
+		FILENAME
+	};
 	typedef std::pair<bool, std::string> Result;
 
 	virtual ~LyricsFetcher() { }
 
 	virtual const char *name() const = 0;
+	virtual const FetchType type() const { return FetchType::URL; };
 	virtual Result fetch(const std::string &artist, const std::string &title);
 	
 protected:
@@ -54,6 +59,17 @@ typedef std::vector<LyricsFetcher_> LyricsFetchers;
 std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher);
 
 /**********************************************************************/
+
+struct FileLyricFetcher : public LyricsFetcher
+{
+	virtual const char *name() const override { return "file"; }
+	virtual const FetchType type() const { return FetchType::FILENAME; };
+
+	Result fetch(const std::string& filepath);
+protected:
+	virtual const char *urlTemplate() const override { return ""; }
+	virtual const char *regex() const override { return ""; }
+};
 
 struct LyricwikiFetcher : public LyricsFetcher
 {
