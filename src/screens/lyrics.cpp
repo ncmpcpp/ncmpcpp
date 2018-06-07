@@ -159,8 +159,10 @@ boost::optional<std::string> downloadLyrics(
 			*save_lyrics = false;
 			result_ = dynamic_cast<FileLyricFetcher*>(fetcher_)->fetch(full_path);
 		}
-		else
+		else{
+			*save_lyrics = true;
 			result_ = fetcher_->fetch(s_artist, s_title);
+		}
 		if (result_.first == false)
 		{
 			if (shared_buffer)
@@ -240,8 +242,6 @@ void Lyrics::update()
 						Statusbar::printf("Couldn't save lyrics as \"%1%\": %2%",
 										  filename, strerror(errno));
 				}
-				else
-					m_save_lyrics = true;
 			}
 			else
 				w << "\nLyrics were not found.\n";
@@ -417,8 +417,6 @@ void Lyrics::fetchInBackground(const MPD::Song &s, bool notify_)
 				if (lyrics){
 					if(m_save_lyrics)
 						saveLyrics(lyrics_file, *lyrics);
-					else
-						m_save_lyrics = false;
 				}
 			}
 		}
