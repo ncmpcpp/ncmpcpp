@@ -161,17 +161,19 @@ LyricsFetcher::Result FileLyricFetcher::fetch(const std::string &filepath)
 	if(!file.isOpen()){
 		result.second = "Can't open file" + filepath;
 	}
-	TagLib::ID3v2::FrameList frames = file.ID3v2Tag()->frameListMap()["USLT"];
-	if(!frames.isEmpty()){
-		TagLib::ID3v2::UnsynchronizedLyricsFrame *frame = 
-			dynamic_cast<TagLib::ID3v2::UnsynchronizedLyricsFrame*>(frames.front());
-		if(frame) {
-			result.second = frame->text().to8Bit();
-			result.first = true;
+	else{
+		TagLib::ID3v2::FrameList frames = file.ID3v2Tag()->frameListMap()["USLT"];
+		if(!frames.isEmpty()){
+			TagLib::ID3v2::UnsynchronizedLyricsFrame *frame = 
+				dynamic_cast<TagLib::ID3v2::UnsynchronizedLyricsFrame*>(frames.front());
+			if(frame) {
+				result.second = frame->text().to8Bit();
+				result.first = true;
+			}
 		}
+		else
+			result.second = "The file doesn't have a lyrics frame";
 	}
-	else
-		result.second = "The file doesn't have a lyrics frame";
 
 	return result;
 }
