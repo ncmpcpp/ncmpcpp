@@ -178,6 +178,7 @@ struct Configuration
 
 	unsigned mpd_connection_timeout;
 	unsigned crossfade_time;
+	std::string random_exclude_pattern;
 	unsigned seek_time;
 	unsigned volume_change_step;
 	unsigned message_delay_time;

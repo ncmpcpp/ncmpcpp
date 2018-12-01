@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <map>
+#include <boost/regex.hpp>
 
 #include "charset.h"
 #include "mpdpp.h"
@@ -601,7 +602,7 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number, std::mt19937 &rng
 	return true;
 }
 
-bool Connection::AddRandomSongs(size_t number, std::mt19937 &rng)
+bool Connection::AddRandomSongs(size_t number, std::string random_exclude_pattern, std::mt19937 &rng)
 {
 	prechecksNoCommandsList();
 	std::vector<std::string> files;
@@ -625,8 +626,13 @@ bool Connection::AddRandomSongs(size_t number, std::mt19937 &rng)
 		std::shuffle(files.begin(), files.end(), rng);
 		StartCommandsList();
 		auto it = files.begin();
-		for (size_t i = 0; i < number && it != files.end(); ++i, ++it)
-			AddSong(*it);
+		boost::regex re(random_exclude_pattern);
+		for (size_t i = 0; i < number && it != files.end(); ++it) {
+			if (random_exclude_pattern.empty() || !boost::regex_match((*it), re)) {
+				AddSong(*it);
+				i++;
+			}
+		}
 		CommitCommandsList();
 	}
 	return true;

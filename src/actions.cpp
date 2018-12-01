@@ -2208,7 +2208,7 @@ void AddRandomItems::run()
 	{
 		bool success;
 		if (rnd_type == 's')
-			success = Mpd.AddRandomSongs(number, Global::RNG);
+			success = Mpd.AddRandomSongs(number, Config.random_exclude_pattern, Global::RNG);
 		else
 			success = Mpd.AddRandomTag(tag_type, number, Global::RNG);
 		if (success)
