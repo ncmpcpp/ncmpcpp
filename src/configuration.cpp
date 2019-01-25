@@ -63,8 +63,12 @@ std::string xdg_config_home()
 void expand_home(std::string &path)
 {
 	assert(env_home != nullptr);
-	if (!path.empty() && path[0] == '~')
-		path.replace(0, 1, env_home);
+	if (!path.empty())
+	{
+		size_t i = path.find("~");
+		if (i != std::string::npos && (i == 0 || path[i - 1] == '@'))
+			path.replace(i, 1, env_home);
+	}
 }
 
 bool configure(int argc, char **argv)
