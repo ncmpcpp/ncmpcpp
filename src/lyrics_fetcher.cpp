@@ -21,6 +21,7 @@
 #include "config.h"
 #include "curl_handle.h"
 
+#include <cctype>
 #include <cstdlib>
 #include <cstring>
 #include <boost/algorithm/string/join.hpp>
@@ -156,6 +157,20 @@ LyricsFetcher::Result FileLyricFetcher::fetch(const std::string &filepath)
 {
 	Result result;
 	result.first = false;
+	result.second = "";
+
+	auto fetchLyricFromID3v2 = [](const TagLib::ID3v2::UnsynchronizedLyricsFrame* frame) -> std::string {
+		if (frame)
+			return frame->text().to8Bit();
+		return "";
+	};
+
+	auto isNotWhiteSpace = [](const std::string& str) {
+		// this is for ascii only someone please change this and let me know
+		for (auto c : str)
+			if (!std::isspace(c)) return true;
+		return false;
+	};
 
 	TagLib::MPEG::File file(filepath.c_str());
 	if(!file.isOpen()){
@@ -164,10 +179,21 @@ LyricsFetcher::Result FileLyricFetcher::fetch(const std::string &filepath)
 	else{
 		TagLib::ID3v2::FrameList frames = file.ID3v2Tag()->frameListMap()["USLT"];
 		if(!frames.isEmpty()){
-			TagLib::ID3v2::UnsynchronizedLyricsFrame *frame = 
-				dynamic_cast<TagLib::ID3v2::UnsynchronizedLyricsFrame*>(frames.front());
-			if(frame) {
-				result.second = frame->text().to8Bit();
+			for (auto f : frames) {
+				TagLib::ID3v2::UnsynchronizedLyricsFrame *frame =
+					dynamic_cast<TagLib::ID3v2::UnsynchronizedLyricsFrame*>(f);
+				result.second = fetchLyricFromID3v2(frame);
+				if(result.second != "" && isNotWhiteSpace(result.second)) {
+					result.first = true;
+					break;
+				}
+			}
+
+			if (!result.first) {
+				// get the first frame
+				TagLib::ID3v2::UnsynchronizedLyricsFrame *frame =
+					dynamic_cast<TagLib::ID3v2::UnsynchronizedLyricsFrame*>(frames.front());
+				result.second = fetchLyricFromID3v2(frame);
 				result.first = true;
 			}
 		}
