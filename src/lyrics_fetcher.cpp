@@ -174,7 +174,7 @@ LyricsFetcher::Result EmbeddedLyricFetcher::fetch(const std::string &filepath)
 			if (!frames.isEmpty()) {
 				auto *frame = dynamic_cast<TagLib::ID3v2::UnsynchronizedLyricsFrame *>(frames.front());
 				result.first = true;
-				lyrics = frame->text().to8Bit();
+				lyrics = frame->text().to8Bit(true);
 			}
 		}
 	} else if (auto flac_file = dynamic_cast<TagLib::FLAC::File *>(f.file())) {
@@ -182,7 +182,7 @@ LyricsFetcher::Result EmbeddedLyricFetcher::fetch(const std::string &filepath)
 			std::string tag_name = "LYRICS";
 			auto xiph = flac_file->xiphComment();
 			if (xiph->contains(tag_name)) {
-				lyrics = xiph->fieldListMap()[tag_name].front().to8Bit();
+				lyrics = xiph->fieldListMap()[tag_name].front().to8Bit(true);
 				result.first = true;
 			}
 		}
