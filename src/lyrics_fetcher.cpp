@@ -23,11 +23,20 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
+
+#include <fileref.h>
+#include <flacfile.h>
+#include <id3v2frame.h>
+#include <id3v2tag.h>
+#include <mpegfile.h>
+#include <unsynchronizedlyricsframe.h>
+#include <xiphcomment.h>
 
 #include "charset.h"
 #include "lyrics_fetcher.h"
@@ -60,6 +69,8 @@ std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher)
 		fetcher = std::make_unique<TekstowoFetcher>();
 	else if (s == "internet")
 		fetcher = std::make_unique<InternetLyricsFetcher>();
+	else if (s == "embedded")
+		fetcher = std::make_unique<EmbeddedLyricFetcher>();
 	else
 		is.setstate(std::ios::failbit);
 	return is;
@@ -141,6 +152,50 @@ void LyricsFetcher::postProcess(std::string &data) const
 		return a.empty() && b.empty();
 	});
 	data = boost::algorithm::join(lines, "\n");
+	boost::trim(data);
+}
+
+/***********************************************************************/
+
+LyricsFetcher::Result EmbeddedLyricFetcher::fetch(const std::string &filepath)
+{
+	LyricsFetcher::Result result;
+	result.first = false;
+	result.second = "";
+	std::string lyrics = "";
+
+	TagLib::FileRef f(filepath.c_str());
+	if (f.isNull())
+		return result;
+
+	if (auto mpeg_file = dynamic_cast<TagLib::MPEG::File *>(f.file())) {
+		if (mpeg_file->hasID3v2Tag()) {
+			auto frames = mpeg_file->ID3v2Tag()->frameListMap()["USLT"];
+			if (!frames.isEmpty()) {
+				auto *frame = dynamic_cast<TagLib::ID3v2::UnsynchronizedLyricsFrame *>(frames.front());
+				result.first = true;
+				lyrics = frame->text().to8Bit();
+			}
+		}
+	} else if (auto flac_file = dynamic_cast<TagLib::FLAC::File *>(f.file())) {
+		if (flac_file->hasXiphComment()) {
+			std::string tag_name = "LYRICS";
+			auto xiph = flac_file->xiphComment();
+			if (xiph->contains(tag_name)) {
+				lyrics = xiph->fieldListMap()[tag_name].front().to8Bit();
+				result.first = true;
+			}
+		}
+	}
+
+	postProcess(lyrics);
+
+	result.second = lyrics;
+	return result;
+}
+
+void EmbeddedLyricFetcher::postProcess(std::string &data) const {
+	boost::erase_all(data, "\r");
 	boost::trim(data);
 }
 

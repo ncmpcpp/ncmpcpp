@@ -92,6 +92,7 @@ private:
 	void stopDownload();
 
 	bool m_refresh_window;
+	bool m_save_lyrics;
 	size_t m_scroll_begin;
 
 	std::shared_ptr<Shared<NC::Buffer>> m_shared_buffer;
