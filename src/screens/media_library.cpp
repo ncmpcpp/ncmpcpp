@@ -188,11 +188,11 @@ MediaLibrary::MediaLibrary()
 , m_fetching_delay(boost::posix_time::milliseconds(Config.data_fetching_delay ? 250 : -1))
 {
 	hasTwoColumns = 0;
-	itsLeftColWidth = COLS/3-1;
-	itsMiddleColWidth = COLS/3;
+	itsLeftColWidth = COLS/4-1;
 	itsMiddleColStartX = itsLeftColWidth+1;
-	itsRightColWidth = COLS-COLS/3*2-1;
-	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
+	itsMiddleColWidth = (COLS-itsLeftColWidth-1)/2;
+	itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
+	itsRightColWidth = COLS-itsMiddleColWidth-itsLeftColWidth-2;
 	
 	Tags = NC::Menu<PrimaryTag>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? tagTypeToString(Config.media_lib_primary_tag) + "s" : "", Config.main_color, NC::Border());
 	setHighlightFixes(Tags);
@@ -238,11 +238,11 @@ void MediaLibrary::resize()
 	if (!hasTwoColumns)
 	{
 		itsLeftColStartX = x_offset;
-		itsLeftColWidth = width/3-1;
+		itsLeftColWidth = width/4-1;
 		itsMiddleColStartX = itsLeftColStartX+itsLeftColWidth+1;
-		itsMiddleColWidth = width/3;
+		itsMiddleColWidth = (width-itsLeftColWidth-1)/2;
 		itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
-		itsRightColWidth = width-width/3*2-1;
+		itsRightColWidth = width-itsMiddleColWidth-itsLeftColWidth-2;
 	}
 	else
 	{
