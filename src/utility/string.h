@@ -60,4 +60,6 @@ std::string getEnclosedString(const std::string &s, char a, char b, size_t *pos)
 
 void removeInvalidCharsFromFilename(std::string &filename, bool win32_compatible);
 
+void escapeSingleQuotes(std::string &filename);
+
 #endif // NCMPCPP_UTILITY_STRING_H

@@ -326,6 +326,7 @@ void Lyrics::edit()
 	GNUC_UNUSED int res;
 	std::string command;
 	std::string filename = lyricsFilename(m_song);
+	escapeSingleQuotes(filename);
 	if (Config.use_console_editor)
 	{
 		command = Config.external_editor + " '" + filename + "'";
@@ -337,7 +338,7 @@ void Lyrics::edit()
 	else
 	{
 		command = "nohup " + Config.external_editor
-			+ " \"" + filename + "\" > /dev/null 2>&1 &";
+			+ " '" + filename + "' > /dev/null 2>&1 &";
 		res = system(command.c_str());
 	}
 }

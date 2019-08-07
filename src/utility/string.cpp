@@ -96,3 +96,15 @@ void removeInvalidCharsFromFilename(std::string &filename, bool win32_compatible
 		}
 	}
 }
+
+void escapeSingleQuotes(std::string &filename)
+{
+	for (size_t i = 0; i < filename.length(); ++i)
+	{
+		if (filename[i] == '\'')
+		{
+			filename.replace(i, 1, "'\\''");
+			i += 3;
+		}
+	}
+}
