@@ -19,13 +19,12 @@ Project page - http://rybczak.net/ncmpcpp/
 
 ### Dependencies:
 
-* boost library
-* ncurses library
-* readline library
-* curl library (optional, required for fetching lyrics and last.fm data)
-* fftw library (optional, required for frequency spectrum music visualization mode)
-* tag library (optional, required for tag editing)
-
+* boost library [https://www.boost.org/]
+* ncurses library [http://www.gnu.org/software/ncurses/ncurses.html]
+* readline library [https://tiswww.case.edu/php/chet/readline/rltop.html]
+* curl library (optional, required for fetching lyrics and last.fm data) [https://curl.haxx.se/]
+* fftw library (optional, required for frequency spectrum music visualization mode) [http://www.fftw.org/]
+* tag library (optional, required for tag editing) [https://taglib.org/]
 
 ### Known issues:
 * No full support for handling encodings other than UTF-8.
