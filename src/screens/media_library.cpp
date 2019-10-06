@@ -244,7 +244,7 @@ void MediaLibrary::resize()
 	if (!hasTwoColumns)
 	{
 		itsLeftColStartX = x_offset;
-		itsLeftColWidth = width/4-1;
+		itsLeftColWidth = width/3-1;
 		itsMiddleColStartX = itsLeftColStartX+itsLeftColWidth+1;
 		itsMiddleColWidth = (width-itsLeftColWidth-1)/2;
 		itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;

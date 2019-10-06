@@ -66,7 +66,7 @@ PlaylistEditor::PlaylistEditor()
 , m_window_timeout(Config.data_fetching_delay ? 250 : BaseScreen::defaultWindowTimeout)
 , m_fetching_delay(boost::posix_time::milliseconds(Config.data_fetching_delay ? 250 : -1))
 {
-	LeftColumnWidth = COLS/4-1;
+	LeftColumnWidth = COLS/3-1;
 	RightColumnStartX = LeftColumnWidth+1;
 	RightColumnWidth = COLS-LeftColumnWidth-1;
 	
@@ -109,7 +109,7 @@ void PlaylistEditor::resize()
 	getWindowResizeParams(x_offset, width);
 	
 	LeftColumnStartX = x_offset;
-	LeftColumnWidth = width/4-1;
+	LeftColumnWidth = width/3-1;
 	RightColumnStartX = LeftColumnStartX+LeftColumnWidth+1;
 	RightColumnWidth = width-LeftColumnWidth-1;
 	
