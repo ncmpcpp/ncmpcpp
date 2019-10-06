@@ -275,6 +275,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("mpd_music_dir", &mpd_music_dir, "~/music", adjust_directory);
 	p.add("mpd_connection_timeout", &mpd_connection_timeout, "5");
 	p.add("mpd_crossfade_time", &crossfade_time, "5");
+	p.add("random_exclude_pattern", &random_exclude_pattern, "");
 	p.add("visualizer_fifo_path", &visualizer_fifo_path, "/tmp/mpd.fifo", adjust_path);
 	p.add("visualizer_output_name", &visualizer_output_name, "Visualizer feed");
 	p.add("visualizer_in_stereo", &visualizer_in_stereo, "yes", yes_no);
@@ -462,7 +463,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("cyclic_scrolling", &use_cyclic_scrolling, "no", yes_no);
 	p.add("lines_scrolled", &lines_scrolled, "2");
 	p.add("lyrics_fetchers", &lyrics_fetchers,
-	      "embedded, lyricwiki, azlyrics, genius, sing365, lyricsmania, metrolyrics, justsomelyrics, jahlyrics, plyrics, tekstowo, internet",
+	      "embedded, lyricwiki, azlyrics, genius, sing365, lyricsmania, metrolyrics, justsomelyrics, jahlyrics, plyrics, tekstowo, zeneszoveg, internet",
 	      list_of<LyricsFetcher_>);
 	p.add("follow_now_playing_lyrics", &now_playing_lyrics, "no", yes_no);
 	p.add("fetch_lyrics_for_current_song_in_background", &fetch_lyrics_in_background,

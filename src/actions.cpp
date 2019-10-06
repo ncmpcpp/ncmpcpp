@@ -804,6 +804,11 @@ void NextSong::run()
 	Mpd.Next();
 }
 
+bool Pause::canBeRun()
+{
+	return Status::State::player() != MPD::psStop;
+}
+
 void Pause::run()
 {
 	Mpd.Toggle();
@@ -843,6 +848,11 @@ void SavePlaylist::run()
 void Stop::run()
 {
 	Mpd.Stop();
+}
+
+void Play::run()
+{
+	Mpd.Play();
 }
 
 void ExecuteCommand::run()
@@ -2198,7 +2208,7 @@ void AddRandomItems::run()
 	{
 		bool success;
 		if (rnd_type == 's')
-			success = Mpd.AddRandomSongs(number, Global::RNG);
+			success = Mpd.AddRandomSongs(number, Config.random_exclude_pattern, Global::RNG);
 		else
 			success = Mpd.AddRandomTag(tag_type, number, Global::RNG);
 		if (success)
@@ -2734,6 +2744,7 @@ void populateActions()
 	insert_action(new Actions::NextSong());
 	insert_action(new Actions::Pause());
 	insert_action(new Actions::Stop());
+	insert_action(new Actions::Play());
 	insert_action(new Actions::ExecuteCommand());
 	insert_action(new Actions::SavePlaylist());
 	insert_action(new Actions::MoveSortOrderUp());

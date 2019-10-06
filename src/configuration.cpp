@@ -63,8 +63,12 @@ std::string xdg_config_home()
 void expand_home(std::string &path)
 {
 	assert(env_home != nullptr);
-	if (!path.empty() && path[0] == '~')
-		path.replace(0, 1, env_home);
+	if (!path.empty())
+	{
+		size_t i = path.find("~");
+		if (i != std::string::npos && (i == 0 || path[i - 1] == '@'))
+			path.replace(i, 1, env_home);
+	}
 }
 
 bool configure(int argc, char **argv)
@@ -162,6 +166,7 @@ bool configure(int argc, char **argv)
 				std::make_tuple("jahlyrics", "sean kingston", "dry your eyes"),
 				std::make_tuple("plyrics", "offspring", "genocide"),
 				std::make_tuple("tekstowo", "rihanna", "umbrella"),
+				std::make_tuple("zeneszoveg", "rihanna", "umbrella"),
 			};
 			for (auto &data : fetcher_data)
 			{
@@ -198,7 +203,7 @@ bool configure(int argc, char **argv)
 		Bindings.generateDefaults();
 
 		// create directories
-		boost::filesystem::create_directory(Config.ncmpcpp_directory);
+		boost::filesystem::create_directories(Config.ncmpcpp_directory);
 		boost::filesystem::create_directory(Config.lyrics_directory);
 
 		// try to get MPD connection details from environment variables
