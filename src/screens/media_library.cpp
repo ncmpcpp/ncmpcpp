@@ -194,7 +194,6 @@ MediaLibrary::MediaLibrary()
 	hasTwoColumns = 0;
 	isAlbumOnly = 0;
 	itsLeftColWidth = COLS/3-1;
-	itsMiddleColWidth = COLS/3;
 	itsMiddleColStartX = itsLeftColWidth+1;
 	itsMiddleColWidth = (COLS-itsLeftColWidth-1)/2;
 	itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
