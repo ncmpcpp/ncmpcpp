@@ -163,8 +163,7 @@ LyricsFetcher::Result EmbeddedLyricFetcher::fetch(const std::string &filepath)
 {
 	LyricsFetcher::Result result;
 	result.first = false;
-	result.second = "";
-	std::string lyrics = "";
+	std::string lyrics = msgNotFound;
 
 	TagLib::FileRef f(filepath.c_str());
 	if (f.isNull())
