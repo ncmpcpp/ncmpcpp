@@ -69,10 +69,10 @@ std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher)
 		fetcher = std::make_unique<TekstowoFetcher>();
 	else if (s == "zeneszoveg")
 		fetcher = std::make_unique<ZeneszovegFetcher>();
-	else if (s == "internet")
-		fetcher = std::make_unique<InternetLyricsFetcher>();
 	else if (s == "embedded")
 		fetcher = std::make_unique<EmbeddedLyricFetcher>();
+	else if (s == "internet")
+		fetcher = std::make_unique<InternetLyricsFetcher>();
 	else
 		is.setstate(std::ios::failbit);
 	return is;
