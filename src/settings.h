@@ -140,6 +140,7 @@ struct Configuration
 	bool header_visibility;
 	bool header_text_scrolling;
 	bool statusbar_visibility;
+	bool connected_message_on_startup;
 	bool titles_visibility;
 	bool centered_cursor;
 	bool screen_switcher_previous;
