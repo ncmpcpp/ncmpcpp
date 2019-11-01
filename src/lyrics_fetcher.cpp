@@ -30,6 +30,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
 
+#ifdef HAVE_TAGLIB_H
 #include <fileref.h>
 #include <flacfile.h>
 #include <id3v2frame.h>
@@ -37,6 +38,7 @@
 #include <mpegfile.h>
 #include <unsynchronizedlyricsframe.h>
 #include <xiphcomment.h>
+#endif
 
 #include "charset.h"
 #include "lyrics_fetcher.h"
@@ -159,6 +161,7 @@ void LyricsFetcher::postProcess(std::string &data) const
 
 /***********************************************************************/
 
+#ifdef HAVE_TAGLIB_H
 LyricsFetcher::Result EmbeddedLyricFetcher::fetch(const std::string &filepath)
 {
 	LyricsFetcher::Result result;
@@ -194,6 +197,16 @@ LyricsFetcher::Result EmbeddedLyricFetcher::fetch(const std::string &filepath)
 	result.second = lyrics;
 	return result;
 }
+#else
+LyricsFetcher::Result EmbeddedLyricFetcher::fetch(const std::string &filepath)
+{
+	LyricsFetcher::Result result;
+	result.first = false;
+	std::string errorMsg = "ncmpcpp must be compilied with taglib for embedded lyrics support";
+	result.second = errorMsg;
+	return result;
+}
+#endif
 
 void EmbeddedLyricFetcher::postProcess(std::string &data) const {
 	boost::erase_all(data, "\r");
