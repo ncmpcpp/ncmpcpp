@@ -53,7 +53,6 @@ MediaLibrary *myLibrary;
 namespace {
 
 bool hasTwoColumns;
-bool isAlbumOnly;
 size_t itsLeftColStartX;
 size_t itsLeftColWidth;
 size_t itsMiddleColWidth;
@@ -74,15 +73,12 @@ std::string Date_(std::string date)
 MPD::SongIterator getSongsFromAlbum(const AlbumEntry &album)
 {
 	Mpd.StartSearch(true);
-	if (!isAlbumOnly)
-		Mpd.AddSearch(Config.media_lib_primary_tag, album.entry().tag());
+	Mpd.AddSearch(Config.media_lib_primary_tag, album.entry().tag());
 	if (!album.isAllTracksEntry())
 	{
 		Mpd.AddSearch(MPD_TAG_ALBUM, album.entry().album());
-		if(!isAlbumOnly) {
-			if (Config.media_library_albums_split_by_date)
-				Mpd.AddSearch(MPD_TAG_DATE, album.entry().date());
-		}
+		if (Config.media_library_albums_split_by_date)
+			Mpd.AddSearch(MPD_TAG_DATE, album.entry().date());
 	}
 	return Mpd.CommitSearchSongs();
 }
@@ -145,14 +141,14 @@ class SortAlbumEntries {
 	typedef MediaLibrary::Album Album;
 	
 	LocaleStringComparison m_cmp;
-
+	
 public:
 	SortAlbumEntries() : m_cmp(std::locale(), Config.ignore_leading_the) { }
 	
 	bool operator()(const AlbumEntry &a, const AlbumEntry &b) const {
 		return (*this)(a.entry(), b.entry());
 	}
-
+	
 	bool operator()(const Album &a, const Album &b) const {
 		if (Config.media_library_sort_by_mtime)
 			return a.mtime() > b.mtime();
@@ -192,12 +188,11 @@ MediaLibrary::MediaLibrary()
 , m_fetching_delay(boost::posix_time::milliseconds(Config.data_fetching_delay ? 250 : -1))
 {
 	hasTwoColumns = 0;
-	isAlbumOnly = 0;
 	itsLeftColWidth = COLS/3-1;
+	itsMiddleColWidth = COLS/3;
 	itsMiddleColStartX = itsLeftColWidth+1;
-	itsMiddleColWidth = (COLS-itsLeftColWidth-1)/2;
-	itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
-	itsRightColWidth = COLS-itsMiddleColWidth-itsLeftColWidth-2;
+	itsRightColWidth = COLS-COLS/3*2-1;
+	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
 	
 	Tags = NC::Menu<PrimaryTag>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? tagTypeToString(Config.media_lib_primary_tag) + "s" : "", Config.main_color, NC::Border());
 	setHighlightFixes(Tags);
@@ -245,9 +240,9 @@ void MediaLibrary::resize()
 		itsLeftColStartX = x_offset;
 		itsLeftColWidth = width/3-1;
 		itsMiddleColStartX = itsLeftColStartX+itsLeftColWidth+1;
-		itsMiddleColWidth = (width-itsLeftColWidth-1)/2;
+		itsMiddleColWidth = width/3;
 		itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
-		itsRightColWidth = width-itsMiddleColWidth-itsLeftColWidth-2;
+		itsRightColWidth = width-width/3*2-1;
 	}
 	else
 	{
@@ -310,28 +305,15 @@ void MediaLibrary::update()
 				unsigned idx = 0;
 				while (!(tag = s->get(Config.media_lib_primary_tag, idx++)).empty())
 				{
-					if (isAlbumOnly) {
-						auto key = std::make_tuple(
-							"",
-							s->getAlbum(),
-							"");
-						auto it = albums.find(key);
-						if (it == albums.end())
-							albums[std::move(key)] = s->getMTime();
-						else
-							it->second = s->getMTime();
-					}
-					else {
-						auto key = std::make_tuple(
-							std::move(tag),
-							s->getAlbum(),
-							Date_(s->getDate()));
-						auto it = albums.find(key);
-						if (it == albums.end())
-							albums[std::move(key)] = s->getMTime();
-						else
-							it->second = s->getMTime();
-					}
+					auto key = std::make_tuple(
+						std::move(tag),
+						s->getAlbum(),
+						Date_(s->getDate()));
+					auto it = albums.find(key);
+					if (it == albums.end())
+						albums[std::move(key)] = s->getMTime();
+					else
+						it->second = s->getMTime();
 				}
 			}
 			size_t idx = 0;
@@ -897,15 +879,7 @@ void MediaLibrary::updateTimer()
 
 void MediaLibrary::toggleColumnsMode()
 {
-	if (isAlbumOnly) {
-		hasTwoColumns = 0;
-		isAlbumOnly = 0;
-	}
-	else if (hasTwoColumns)
-		isAlbumOnly = 1;
-	else
-		hasTwoColumns = 1;
-
+	hasTwoColumns = !hasTwoColumns;
 	Tags.clear();
 	Albums.clear();
 	Albums.reset();
@@ -918,14 +892,8 @@ void MediaLibrary::toggleColumnsMode()
 		{
 			std::string item_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));
-			if(!isAlbumOnly) {
-				std::string and_mtime = Config.media_library_sort_by_mtime ? " and mtime" : "";
-				Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
-			}
-			else {
-				std::string and_mtime = Config.media_library_sort_by_mtime ? " (sorted by mtime)" : "";
-				Albums.setTitle("Albums" + and_mtime);
-			}
+			std::string and_mtime = Config.media_library_sort_by_mtime ? " and mtime" : "";
+			Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
 		}
 	}
 	else
@@ -956,14 +924,8 @@ void MediaLibrary::toggleSortMode()
 		{
 			std::string item_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));
-			if(!isAlbumOnly) {
-				std::string and_mtime = Config.media_library_sort_by_mtime ? (" " "and mtime") : "";
-				Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
-			}
-			else {
-				std::string and_mtime = Config.media_library_sort_by_mtime ? " (sorted by mtime)" : "";
-				Albums.setTitle("Albums" + and_mtime);
-			}
+			std::string and_mtime = Config.media_library_sort_by_mtime ? (" " "and mtime") : "";
+			Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
 		}
 	}
 	else
@@ -1108,15 +1070,13 @@ std::string AlbumToString(const AlbumEntry &ae)
 	{
 		if (hasTwoColumns)
 		{
-			if(!isAlbumOnly) {
-				if (ae.entry().tag().empty())
-					result += Config.empty_tag;
-				else
-					result += ae.entry().tag();
-				result += " - ";
-			}
+			if (ae.entry().tag().empty())
+				result += Config.empty_tag;
+			else
+				result += ae.entry().tag();
+			result += " - ";
 		}
-		if (Config.media_lib_primary_tag != MPD_TAG_DATE && !ae.entry().date().empty() && !isAlbumOnly)
+		if (Config.media_lib_primary_tag != MPD_TAG_DATE && !ae.entry().date().empty())
 			result += "(" + ae.entry().date() + ") ";
 		result += ae.entry().album().empty() ? "<no album>" : ae.entry().album();
 	}
