@@ -41,6 +41,11 @@ Configuration Config;
 
 namespace {
 
+std::string xdg_data_home()
+{
+	return getEnvironment("XDG_DATA_HOME", "~/.local/share") + "/";
+}
+
 std::vector<Column> generate_columns(const std::string &format)
 {
 	std::vector<Column> result;
