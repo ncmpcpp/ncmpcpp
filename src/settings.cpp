@@ -458,7 +458,6 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("default_tag_editor_pattern", &pattern, "%n - %t");
 	p.add("header_visibility", &header_visibility, "yes", yes_no);
 	p.add("statusbar_visibility", &statusbar_visibility, "yes", yes_no);
-	p.add("connected_message_on_startup", &connected_message_on_startup, "yes", yes_no);
 	p.add("titles_visibility", &titles_visibility, "yes", yes_no);
 	p.add("header_text_scrolling", &header_text_scrolling, "yes", yes_no);
 	p.add("cyclic_scrolling", &use_cyclic_scrolling, "no", yes_no);

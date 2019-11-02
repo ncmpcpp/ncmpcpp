@@ -193,7 +193,6 @@ MediaLibrary::MediaLibrary()
 {
 	hasTwoColumns = 0;
 	isAlbumOnly = 0;
-
 	itsLeftColWidth = COLS/3-1;
 	itsMiddleColWidth = COLS/3;
 	itsMiddleColStartX = itsLeftColWidth+1;
@@ -244,7 +243,7 @@ void MediaLibrary::resize()
 	if (!hasTwoColumns)
 	{
 		itsLeftColStartX = x_offset;
-		itsLeftColWidth = width/4-1;
+		itsLeftColWidth = width/3-1;
 		itsMiddleColStartX = itsLeftColStartX+itsLeftColWidth+1;
 		itsMiddleColWidth = width/3;
 		itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
