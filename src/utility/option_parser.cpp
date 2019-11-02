@@ -45,6 +45,24 @@ bool yes_no(const std::string &v)
 		invalid_value(v);
 }
 
+std::string check_ratio_two(const std::string &v)
+{
+	boost::regex expr{"^[1-9][0-9]*:[1-9][0-9]*$"};
+	if (boost::regex_match(v, expr))
+		return v;
+	else
+		invalid_value(v);
+}
+
+std::string check_ratio_three(const std::string &v)
+{
+	boost::regex expr{"^[1-9][0-9]*:[1-9][0-9]*:[1-9][0-9]*$"};
+	if (boost::regex_match(v, expr))
+		return v;
+	else
+		invalid_value(v);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 bool option_parser::run(std::istream &is, bool ignore_errors)

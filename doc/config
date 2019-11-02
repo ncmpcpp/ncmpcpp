@@ -418,6 +418,20 @@
 #
 #ask_for_locked_screen_width_part = yes
 #
+##
+## Width of media_library screen columns
+##
+#
+#media_library_column_width_ratio_two = 1:1
+#
+#media_library_column_width_ratio_three = 1:1:1
+#
+##
+## Width of playlist_editor screen columns
+##
+#
+#playlist_editor_column_width_ratio = 1:2
+#
 #jump_to_now_playing_song_at_start = yes
 #
 #ask_before_clearing_playlists = yes

@@ -193,11 +193,18 @@ MediaLibrary::MediaLibrary()
 {
 	hasTwoColumns = 0;
 	isAlbumOnly = 0;
-	itsLeftColWidth = COLS/3-1;
-	itsMiddleColWidth = COLS/3;
+
+	const std::string ratio = Config.media_library_column_width_ratio_three;
+	std::vector<int> ratio_vector = parse_ratio(ratio);
+	int ra = ratio_vector[0];
+	int rb = ratio_vector[1];
+	int rc = ratio_vector[2];
+
+	itsLeftColWidth = COLS*ra/(ra+rb+rc)-1;
 	itsMiddleColStartX = itsLeftColWidth+1;
-	itsRightColWidth = COLS-COLS/3*2-1;
-	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
+	itsMiddleColWidth = COLS*rb/(ra+rb+rc);
+	itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
+	itsRightColWidth = COLS-itsLeftColWidth-itsMiddleColWidth-2;
 	
 	Tags = NC::Menu<PrimaryTag>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? tagTypeToString(Config.media_lib_primary_tag) + "s" : "", Config.main_color, NC::Border());
 	setHighlightFixes(Tags);
@@ -242,18 +249,29 @@ void MediaLibrary::resize()
 	getWindowResizeParams(x_offset, width);
 	if (!hasTwoColumns)
 	{
+		const std::string ratio = Config.media_library_column_width_ratio_three;
+		std::vector<int> ratio_vector = parse_ratio(ratio);
+		int ra = ratio_vector[0];
+		int rb = ratio_vector[1];
+		int rc = ratio_vector[2];
+
 		itsLeftColStartX = x_offset;
-		itsLeftColWidth = width/3-1;
+		itsLeftColWidth = width*ra/(ra+rb+rc)-1;
 		itsMiddleColStartX = itsLeftColStartX+itsLeftColWidth+1;
-		itsMiddleColWidth = width/3;
+		itsMiddleColWidth = width*rb/(ra+rb+rc);
 		itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
-		itsRightColWidth = width-width/3*2-1;
+		itsRightColWidth = width-itsLeftColWidth-itsMiddleColWidth-2;
 	}
 	else
 	{
+		const std::string ratio = Config.media_library_column_width_ratio_two;
+		std::vector<int> ratio_vector = parse_ratio(ratio);
+		int ra = ratio_vector[0];
+		int rb = ratio_vector[1];
+
 		itsMiddleColStartX = x_offset;
-		itsMiddleColWidth = width/2;
-		itsRightColStartX = x_offset+itsMiddleColWidth+1;
+		itsMiddleColWidth = width*ra/(ra+rb);
+		itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
 		itsRightColWidth = width-itsMiddleColWidth-1;
 	}
 	

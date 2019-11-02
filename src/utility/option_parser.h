@@ -38,6 +38,7 @@
 #include <boost/lexical_cast.hpp>
 #include <cassert>
 #include <stdexcept>
+#include <string>
 #include <unordered_map>
 
 [[noreturn]] inline void invalid_value(const std::string &v)
@@ -74,6 +75,9 @@ std::vector<ValueT> list_of(const std::string &v)
 }
 
 bool yes_no(const std::string &v);
+
+std::string check_ratio_two(const std::string &v);
+std::string check_ratio_three(const std::string &v);
 
 ////////////////////////////////////////////////////////////////////////////////
 

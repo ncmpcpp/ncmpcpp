@@ -590,6 +590,13 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("active_window_border", &active_window_border, "red",
 	      verbose_lexical_cast<NC::Color>);
 
+	p.add("playlist_editor_column_width_ratio", &playlist_editor_column_width_ratio,
+			"1:2", check_ratio_two);
+	p.add("media_library_column_width_ratio_two", &media_library_column_width_ratio_two,
+			"1:1", check_ratio_two);
+	p.add("media_library_column_width_ratio_three", &media_library_column_width_ratio_three,
+			"1:1:1", check_ratio_three);
+
 	return std::all_of(
 		config_paths.begin(),
 		config_paths.end(),

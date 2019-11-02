@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <boost/range/adaptor/reversed.hpp>
+#include <boost/algorithm/string.hpp>
 #include <time.h>
 
 #include "enums.h"
@@ -217,4 +218,17 @@ void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,
 	}
 	else
 		w << buf;
+}
+
+std::vector<int> parse_ratio(const std::string &s)
+{
+	std::vector<int> ret;
+	std::vector<std::string> temp;
+
+	boost::split(temp, s, boost::is_any_of(":"));
+
+	for (auto i : temp)
+		ret.push_back(std::stoi(i));
+
+	return ret;
 }
