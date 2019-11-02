@@ -517,6 +517,12 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	      });
 	p.add("ask_for_locked_screen_width_part", &ask_for_locked_screen_width_part,
 	      "yes", yes_no);
+	p.add("media_library_column_width_ratio_two", &media_library_column_width_ratio_two,
+			"1:1", check_ratio_two);
+	p.add("media_library_column_width_ratio_three", &media_library_column_width_ratio_three,
+			"1:1:1", check_ratio_three);
+	p.add("playlist_editor_column_width_ratio", &playlist_editor_column_width_ratio,
+			"1:2", check_ratio_two);
 	p.add("jump_to_now_playing_song_at_start", &jump_to_now_playing_song_at_start,
 	      "yes", yes_no);
 	p.add("ask_before_clearing_playlists", &ask_before_clearing_playlists,
@@ -589,13 +595,6 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("window_border_color", &window_border, "green", verbose_lexical_cast<NC::Color>);
 	p.add("active_window_border", &active_window_border, "red",
 	      verbose_lexical_cast<NC::Color>);
-
-	p.add("playlist_editor_column_width_ratio", &playlist_editor_column_width_ratio,
-			"1:2", check_ratio_two);
-	p.add("media_library_column_width_ratio_two", &media_library_column_width_ratio_two,
-			"1:1", check_ratio_two);
-	p.add("media_library_column_width_ratio_three", &media_library_column_width_ratio_three,
-			"1:1:1", check_ratio_three);
 
 	return std::all_of(
 		config_paths.begin(),
