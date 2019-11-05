@@ -76,6 +76,7 @@ std::vector<ValueT> list_of(const std::string &v)
 
 bool yes_no(const std::string &v);
 
+bool integers_in_range(const std::string &v);
 std::string check_ratio_two(const std::string &v);
 std::string check_ratio_three(const std::string &v);
 

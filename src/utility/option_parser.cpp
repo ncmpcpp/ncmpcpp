@@ -30,6 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <iostream>
 
@@ -45,10 +46,33 @@ bool yes_no(const std::string &v)
 		invalid_value(v);
 }
 
+bool integers_in_range(const std::string &v)
+{
+	std::vector<std::string> temp;
+	boost::split(temp, v, boost::is_any_of(":"));
+
+	for (auto i : temp)
+	{
+		try
+		{
+			int x = std::stoi(i);
+		}
+		catch(const std::out_of_range &e)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 std::string check_ratio_two(const std::string &v)
 {
 	boost::regex expr{"^[1-9][0-9]*:[1-9][0-9]*$"};
-	if (boost::regex_match(v, expr))
+	if (!boost::regex_match(v, expr))
+		invalid_value(v);
+
+	if (integers_in_range(v))
 		return v;
 	else
 		invalid_value(v);
@@ -57,7 +81,10 @@ std::string check_ratio_two(const std::string &v)
 std::string check_ratio_three(const std::string &v)
 {
 	boost::regex expr{"^[1-9][0-9]*:[1-9][0-9]*:[1-9][0-9]*$"};
-	if (boost::regex_match(v, expr))
+	if (!boost::regex_match(v, expr))
+		invalid_value(v);
+
+	if (integers_in_range(v))
 		return v;
 	else
 		invalid_value(v);
