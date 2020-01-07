@@ -424,8 +424,10 @@ void write_bindings(NC::Scrollpad &w)
 	}
 
 	section(w, "", "List of available colors");
-	for (int i = 0; i < COLORS; ++i)
+	for (int i = 0; i < NC::colorCount(); ++i)
+	{
 		w << NC::Color(i, NC::Color::transparent) << i+1 << NC::Color::End << " ";
+	}
 }
 
 }
