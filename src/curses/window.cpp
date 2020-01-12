@@ -33,6 +33,10 @@
 
 namespace {
 
+// In a DirectColor setup, COLORS as returned by ncurses (via terminfo) can
+// run as high as 2^24. We only work with up to 256.
+int maxColor;
+
 namespace rl {
 
 bool aborted;
@@ -224,9 +228,9 @@ int Color::pairNumber() const
 	else if (!isDefault())
 	{
 		if (!currentBackground())
-			result = (background() + 1) % COLORS;
+			result = (background() + 1) % colorCount();
 		result *= 256;
-		result += foreground() % COLORS;
+		result += foreground() % colorCount();
 
 		assert(result < int(color_pair_map.size()));
 
@@ -385,6 +389,11 @@ void disable()
 
 }
 
+int colorCount()
+{
+  return maxColor;
+}
+
 void initScreen(bool enable_colors, bool enable_mouse)
 {
 	initscr();
@@ -392,13 +401,18 @@ void initScreen(bool enable_colors, bool enable_mouse)
 	{
 		start_color();
 		use_default_colors();
+		maxColor = COLORS;
+		if (maxColor > 256)
+		{
+			maxColor = 256;
+		}
 		color_pair_map.resize(256 * 256, 0);
 
 		// Predefine pairs for colors with transparent background, all the other
 		// ones will be dynamically registered in Color::pairNumber when they're
 		// used.
 		color_pair_counter = 1;
-		for (int fg = 0; fg < COLORS; ++fg, ++color_pair_counter)
+		for (int fg = 0; fg < colorCount(); ++fg, ++color_pair_counter)
 		{
 			init_pair(color_pair_counter, fg, -1);
 			color_pair_map[fg] = color_pair_counter;

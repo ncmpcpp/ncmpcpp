@@ -219,6 +219,10 @@ void disable();
 /// @param enable_colors enables colors
 void initScreen(bool enable_colors, bool enable_mouse);
 
+// Get the maximum supported color index (but only once initScreen() has been
+// successfully called). This might be less than the advertised COLORS.
+int colorCount();
+
 /// Pauses the screen (e.g. for running an external command)
 void pauseScreen();
 
