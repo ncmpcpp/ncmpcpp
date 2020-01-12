@@ -173,18 +173,17 @@ void writeID3v2Tags(const MPD::MutableSong &s, TagLib::ID3v2::Tag *tag)
 void writeXiphComments(const MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag)
 {
 	auto writeXiph = [&](const TagLib::String &type, const TagLib::StringList &list) {
-		tag->removeField(type);
 		for (auto it = list.begin(); it != list.end(); ++it)
-			tag->addField(type, *it, false);
+			tag->addField(type, *it);
 	};
 	// remove field previously used as album artist
-	tag->removeField("ALBUM ARTIST");
+	tag->removeFields("ALBUM ARTIST");
 	// remove field TRACK, some taggers use it as TRACKNUMBER
-	tag->removeField("TRACK");
+	tag->removeFields("TRACK");
 	// remove field DISC, some taggers use it as DISCNUMBER
-	tag->removeField("DISC");
+	tag->removeFields("DISC");
 	// remove field DESCRIPTION, it's displayed as COMMENT
-	tag->removeField("DESCRIPTION");
+	tag->removeFields("DESCRIPTION");
 	writeXiph("TITLE", tagList(s, &MPD::Song::getTitle));
 	writeXiph("ARTIST", tagList(s, &MPD::Song::getArtist));
 	writeXiph("ALBUMARTIST", tagList(s, &MPD::Song::getAlbumArtist));
