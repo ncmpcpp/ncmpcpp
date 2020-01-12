@@ -240,7 +240,7 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist,
 		return result;
 	}
 
-	auto urls = getContent("<A HREF=\"(.*?)\">here</A>", data);
+	auto urls = getContent("<A HREF=\"http://www.google.com/url\\?q=(.*?)\">here</A>", data);
 
 	if (urls.empty() || !isURLOk(urls[0]))
 	{
