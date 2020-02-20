@@ -56,7 +56,7 @@ const size_t Clock::Height = 8;
 Clock::Clock()
 {
 	Width = Config.clock_display_seconds ? 60 : 40;
-	
+
 	m_pane = NC::Window(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border());
 	w = NC::Window((COLS-Width)/2, (MainHeight-Height)/2+MainStartY, Width, Height-1, "", Config.main_color, Config.main_color);
 }
@@ -65,12 +65,12 @@ void Clock::resize()
 {
 	size_t x_offset, width;
 	getWindowResizeParams(x_offset, width);
-	
+
 	// used for clearing area out of clock window while resizing terminal
 	m_pane.resize(width, MainHeight);
 	m_pane.moveTo(x_offset, MainStartY);
 	m_pane.refresh();
-	
+
 	if (Width <= width && Height <= MainHeight)
 		w.moveTo(x_offset+(width-Width)/2, MainStartY+(MainHeight-Height)/2);
 }
@@ -104,7 +104,7 @@ void Clock::update()
 	{
 		using Global::myLockedScreen;
 		using Global::myInactiveScreen;
-		
+
 		if (myLockedScreen)
 		{
 			if (myInactiveScreen != myLockedScreen)
@@ -114,9 +114,9 @@ void Clock::update()
 		else
 			myPlaylist->switchTo();
 	}
-	
+
 	auto time = boost::posix_time::to_tm(Global::Timer);
-	
+
 	mask = 0;
 	Set(time.tm_sec % 10, 0);
 	Set(time.tm_sec / 10, 4);
@@ -126,14 +126,14 @@ void Clock::update()
 	Set(time.tm_hour / 10, 24);
 	Set(10, 7);
 	Set(10, 17);
-	
+
 	char buf[64];
-	std::strftime(buf, 64, "%x", &time);
+	std::strftime(buf, 64, Config.clock_time_format.c_str(), &time);
 	color_set(Config.main_color.pairNumber(), nullptr);
 	mvprintw(w.getStarty()+w.getHeight(), w.getStartX()+(w.getWidth()-strlen(buf))/2, "%s", buf);
 	standend();
 	refresh();
-	
+
 	for (int k = 0; k < 6; ++k)
 	{
 		newer[k] = (newer[k] & ~mask) | (next[k] & mask);

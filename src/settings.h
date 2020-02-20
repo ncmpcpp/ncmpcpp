@@ -59,6 +59,7 @@ struct Configuration
 
 	std::string ncmpcpp_directory;
 	std::string lyrics_directory;
+	std::string clock_time_format;
 
 	std::string mpd_music_dir;
 	std::string visualizer_fifo_path;
