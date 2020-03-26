@@ -567,6 +567,10 @@ int Connection::AddSong(const Song &s, int pos)
 	return AddSong((!s.isFromDatabase() ? "file://" : "") + s.getURI(), pos);
 }
 
+void Connection::AddTag(int id, mpd_tag_type tag, const std::string &value) {
+	mpd_run_add_tag_id(m_connection.get(), id, tag, value.c_str());
+}
+
 bool Connection::Add(const std::string &path)
 {
 	bool result;
