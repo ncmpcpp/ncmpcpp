@@ -25,6 +25,7 @@
 #include <exception>
 #include <random>
 #include <set>
+#include <stdexcept>
 #include <vector>
 
 #include <mpd/client.h>
