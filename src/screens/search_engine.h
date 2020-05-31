@@ -147,7 +147,7 @@ private:
 	
 	static const char *SearchModes[];
 	
-	static const size_t ConstraintsNumber = 11;
+	static const size_t ConstraintsNumber = 14;
 	static const char *ConstraintsNames[];
 	std::string itsConstraints[ConstraintsNumber];
 	

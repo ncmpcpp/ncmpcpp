@@ -172,10 +172,28 @@ std::string Song::getComposer(unsigned idx) const
 	return get(MPD_TAG_COMPOSER, idx);
 }
 
+std::string Song::getWork(unsigned idx) const
+{
+	assert(m_song);
+	return get(MPD_TAG_WORK, idx);
+}
+
+std::string Song::getGrouping(unsigned idx) const
+{
+	assert(m_song);
+	return get(MPD_TAG_GROUPING, idx);
+}
+
 std::string Song::getPerformer(unsigned idx) const
 {
 	assert(m_song);
 	return get(MPD_TAG_PERFORMER, idx);
+}
+
+std::string Song::getConductor(unsigned idx) const
+{
+	assert(m_song);
+	return get(MPD_TAG_CONDUCTOR, idx);
 }
 
 std::string Song::getDisc(unsigned idx) const

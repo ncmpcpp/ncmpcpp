@@ -67,7 +67,10 @@ struct Song
 	virtual std::string getDate(unsigned idx = 0) const;
 	virtual std::string getGenre(unsigned idx = 0) const;
 	virtual std::string getComposer(unsigned idx = 0) const;
+	virtual std::string getWork(unsigned idx = 0) const;
+	virtual std::string getGrouping(unsigned idx = 0) const;
 	virtual std::string getPerformer(unsigned idx = 0) const;
+	virtual std::string getConductor(unsigned idx = 0) const;
 	virtual std::string getDisc(unsigned idx = 0) const;
 	virtual std::string getComment(unsigned idx = 0) const;
 	virtual std::string getLength(unsigned idx = 0) const;

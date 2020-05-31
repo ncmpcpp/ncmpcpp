@@ -69,9 +69,24 @@ std::string MutableSong::getComposer(unsigned idx) const
 	return getTag(MPD_TAG_COMPOSER, [this, idx](){ return Song::getComposer(idx); }, idx);
 }
 
+std::string MutableSong::getWork(unsigned idx) const
+{
+	return getTag(MPD_TAG_WORK, [this, idx](){ return Song::getWork(idx); }, idx);
+}
+
+std::string MutableSong::getGrouping(unsigned idx) const
+{
+	return getTag(MPD_TAG_GROUPING, [this, idx](){ return Song::getGrouping(idx); }, idx);
+}
+
 std::string MutableSong::getPerformer(unsigned idx) const
 {
 	return getTag(MPD_TAG_PERFORMER, [this, idx](){ return Song::getPerformer(idx); }, idx);
+}
+
+std::string MutableSong::getConductor(unsigned idx) const
+{
+	return getTag(MPD_TAG_CONDUCTOR, [this, idx](){ return Song::getConductor(idx); }, idx);
 }
 
 std::string MutableSong::getDisc(unsigned idx) const
@@ -124,9 +139,24 @@ void MutableSong::setComposer(const std::string &value, unsigned idx)
 	replaceTag(MPD_TAG_COMPOSER, Song::getComposer(idx), value, idx);
 }
 
+void MutableSong::setWork(const std::string &value, unsigned idx)
+{
+	replaceTag(MPD_TAG_WORK, Song::getWork(idx), value, idx);
+}
+
+void MutableSong::setGrouping(const std::string &value, unsigned idx)
+{
+	replaceTag(MPD_TAG_GROUPING, Song::getGrouping(idx), value, idx);
+}
+
 void MutableSong::setPerformer(const std::string &value, unsigned idx)
 {
 	replaceTag(MPD_TAG_PERFORMER, Song::getPerformer(idx), value, idx);
+}
+
+void MutableSong::setConductor(const std::string &value, unsigned idx)
+{
+	replaceTag(MPD_TAG_CONDUCTOR, Song::getConductor(idx), value, idx);
 }
 
 void MutableSong::setDisc(const std::string &value, unsigned idx)

@@ -54,7 +54,10 @@ namespace {
 	"Album",
 	"Filename",
 	"Composer",
+	"Work",
+	"Grouping",
 	"Performer",
+	"Conductor",
 	"Genre",
 	"Date",
 	"Comment"
@@ -154,7 +157,10 @@ const char *SearchEngine::ConstraintsNames[] =
 	"Album",
 	"Filename",
 	"Composer",
+	"Work",
+	"Grouping",
 	"Performer",
+	"Conductor",
 	"Genre",
 	"Date",
 	"Comment"
@@ -168,9 +174,9 @@ const char *SearchEngine::SearchModes[] =
 	0
 };
 
-size_t SearchEngine::StaticOptions = 20;
-size_t SearchEngine::ResetButton = 16;
-size_t SearchEngine::SearchButton = 15;
+size_t SearchEngine::StaticOptions = 23;
+size_t SearchEngine::ResetButton = 19;
+size_t SearchEngine::SearchButton = 18;
 
 SearchEngine::SearchEngine()
 : Screen(NC::Menu<SEItem>(0, MainStartY, COLS, MainHeight, "", Config.main_color, NC::Border()))
@@ -463,13 +469,19 @@ void SearchEngine::Search()
 		if (!itsConstraints[6].empty())
 			Mpd.AddSearch(MPD_TAG_COMPOSER, itsConstraints[6]);
 		if (!itsConstraints[7].empty())
-			Mpd.AddSearch(MPD_TAG_PERFORMER, itsConstraints[7]);
+			Mpd.AddSearch(MPD_TAG_WORK, itsConstraints[7]);
 		if (!itsConstraints[8].empty())
-			Mpd.AddSearch(MPD_TAG_GENRE, itsConstraints[8]);
+			Mpd.AddSearch(MPD_TAG_GROUPING, itsConstraints[8]);
 		if (!itsConstraints[9].empty())
-			Mpd.AddSearch(MPD_TAG_DATE, itsConstraints[9]);
+			Mpd.AddSearch(MPD_TAG_PERFORMER, itsConstraints[9]);
 		if (!itsConstraints[10].empty())
-			Mpd.AddSearch(MPD_TAG_COMMENT, itsConstraints[10]);
+			Mpd.AddSearch(MPD_TAG_CONDUCTOR, itsConstraints[10]);
+		if (!itsConstraints[11].empty())
+			Mpd.AddSearch(MPD_TAG_GENRE, itsConstraints[11]);
+		if (!itsConstraints[12].empty())
+			Mpd.AddSearch(MPD_TAG_DATE, itsConstraints[12]);
+		if (!itsConstraints[13].empty())
+			Mpd.AddSearch(MPD_TAG_COMMENT, itsConstraints[13]);
 		for (MPD::SongIterator s = Mpd.CommitSearchSongs(), end; s != end; ++s)
 			w.addItem(std::move(*s));
 		return;
@@ -524,7 +536,10 @@ void SearchEngine::Search()
 					|| Regex::search(s->getAlbum(), rx[0], Config.ignore_diacritics)
 					|| Regex::search(s->getName(), rx[0], Config.ignore_diacritics)
 					|| Regex::search(s->getComposer(), rx[0], Config.ignore_diacritics)
+					|| Regex::search(s->getWork(), rx[0], Config.ignore_diacritics)
+					|| Regex::search(s->getGrouping(), rx[0], Config.ignore_diacritics)
 					|| Regex::search(s->getPerformer(), rx[0], Config.ignore_diacritics)
+					|| Regex::search(s->getConductor(), rx[0], Config.ignore_diacritics)
 					|| Regex::search(s->getGenre(), rx[0], Config.ignore_diacritics)
 					|| Regex::search(s->getDate(), rx[0], Config.ignore_diacritics)
 					|| Regex::search(s->getComment(), rx[0], Config.ignore_diacritics);
@@ -541,13 +556,19 @@ void SearchEngine::Search()
 			if (found && !rx[6].empty())
 				found = Regex::search(s->getComposer(), rx[6], Config.ignore_diacritics);
 			if (found && !rx[7].empty())
-				found = Regex::search(s->getPerformer(), rx[7], Config.ignore_diacritics);
+				found = Regex::search(s->getWork(), rx[7], Config.ignore_diacritics);
 			if (found && !rx[8].empty())
-				found = Regex::search(s->getGenre(), rx[8], Config.ignore_diacritics);
+				found = Regex::search(s->getGrouping(), rx[8], Config.ignore_diacritics);
 			if (found && !rx[9].empty())
-				found = Regex::search(s->getDate(), rx[9], Config.ignore_diacritics);
+				found = Regex::search(s->getPerformer(), rx[9], Config.ignore_diacritics);
 			if (found && !rx[10].empty())
-				found = Regex::search(s->getComment(), rx[10], Config.ignore_diacritics);
+				found = Regex::search(s->getConductor(), rx[10], Config.ignore_diacritics);
+			if (found && !rx[11].empty())
+				found = Regex::search(s->getGenre(), rx[11], Config.ignore_diacritics);
+			if (found && !rx[12].empty())
+				found = Regex::search(s->getDate(), rx[12], Config.ignore_diacritics);
+			if (found && !rx[13].empty())
+				found = Regex::search(s->getComment(), rx[13], Config.ignore_diacritics);
 		}
 		else // match only if values are equal
 		{
@@ -559,7 +580,10 @@ void SearchEngine::Search()
 				|| !cmp(s->getAlbum(), itsConstraints[0])
 				|| !cmp(s->getName(), itsConstraints[0])
 				|| !cmp(s->getComposer(), itsConstraints[0])
+				|| !cmp(s->getWork(), itsConstraints[0])
+				|| !cmp(s->getGrouping(), itsConstraints[0])
 				|| !cmp(s->getPerformer(), itsConstraints[0])
+				|| !cmp(s->getConductor(), itsConstraints[0])
 				|| !cmp(s->getGenre(), itsConstraints[0])
 				|| !cmp(s->getDate(), itsConstraints[0])
 				|| !cmp(s->getComment(), itsConstraints[0]);
@@ -577,13 +601,19 @@ void SearchEngine::Search()
 			if (found && !itsConstraints[6].empty())
 				found = !cmp(s->getComposer(), itsConstraints[6]);
 			if (found && !itsConstraints[7].empty())
-				found = !cmp(s->getPerformer(), itsConstraints[7]);
+				found = !cmp(s->getWork(), itsConstraints[7]);
 			if (found && !itsConstraints[8].empty())
-				found = !cmp(s->getGenre(), itsConstraints[8]);
+				found = !cmp(s->getGrouping(), itsConstraints[8]);
 			if (found && !itsConstraints[9].empty())
-				found = !cmp(s->getDate(), itsConstraints[9]);
+				found = !cmp(s->getPerformer(), itsConstraints[9]);
 			if (found && !itsConstraints[10].empty())
-				found = !cmp(s->getComment(), itsConstraints[10]);
+				found = !cmp(s->getConductor(), itsConstraints[10]);
+			if (found && !itsConstraints[11].empty())
+				found = !cmp(s->getGenre(), itsConstraints[11]);
+			if (found && !itsConstraints[12].empty())
+				found = !cmp(s->getDate(), itsConstraints[12]);
+			if (found && !itsConstraints[13].empty())
+				found = !cmp(s->getComment(), itsConstraints[13]);
 		}
 		
 		if (any_found && found)

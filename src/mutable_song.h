@@ -42,7 +42,10 @@ struct MutableSong : public Song
 	virtual std::string getDate(unsigned idx = 0) const override;
 	virtual std::string getGenre(unsigned idx = 0) const override;
 	virtual std::string getComposer(unsigned idx = 0) const override;
+	virtual std::string getWork(unsigned idx = 0) const override;
+	virtual std::string getGrouping(unsigned idx = 0) const override;
 	virtual std::string getPerformer(unsigned idx = 0) const override;
+	virtual std::string getConductor(unsigned idx = 0) const override;
 	virtual std::string getDisc(unsigned idx = 0) const override;
 	virtual std::string getComment(unsigned idx = 0) const override;
 	
@@ -54,7 +57,10 @@ struct MutableSong : public Song
 	void setDate(const std::string &value, unsigned idx = 0);
 	void setGenre(const std::string &value, unsigned idx = 0);
 	void setComposer(const std::string &value, unsigned idx = 0);
+	void setWork(const std::string &value, unsigned idx = 0);
+	void setGrouping(const std::string &value, unsigned idx = 0);
 	void setPerformer(const std::string &value, unsigned idx = 0);
+	void setConductor(const std::string &value, unsigned idx = 0);
 	void setDisc(const std::string &value, unsigned idx = 0);
 	void setComment(const std::string &value, unsigned idx = 0);
 	
