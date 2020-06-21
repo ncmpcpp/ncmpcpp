@@ -60,24 +60,51 @@ void Progressbar::draw(unsigned int elapsed, unsigned int time)
 	unsigned pb_width = wFooter->getWidth();
 	unsigned howlong = time ? pb_width*elapsed/time : 0;
 	*wFooter << Config.progressbar_color;
-	if (Config.progressbar[2] != '\0')
+
+	// set the different bar characters depending on the amount of configured chars
+	char bar_start_char = Config.progressbar[0];
+	char bar_time_char = Config.progressbar[0];
+	char bar_time_end_char = Config.progressbar[1];
+	char bar_remaining_char = Config.progressbar[2];
+	char bar_remaining_end_char = Config.progressbar[2];
+	if (Config.progressbar[3] != '\0') 
 	{
-		wFooter->goToXY(0, 0);
-		for (unsigned i = 0; i < pb_width; ++i)
-			*wFooter << Config.progressbar[2];
-		wFooter->goToXY(0, 0);
+		bar_time_char = Config.progressbar[1];
+		bar_remaining_char = Config.progressbar[2];
+		bar_time_end_char = Config.progressbar[3];
+		bar_remaining_end_char = Config.progressbar[3];
+	} 
+	if (Config.progressbar[4] != '\0') 
+	{
+		bar_remaining_end_char = Config.progressbar[4];
+	}
+
+
+	// draw the progressbar
+	if (Config.progressbar[2] == '\0')
+	{
+		mvwhline(wFooter->raw(), 0, 0, 0, pb_width);
 	}
 	else
-		mvwhline(wFooter->raw(), 0, 0, 0, pb_width);
+	{
+		wFooter->goToXY(0, 0);
+		*wFooter << bar_start_char;
+		for (unsigned i = 1; i < pb_width - 1; ++i) {
+			*wFooter << bar_remaining_char;
+		}
+		*wFooter << bar_remaining_end_char;
+		wFooter->goToXY(0, 0);
+	}
 	*wFooter << NC::FormattedColor::End<>(Config.progressbar_color);
 	if (time)
 	{
 		*wFooter << Config.progressbar_elapsed_color;
 		pb_width = std::min(size_t(howlong), wFooter->getWidth());
-		for (unsigned i = 0; i < pb_width; ++i)
-			*wFooter << Config.progressbar[0];
+		*wFooter << bar_start_char;
+		for (unsigned i = 1; i < pb_width; ++i)
+			*wFooter << bar_time_char;
 		if (howlong < wFooter->getWidth())
-			*wFooter << Config.progressbar[1];
+			*wFooter << bar_time_end_char;
 		*wFooter << NC::FormattedColor::End<>(Config.progressbar_elapsed_color);
 	}
 }

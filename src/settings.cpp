@@ -415,9 +415,9 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("centered_cursor", &centered_cursor, "no", yes_no);
 	p.add("progressbar_look", &progressbar, "=>", [](std::string v) {
 			auto result = ToWString(std::move(v));
-			boundsCheck<std::wstring::size_type>(result.size(), 2, 3);
-			// If two characters were specified, fill \0 as the third one.
-			result.resize(3);
+			boundsCheck<std::wstring::size_type>(result.size(), 2, 5);
+			// If less than 5 characters were specified, fill \0 as the remaining.
+			result.resize(5);
 			return result;
 	});
 	p.add("default_place_to_search_in", &search_in_db, "database", [](std::string v) {

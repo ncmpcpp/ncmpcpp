@@ -318,8 +318,11 @@
 #centered_cursor = no
 #
 ##
-## Note: You can specify third character which will be used to build 'empty'
-## part of progressbar.
+## Note: You can specify up to 5 characters here:
+## given the config
+## progressbar_look = 12345
+## the progressbar would look like this:
+## 122222344444444444444445
 ##
 #progressbar_look = =>
 #
