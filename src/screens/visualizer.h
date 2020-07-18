@@ -72,7 +72,7 @@ private:
 #	ifdef HAVE_FFTW3_H
 	void DrawFrequencySpectrum(int16_t *, ssize_t, size_t, size_t);
 	void DrawFrequencySpectrumStereo(int16_t *, int16_t *, ssize_t, size_t);
-	void ApplyHammingWindow(double *, int16_t *, ssize_t);
+	void ApplyWindow(double *, int16_t *, ssize_t);
 	double Bin2Hz(size_t);
 #	endif // HAVE_FFTW3_H
 
@@ -90,10 +90,10 @@ private:
 	fftw_complex *m_fftw_output;
 	fftw_plan m_fftw_plan;
 	const uint32_t DFT_SIZE = 10000;
-	const double DYNAMIC_RANGE = 70;
+	const double DYNAMIC_RANGE = 100;
 	const double HZ_MIN = 20;
 	const double HZ_MAX = 20000;
-	const double GAIN = 30;
+	const double GAIN = 0;
 	std::vector<double> dft_logspace;
 
 	std::vector<double> m_freq_magnitudes;

@@ -412,7 +412,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 	const bool flipped = y_offset > 0;
 
 	// copy samples to fftw input array and apply Hamming window
-	ApplyHammingWindow(m_fftw_input, buf, samples);
+	ApplyWindow(m_fftw_input, buf, samples);
 	fftw_execute(m_fftw_plan);
 
 	// Count magnitude of each frequency and normalize
@@ -489,10 +489,20 @@ void Visualizer::DrawFrequencySpectrumStereo(int16_t *buf_left, int16_t *buf_rig
 	DrawFrequencySpectrum(buf_right, samples, height, w.getHeight() - height);
 }
 
-void Visualizer::ApplyHammingWindow(double *output, int16_t *input, ssize_t samples)
+void Visualizer::ApplyWindow(double *output, int16_t *input, ssize_t samples)
 {
-	for (unsigned i = 0; i < m_samples; ++i)
-		output[i] = (0.54 - 0.46*cos((2*i*boost::math::constants::pi<double>())/(m_samples-1))) * input[i] / INT16_MAX;
+	// Use Blackman window for low sidelobes and fast sidelobe rolloff
+	// don't care too much about mainlobe width
+	const double alpha = 0.16;
+	const double a0 = (1 - alpha) / 2;
+	const double a1 = 0.5;
+	const double a2 = alpha / 2;
+	const double pi = boost::math::constants::pi<double>();
+	for (unsigned i = 0; i < samples; ++i)
+	{
+		double window = a0 - a1*cos(2*pi*i/(samples-1)) + a2*cos(4*pi*i/(samples-1));
+		output[i] = window * input[i] / INT16_MAX;
+	}
 }
 
 double Visualizer::Bin2Hz(size_t bin)
