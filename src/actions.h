@@ -168,6 +168,7 @@ enum class Type
 
 void validateScreenSize();
 void initializeScreens();
+void destroyScreens();
 void setResizeFlags();
 void resizeScreen(bool reload_main_window);
 void setWindowsDimensions();

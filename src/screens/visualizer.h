@@ -37,6 +37,7 @@
 struct Visualizer: Screen<NC::Window>, Tabbable
 {
 	Visualizer();
+	~Visualizer();
 
 	virtual void switchTo() override;
 	virtual void resize() override;

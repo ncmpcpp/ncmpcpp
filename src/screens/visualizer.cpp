@@ -89,6 +89,16 @@ Visualizer::Visualizer()
 #	endif // HAVE_FFTW3_H
 }
 
+Visualizer::~Visualizer()
+{
+#	ifdef HAVE_FFTW3_H
+	fftw_destroy_plan(m_fftw_plan);
+	fftw_free(m_fftw_input);
+	fftw_free(m_fftw_output);
+	fftw_cleanup();
+#	endif // HAVE_FFTW3_H
+}
+
 void Visualizer::switchTo()
 {
 	SwitchTo::execute(this);
