@@ -69,15 +69,23 @@ Visualizer::Visualizer()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
 {
 	ResetFD();
-	m_samples = 44100/fps;
+	read_samples = 44100/fps;
+	m_samples = DFT_SIZE;
 	if (Config.visualizer_in_stereo)
-		m_samples *= 2;
+	{
+		sample_buffer.resize(2*m_samples);
+		read_samples *= 2;
+	}
+	else
+		sample_buffer.resize(m_samples);
+
 #	ifdef HAVE_FFTW3_H
 	m_fftw_results = m_samples/2+1;
 	m_freq_magnitudes.resize(m_fftw_results);
 	m_fftw_input = static_cast<double *>(fftw_malloc(sizeof(double)*m_samples));
 	m_fftw_output = static_cast<fftw_complex *>(fftw_malloc(sizeof(fftw_complex)*m_fftw_results));
 	m_fftw_plan = fftw_plan_dft_r2c_1d(m_samples, m_fftw_input, m_fftw_output, FFTW_ESTIMATE);
+	dft_logspace.reserve(500);
 #	endif // HAVE_FFTW3_H
 }
 
@@ -111,9 +119,9 @@ void Visualizer::update()
 
 	// PCM in format 44100:16:1 (for mono visualization) and
 	// 44100:16:2 (for stereo visualization) is supported.
-	Samples samples(m_samples);
-	ssize_t data = read(m_fifo, samples.data(),
-	                    samples.size() * sizeof(Samples::value_type));
+	memmove(sample_buffer.data(), sample_buffer.data()+read_samples, sample_buffer.size()-read_samples);
+	ssize_t data = read(m_fifo, sample_buffer.data(),
+	                    read_samples * sizeof(int16_t));
 	if (data < 0) // no data available in fifo
 		return;
 
@@ -153,7 +161,7 @@ void Visualizer::update()
 
 	const ssize_t samples_read = data/sizeof(int16_t);
 	m_auto_scale_multiplier += 1.0/fps;
-	for (auto &sample : samples)
+	for (auto &sample : sample_buffer)
 	{
 		double scale = std::numeric_limits<int16_t>::min();
 		scale /= sample;
@@ -161,7 +169,7 @@ void Visualizer::update()
 		if (scale < m_auto_scale_multiplier)
 			m_auto_scale_multiplier = scale;
 	}
-	for (auto &sample : samples)
+	for (auto &sample : sample_buffer)
 	{
 		int32_t tmp = sample;
 		if (m_auto_scale_multiplier <= 50.0) // limit the auto scale
@@ -181,8 +189,8 @@ void Visualizer::update()
 		int16_t buf_left[chan_samples], buf_right[chan_samples];
 		for (ssize_t i = 0, j = 0; i < samples_read; i += 2, ++j)
 		{
-			buf_left[j] = samples[i];
-			buf_right[j] = samples[i+1];
+			buf_left[j] = sample_buffer[i];
+			buf_right[j] = sample_buffer[i+1];
 		}
 		size_t half_height = w.getHeight()/2;
 
@@ -190,7 +198,7 @@ void Visualizer::update()
 	}
 	else
 	{
-		(this->*draw)(samples.data(), samples_read, 0, w.getHeight());
+		(this->*draw)(sample_buffer.data(), samples_read, 0, w.getHeight());
 	}
 	w.refresh();
 }
@@ -393,35 +401,67 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 	// If right channel is drawn, bars descend from the top to the bottom.
 	const bool flipped = y_offset > 0;
 
-	// copy samples to fftw input array
-	for (unsigned i = 0; i < m_samples; ++i)
-		m_fftw_input[i] = i < samples ? buf[i] : 0;
+	// copy samples to fftw input array and apply Hamming window
+	ApplyHammingWindow(m_fftw_input, buf, samples);
 	fftw_execute(m_fftw_plan);
 
-	// Count magnitude of each frequency and scale it to fit the screen.
+	// Count magnitude of each frequency and normalize
 	for (size_t i = 0; i < m_fftw_results; ++i)
 		m_freq_magnitudes[i] = sqrt(
 			m_fftw_output[i][0]*m_fftw_output[i][0]
 		+	m_fftw_output[i][1]*m_fftw_output[i][1]
-		)/2e4*height;
+		)/DFT_SIZE;
 
 	const size_t win_width = w.getWidth();
-	// Cut bandwidth a little to achieve better look.
-	const double bins_per_bar = m_fftw_results/win_width * 7/10;
-	double bar_height;
-	size_t bar_bound_height;
+
+	// Generate log-scaled vector of frequencies from HZ_MIN to HZ_MAX
+	// Calculate number of extra bins needed between 0 HZ and HZ_MIN
+	const size_t left_bins = (log10(HZ_MIN) - win_width*log10(HZ_MIN)) / (log10(HZ_MIN) - log10(HZ_MAX));
+	// Generate logspaced frequencies
+	dft_logspace.resize(win_width);
+	const double log_scale = log10(HZ_MAX) / (left_bins + dft_logspace.size() - 1);
+	for (int i = left_bins; i < dft_logspace.size() + left_bins; ++i) {
+		dft_logspace[i - left_bins] = pow(10, i * log_scale);
+	}
+
+	double prev_bar_height = 0;
+	size_t cur_bin = 0;
 	for (size_t x = 0; x < win_width; ++x)
 	{
-		bar_height = 0;
-		for (int j = 0; j < bins_per_bar; ++j)
-			bar_height += m_freq_magnitudes[x*bins_per_bar+j];
-		// Buff higher frequencies.
-		bar_height *= log2(2 + x) * 100.0/win_width;
-		// Moderately normalize the heights.
-		bar_height = pow(bar_height, 0.5);
+		double bar_height = 0;
 
-		bar_bound_height = std::min(std::size_t(bar_height/bins_per_bar), height);
-		for (size_t j = 0; j < bar_bound_height; ++j)
+		// accumulate bins
+		size_t count = 0;
+		// check right bound
+		while (cur_bin < m_fftw_results && Bin2Hz(cur_bin) < dft_logspace[x])
+		{
+			// check left bound if not first index
+			if (x == 0 || Bin2Hz(cur_bin) >= dft_logspace[x-1])
+			{
+				bar_height += m_freq_magnitudes[cur_bin];
+				++count;
+			}
+			++cur_bin;
+		}
+
+		// average bins, using previous bin if not enough data
+		if (x > 0 && count == 0)
+		{
+			bar_height = prev_bar_height;
+		}
+		else
+		{
+			bar_height /= count;
+		}
+		prev_bar_height = bar_height;
+
+		// log scale bar heights
+		bar_height = (20 * log10(bar_height) + DYNAMIC_RANGE + GAIN) / DYNAMIC_RANGE;
+		// Scale bar height between 0 and height
+		bar_height = bar_height > 0 ? bar_height * height : 0;
+		bar_height = bar_height > height ? height : bar_height;
+
+		for (size_t j = 0; j < bar_height; ++j)
 		{
 			size_t y = flipped ? y_offset+j : y_offset+height-j-1;
 			auto c = toColor(j, height);
@@ -437,6 +477,17 @@ void Visualizer::DrawFrequencySpectrumStereo(int16_t *buf_left, int16_t *buf_rig
 {
 	DrawFrequencySpectrum(buf_left, samples, 0, height);
 	DrawFrequencySpectrum(buf_right, samples, height, w.getHeight() - height);
+}
+
+void Visualizer::ApplyHammingWindow(double *output, int16_t *input, ssize_t samples)
+{
+	for (unsigned i = 0; i < m_samples; ++i)
+		output[i] = (0.54 - 0.46*cos((2*i*boost::math::constants::pi<double>())/(m_samples-1))) * input[i] / INT16_MAX;
+}
+
+double Visualizer::Bin2Hz(size_t bin)
+{
+	return bin*44100/DFT_SIZE;
 }
 #endif // HAVE_FFTW3_H
 

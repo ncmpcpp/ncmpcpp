@@ -71,6 +71,8 @@ private:
 #	ifdef HAVE_FFTW3_H
 	void DrawFrequencySpectrum(int16_t *, ssize_t, size_t, size_t);
 	void DrawFrequencySpectrumStereo(int16_t *, int16_t *, ssize_t, size_t);
+	void ApplyHammingWindow(double *, int16_t *, ssize_t);
+	double Bin2Hz(size_t);
 #	endif // HAVE_FFTW3_H
 
 	int m_output_id;
@@ -78,12 +80,20 @@ private:
 
 	int m_fifo;
 	size_t m_samples;
+	size_t read_samples;
+	std::vector<int16_t> sample_buffer;
 	double m_auto_scale_multiplier;
 #	ifdef HAVE_FFTW3_H
 	size_t m_fftw_results;
 	double *m_fftw_input;
 	fftw_complex *m_fftw_output;
 	fftw_plan m_fftw_plan;
+	const uint32_t DFT_SIZE = 10000;
+	const double DYNAMIC_RANGE = 70;
+	const double HZ_MIN = 20;
+	const double HZ_MAX = 20000;
+	const double GAIN = 30;
+	std::vector<double> dft_logspace;
 
 	std::vector<double> m_freq_magnitudes;
 #	endif // HAVE_FFTW3_H
