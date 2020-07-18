@@ -70,21 +70,17 @@ Visualizer::Visualizer()
 {
 	ResetFD();
 	read_samples = 44100/fps;
-	m_samples = DFT_SIZE;
 	if (Config.visualizer_in_stereo)
-	{
-		sample_buffer.resize(2*m_samples);
 		read_samples *= 2;
-	}
-	else
-		sample_buffer.resize(m_samples);
+	sample_buffer.resize(read_samples);
 
 #	ifdef HAVE_FFTW3_H
-	m_fftw_results = m_samples/2+1;
+	m_fftw_results = DFT_SIZE/2+1;
 	m_freq_magnitudes.resize(m_fftw_results);
-	m_fftw_input = static_cast<double *>(fftw_malloc(sizeof(double)*m_samples));
+	m_fftw_input = static_cast<double *>(fftw_malloc(sizeof(double)*DFT_SIZE));
+	memset(m_fftw_input, 0, sizeof(double)*DFT_SIZE);
 	m_fftw_output = static_cast<fftw_complex *>(fftw_malloc(sizeof(fftw_complex)*m_fftw_results));
-	m_fftw_plan = fftw_plan_dft_r2c_1d(m_samples, m_fftw_input, m_fftw_output, FFTW_ESTIMATE);
+	m_fftw_plan = fftw_plan_dft_r2c_1d(DFT_SIZE, m_fftw_input, m_fftw_output, FFTW_ESTIMATE);
 	dft_logspace.reserve(500);
 #	endif // HAVE_FFTW3_H
 }
@@ -420,7 +416,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 		m_freq_magnitudes[i] = sqrt(
 			m_fftw_output[i][0]*m_fftw_output[i][0]
 		+	m_fftw_output[i][1]*m_fftw_output[i][1]
-		)/DFT_SIZE;
+		) / (DFT_SIZE - DFT_PAD);
 
 	const size_t win_width = w.getWidth();
 
@@ -500,7 +496,7 @@ void Visualizer::ApplyWindow(double *output, int16_t *input, ssize_t samples)
 	const double pi = boost::math::constants::pi<double>();
 	for (unsigned i = 0; i < samples; ++i)
 	{
-		double window = a0 - a1*cos(2*pi*i/(samples-1)) + a2*cos(4*pi*i/(samples-1));
+		double window = a0 - a1*cos(2*pi*i/(DFT_SIZE-DFT_PAD-1)) + a2*cos(4*pi*i/(DFT_SIZE-DFT_PAD-1));
 		output[i] = window * input[i] / INT16_MAX;
 	}
 }

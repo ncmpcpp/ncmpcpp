@@ -80,7 +80,6 @@ private:
 	boost::posix_time::ptime m_timer;
 
 	int m_fifo;
-	size_t m_samples;
 	size_t read_samples;
 	std::vector<int16_t> sample_buffer;
 	double m_auto_scale_multiplier;
@@ -89,7 +88,8 @@ private:
 	double *m_fftw_input;
 	fftw_complex *m_fftw_output;
 	fftw_plan m_fftw_plan;
-	const uint32_t DFT_SIZE = 10000;
+	const uint32_t DFT_SIZE = 1<<14;
+	const uint32_t DFT_PAD = DFT_SIZE - 4000;
 	const double DYNAMIC_RANGE = 100;
 	const double HZ_MIN = 20;
 	const double HZ_MAX = 20000;
