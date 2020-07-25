@@ -170,39 +170,6 @@ void initializeScreens()
 	
 }
 
-void destroyScreens()
-{
-	delete myHelp;
-	delete myPlaylist;
-	delete myBrowser;
-	delete mySearcher;
-	delete myLibrary;
-	delete myPlaylistEditor;
-	delete myLyrics;
-	delete mySelectedItemsAdder;
-	delete mySongInfo;
-	delete myServerInfo;
-	delete mySortPlaylistDialog;
-	delete myLastfm;
-
-#	ifdef HAVE_TAGLIB_H
-	delete myTinyTagEditor;
-	delete myTagEditor;
-#	endif // HAVE_TAGLIB_H
-
-#	ifdef ENABLE_VISUALIZER
-	delete myVisualizer;
-#	endif // ENABLE_VISUALIZER
-
-#	ifdef ENABLE_OUTPUTS
-	delete myOutputs;
-#	endif // ENABLE_OUTPUTS
-
-#	ifdef ENABLE_CLOCK
-	delete myClock;
-#	endif // ENABLE_CLOCK
-}
-
 void setResizeFlags()
 {
 	myHelp->hasToBeResized = 1;

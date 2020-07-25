@@ -251,6 +251,5 @@ int main(int argc, char **argv)
 			Statusbar::printf("Unexpected error: %1%", e.what());
 		}
 	}
-	Actions::destroyScreens();
 	return 0;
 }
