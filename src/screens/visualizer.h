@@ -96,7 +96,6 @@ private:
 	const double HZ_MAX = 20000;
 	const double GAIN = 0;
 	std::vector<double> dft_logspace;
-	size_t total_bytes_read;
 
 	std::vector<double> m_freq_magnitudes;
 #	endif // HAVE_FFTW3_H

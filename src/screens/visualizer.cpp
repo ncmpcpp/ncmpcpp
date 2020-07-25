@@ -31,6 +31,7 @@
 #include <fstream>
 #include <limits>
 #include <fcntl.h>
+#include <cassert>
 
 #include "global.h"
 #include "settings.h"
@@ -70,12 +71,17 @@ Visualizer::Visualizer()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
 {
 	ResetFD();
+#	ifdef HAVE_FFTW3_H
 	read_samples = DFT_SIZE - DFT_PAD;
+#	else
+	read_samples = 44100 / fps;
+#	endif // HAVE_FFTW3_H
 	if (Config.visualizer_in_stereo)
 		read_samples *= 2;
 	sample_buffer.resize(read_samples);
 	temp_sample_buffer.resize(read_samples);
-	memset(sample_buffer.data(), 0, read_samples*sizeof(int16_t));
+	memset(sample_buffer.data(), 0, sample_buffer.size()*sizeof(int16_t));
+	memset(temp_sample_buffer.data(), 0, sample_buffer.size()*sizeof(int16_t));
 
 #	ifdef HAVE_FFTW3_H
 	m_fftw_results = DFT_SIZE/2+1;
@@ -85,7 +91,6 @@ Visualizer::Visualizer()
 	m_fftw_output = static_cast<fftw_complex *>(fftw_malloc(sizeof(fftw_complex)*m_fftw_results));
 	m_fftw_plan = fftw_plan_dft_r2c_1d(DFT_SIZE, m_fftw_input, m_fftw_output, FFTW_ESTIMATE);
 	dft_logspace.reserve(500);
-	total_bytes_read = 0;
 #	endif // HAVE_FFTW3_H
 }
 
@@ -96,9 +101,10 @@ void Visualizer::switchTo()
 	SetFD();
 	m_timer = boost::posix_time::from_time_t(0);
 	drawHeader();
-	total_bytes_read = 0;
 	memset(sample_buffer.data(), 0, sample_buffer.size()*sizeof(int16_t));
+#	ifdef HAVE_FFTW3_H
 	GenLogspace();
+#	endif // HAVE_FFTW3_H
 }
 
 void Visualizer::resize()
@@ -108,7 +114,9 @@ void Visualizer::resize()
 	w.resize(width, MainHeight);
 	w.moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
+#	ifdef HAVE_FFTW3_H
 	GenLogspace();
+#	endif // HAVE_FFTW3_H
 }
 
 std::wstring Visualizer::title()
@@ -123,28 +131,19 @@ void Visualizer::update()
 
 	// PCM in format 44100:16:1 (for mono visualization) and
 	// 44100:16:2 (for stereo visualization) is supported.
-	// memmove(sample_buffer.data(), sample_buffer.data()+read_samples, sample_buffer.size()-read_samples);
-	ssize_t data = read(m_fifo, temp_sample_buffer.data(),
-	                   read_samples*sizeof(int16_t));
-	if (data < 0) // no data available in fifo
+	const int buf_size = sizeof(int16_t)*read_samples;
+	ssize_t data = read(m_fifo, temp_sample_buffer.data(), buf_size);
+	if (data <= 0) // no data available in fifo
 		return;
 
 	{
-		// create int8_t pointers for artithmetic
-		int8_t *sdata = (int8_t *)sample_buffer.data();
-		int8_t *temp_sdata = (int8_t *)temp_sample_buffer.data();
-		if (total_bytes_read < read_samples*sizeof(int16_t))
-		{
-			memcpy(sdata + total_bytes_read, temp_sdata, std::min((size_t)data, read_samples*sizeof(int16_t)*total_bytes_read));
-			total_bytes_read += data;
-		}
-		else
-		{
-			memmove(sdata, sdata+data, sizeof(int16_t)*read_samples - data);
-			memcpy(sdata + sizeof(int16_t)*read_samples - data, temp_sdata, data);
-		}
+		// create int8_t pointers for arithmetic
+		int8_t *const sdata = (int8_t *)sample_buffer.data();
+		int8_t *const temp_sdata = (int8_t *)temp_sample_buffer.data();
+		int8_t *const sdata_end = sdata + buf_size;
+		memmove(sdata, sdata + data, buf_size - data);
+		memcpy(sdata_end - data, temp_sdata, data);
 	}
-  
 
 	if (m_output_id != -1 && Global::Timer - m_timer > Config.visualizer_sync_interval)
 	{
@@ -180,8 +179,8 @@ void Visualizer::update()
 		drawStereo = &Visualizer::DrawSoundWaveStereo;
 	}
 
-	const ssize_t samples_read = data/sizeof(int16_t);
 #	ifdef HAVE_FFTW3_H
+	// don't scale for spectrum visualizer
 	if (Config.visualizer_type != VisualizerType::Spectrum)
 #	endif // HAVE_FFTW3_H
 	{
@@ -208,13 +207,12 @@ void Visualizer::update()
 		}
 	}
 
-
 	w.clear();
 	if (Config.visualizer_in_stereo)
 	{
-		auto chan_samples = samples_read/2;
+		auto chan_samples = read_samples/2;
 		int16_t buf_left[chan_samples], buf_right[chan_samples];
-		for (ssize_t i = 0, j = 0; i < samples_read; i += 2, ++j)
+		for (ssize_t i = 0, j = 0; i < read_samples; i += 2, ++j)
 		{
 			buf_left[j] = sample_buffer[i];
 			buf_right[j] = sample_buffer[i+1];
@@ -225,7 +223,7 @@ void Visualizer::update()
 	}
 	else
 	{
-		(this->*draw)(sample_buffer.data(), samples_read, 0, w.getHeight());
+		(this->*draw)(sample_buffer.data(), read_samples, 0, w.getHeight());
 	}
 	w.refresh();
 }
