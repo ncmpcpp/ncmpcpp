@@ -291,6 +291,12 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			boundsCheck<std::wstring::size_type>(result.size(), 2, 2);
 			return result;
 	});
+	p.add("visualizer_use_frac_look", &visualizer_use_frac_look, "no", yes_no);
+	p.add("visualizer_frac_look", &visualizer_frac_chars, "▁▂▃▄▅▆▇█", [](std::string s) {
+			auto result = ToWString(std::move(s));
+			boundsCheck<std::wstring::size_type>(result.size(), 8, 8);
+			return result;
+	});
 	p.add("visualizer_color", &visualizer_colors,
 	      "blue, cyan, green, yellow, magenta, red", list_of<NC::FormattedColor>);
 	p.add("system_encoding", &system_encoding, "", [](std::string encoding) {

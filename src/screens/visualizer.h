@@ -37,7 +37,6 @@
 struct Visualizer: Screen<NC::Window>, Tabbable
 {
 	Visualizer();
-	~Visualizer();
 
 	virtual void switchTo() override;
 	virtual void resize() override;
@@ -73,6 +72,7 @@ private:
 	void DrawFrequencySpectrum(int16_t *, ssize_t, size_t, size_t);
 	void DrawFrequencySpectrumStereo(int16_t *, int16_t *, ssize_t, size_t);
 	void ApplyWindow(double *, int16_t *, ssize_t);
+	void GenLogspace();
 	double Bin2Hz(size_t);
 #	endif // HAVE_FFTW3_H
 
@@ -82,6 +82,7 @@ private:
 	int m_fifo;
 	size_t read_samples;
 	std::vector<int16_t> sample_buffer;
+	std::vector<int16_t> temp_sample_buffer;
 	double m_auto_scale_multiplier;
 #	ifdef HAVE_FFTW3_H
 	size_t m_fftw_results;
@@ -95,6 +96,7 @@ private:
 	const double HZ_MAX = 20000;
 	const double GAIN = 0;
 	std::vector<double> dft_logspace;
+	size_t total_bytes_read;
 
 	std::vector<double> m_freq_magnitudes;
 #	endif // HAVE_FFTW3_H
