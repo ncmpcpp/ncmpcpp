@@ -82,8 +82,9 @@ struct Configuration
 	std::string lastfm_preferred_language;
 	std::wstring progressbar;
 	std::wstring visualizer_chars;
-  bool visualizer_use_frac_look;
-	std::wstring visualizer_frac_chars;
+	bool visualizer_smooth_look;
+	bool visualizer_cubic_interp;
+	std::wstring visualizer_smooth_chars;
 
 	std::string pattern;
 

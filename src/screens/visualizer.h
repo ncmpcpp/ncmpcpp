@@ -74,15 +74,16 @@ private:
 	void ApplyWindow(double *, int16_t *, ssize_t);
 	void GenLogspace();
 	double Bin2Hz(size_t);
+	double Interpolate(size_t, size_t);
 #	endif // HAVE_FFTW3_H
 
 	int m_output_id;
 	boost::posix_time::ptime m_timer;
 
 	int m_fifo;
-	size_t read_samples;
-	std::vector<int16_t> sample_buffer;
-	std::vector<int16_t> temp_sample_buffer;
+	size_t m_read_samples;
+	std::vector<int16_t> m_sample_buffer;
+	std::vector<int16_t> m_temp_sample_buffer;
 	double m_auto_scale_multiplier;
 #	ifdef HAVE_FFTW3_H
 	size_t m_fftw_results;
@@ -90,12 +91,13 @@ private:
 	fftw_complex *m_fftw_output;
 	fftw_plan m_fftw_plan;
 	const uint32_t DFT_SIZE = 1<<14;
-	const uint32_t DFT_PAD = DFT_SIZE - 4000;
+	const uint32_t DFT_PAD = DFT_SIZE - (1<<12);
 	const double DYNAMIC_RANGE = 100;
 	const double HZ_MIN = 20;
 	const double HZ_MAX = 20000;
 	const double GAIN = 0;
-	std::vector<double> dft_logspace;
+	std::vector<double> m_dft_logspace;
+	std::vector<std::pair<size_t, double>> m_bar_heights;
 
 	std::vector<double> m_freq_magnitudes;
 #	endif // HAVE_FFTW3_H

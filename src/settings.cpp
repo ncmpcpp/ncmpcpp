@@ -291,8 +291,9 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			boundsCheck<std::wstring::size_type>(result.size(), 2, 2);
 			return result;
 	});
-	p.add("visualizer_use_frac_look", &visualizer_use_frac_look, "no", yes_no);
-	p.add("visualizer_frac_look", &visualizer_frac_chars, "▁▂▃▄▅▆▇█", [](std::string s) {
+	p.add("visualizer_smooth_look", &visualizer_smooth_look, "no", yes_no);
+	p.add("visualizer_cubic_interp", &visualizer_cubic_interp, "yes", yes_no);
+	p.add("visualizer_smooth_chars", &visualizer_smooth_chars, "▁▂▃▄▅▆▇█", [](std::string s) {
 			auto result = ToWString(std::move(s));
 			boundsCheck<std::wstring::size_type>(result.size(), 8, 8);
 			return result;
