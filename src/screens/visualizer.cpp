@@ -68,7 +68,13 @@ const NC::FormattedColor &toColor(size_t number, size_t max, bool wrap = true)
 }
 
 Visualizer::Visualizer()
-: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
+: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border())),
+  DFT_SIZE(Config.visualizer_dft_size),
+  DFT_PAD(Config.visualizer_dft_pad),
+  DYNAMIC_RANGE(Config.visualizer_dynamic_range),
+  HZ_MIN(Config.visualizer_hz_min),
+  HZ_MAX(Config.visualizer_hz_max),
+  GAIN(Config.visualizer_gain)
 {
 	ResetFD();
 #	ifdef HAVE_FFTW3_H

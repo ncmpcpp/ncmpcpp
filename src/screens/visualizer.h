@@ -90,12 +90,12 @@ private:
 	double *m_fftw_input;
 	fftw_complex *m_fftw_output;
 	fftw_plan m_fftw_plan;
-	const uint32_t DFT_SIZE = 1<<14;
-	const uint32_t DFT_PAD = DFT_SIZE - (1<<12);
-	const double DYNAMIC_RANGE = 100;
-	const double HZ_MIN = 20;
-	const double HZ_MAX = 20000;
-	const double GAIN = 0;
+	const uint32_t DFT_SIZE;
+	const uint32_t DFT_PAD;
+	const double DYNAMIC_RANGE;
+	const double HZ_MIN;
+	const double HZ_MAX;
+	const double GAIN;
 	std::vector<double> m_dft_logspace;
 	std::vector<std::pair<size_t, double>> m_bar_heights;
 

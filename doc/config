@@ -94,6 +94,51 @@
 ##
 #visualizer_color = 41, 83, 119, 155, 185, 215, 209, 203, 197, 161
 #
+##
+## Note: The next few visualization options apply to the spectrum visualizer
+##
+#
+## Use unicode block characters for a smoother, more continuous look.
+## This option does not work properly with stereo visualization due to lacking
+## unicode characters
+#
+#visualizer_smooth_look = yes
+#
+## Specify the characters used for smooth look, must be 8 characters long
+#
+#visualizer_smooth_chars =  "▁▂▃▄▅▆▇█"
+#
+## Use cubic interpolation in between DFT bins as a cheaper alternative to
+## raising DFT size
+#
+#visualizer_cubic_interp = yes
+#
+## DFT size, larger values creates potentially smoother output at lower
+## frequencies, at the cost of performance
+#
+#visualizer_dft_size = 16384
+#
+## Number of zeros to pad DFT, must be less than DFT size
+#
+#visualizer_dft_pad = 12288
+#
+## Dynamic range of visualizer in dB, larger dynamic range means a wider range
+## of volumes will be displayed
+#
+#visualizer_dynamic_range = 100
+#
+## Gain of visualizer in dB, larger/smaller values shift bars up/down
+#
+#visualizer_gain = 0
+#
+## Left-most frequency of visualizer in Hz, must be less than HZ MAX
+#
+#visualizer_hz_min = 20
+#
+## Right-most frequency of visualizer in Hz, must be greater than HZ MIN
+#
+#visualizer_hz_max = 20000
+#
 ##### system encoding #####
 ##
 ## ncmpcpp should detect your charset encoding but if it failed to do so, you

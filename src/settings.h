@@ -84,6 +84,12 @@ struct Configuration
 	std::wstring visualizer_chars;
 	bool visualizer_smooth_look;
 	bool visualizer_cubic_interp;
+	uint32_t visualizer_dft_size;
+	uint32_t visualizer_dft_pad;
+	double visualizer_dynamic_range;
+	double visualizer_hz_min;
+	double visualizer_hz_max;
+	double visualizer_gain;
 	std::wstring visualizer_smooth_chars;
 
 	std::string pattern;
