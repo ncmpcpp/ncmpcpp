@@ -327,7 +327,6 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			});
 	p.add("visualizer_smooth_chars", &visualizer_smooth_chars, "▁▂▃▄▅▆▇█", [](std::string s) {
 			auto result = ToWString(std::move(s));
-			boundsCheck<std::wstring::size_type>(result.size(), 8, 8);
 			return result;
 	});
 	p.add("visualizer_color", &visualizer_colors,

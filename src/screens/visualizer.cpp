@@ -509,21 +509,41 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 		for (size_t j = 0; j < h; ++j)
 		{
 			size_t y = flipped ? y_offset+j : y_offset+height-j-1;
-			auto c = toColor(j, height);
+			auto color = toColor(j, height);
 			std::wstring ch;
+			bool reverse = false;
+
+			// select character to draw
 			if (Config.visualizer_smooth_look) {
-				if (j < h-1) {
-					ch = Config.visualizer_smooth_chars[7];
+				// smooth
+				const size_t &size = Config.visualizer_smooth_chars.size();
+				const int idx = static_cast<int>(size*h) % size;
+				if (j < h-1 || idx == size-1) {
+					// full height
+					ch = Config.visualizer_smooth_chars[size-1];
 				} else {
-					ch = Config.visualizer_smooth_chars[static_cast<int>(8*h) % 8];
+					// fractional height
+					if (flipped) {
+						ch = Config.visualizer_smooth_chars[size-idx-2];
+						reverse = true;
+					} else {
+						ch = Config.visualizer_smooth_chars[idx];
+					}
 				}
 			} else  {
+				// default, non-smooth
 				ch = Config.visualizer_chars[1];
 			}
-			w << NC::XY(x, y)
-				<< c
-				<< ch
-				<< NC::FormattedColor::End<>(c);
+
+			// draw character on screen
+			w << NC::XY(x, y);
+			if (reverse) {
+					w << NC::Format::Reverse;
+			}
+			w << color << ch << NC::FormattedColor::End<>(color);
+			if (reverse) {
+					w << NC::Format::NoReverse;
+			}
 		}
 	}
 }

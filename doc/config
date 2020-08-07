@@ -99,12 +99,11 @@
 ##
 #
 ## Use unicode block characters for a smoother, more continuous look.
-## This option does not work properly with stereo visualization due to lacking
-## unicode characters
 #
 #visualizer_smooth_look = yes
 #
-## Specify the characters used for smooth look, must be 8 characters long
+## Specify the characters used for smooth look. Last character should be the
+## full height character, others should be increasing fractional heights
 #
 #visualizer_smooth_chars =  "▁▂▃▄▅▆▇█"
 #
