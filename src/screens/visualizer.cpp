@@ -525,7 +525,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 					// fractional height
 					if (flipped) {
 						ch = Config.visualizer_smooth_chars[size-idx-2];
-						reverse = true;
+						color = NC::FormattedColor(color.color(), {NC::Format::Reverse});
 					} else {
 						ch = Config.visualizer_smooth_chars[idx];
 					}
@@ -536,14 +536,10 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 			}
 
 			// draw character on screen
-			w << NC::XY(x, y);
-			if (reverse) {
-					w << NC::Format::Reverse;
-			}
-			w << color << ch << NC::FormattedColor::End<>(color);
-			if (reverse) {
-					w << NC::Format::NoReverse;
-			}
+			w << NC::XY(x, y)
+			  << color
+			  << ch
+			  << NC::FormattedColor::End<>(color);
 		}
 	}
 }
