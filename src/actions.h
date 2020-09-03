@@ -77,6 +77,7 @@ enum class Type
 	MoveSelectedItemsDown,
 	MoveSelectedItemsTo,
 	Add,
+	Load,
 	SeekForward,
 	SeekBackward,
 	ToggleDisplayMode,
@@ -600,6 +601,15 @@ private:
 struct Add: BaseAction
 {
 	Add(): BaseAction(Type::Add, "add") { }
+	
+private:
+	virtual bool canBeRun() override;
+	virtual void run() override;
+};
+
+struct Load: BaseAction
+{
+	Load(): BaseAction(Type::Load, "load") { }
 	
 private:
 	virtual bool canBeRun() override;
