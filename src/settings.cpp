@@ -244,6 +244,10 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add<void>("mpd_port", nullptr, "6600", [](std::string port) {
 			Mpd.SetPort(verbose_lexical_cast<unsigned>(port));
 		});
+	p.add<void>("mpd_password", nullptr, "", [](std::string password) {
+			if (!password.empty())
+				Mpd.SetPassword(password);
+		});
 	p.add("mpd_music_dir", &mpd_music_dir, "~/music", adjust_directory);
 	p.add("mpd_connection_timeout", &mpd_connection_timeout, "5");
 	p.add("mpd_crossfade_time", &crossfade_time, "5");

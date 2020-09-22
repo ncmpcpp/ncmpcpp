@@ -27,6 +27,8 @@
 #
 #mpd_port = 6600
 #
+#mpd_password = ""
+#
 #mpd_connection_timeout = 5
 #
 ## Needed for tag editor and file operations to work.
