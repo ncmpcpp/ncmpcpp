@@ -430,6 +430,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	});
 	p.add("user_interface", &design, "classic");
 	p.add("data_fetching_delay", &data_fetching_delay, "yes", yes_no);
+	p.add("media_library_hide_album_dates", &media_lib_hide_album_dates, "no", yes_no);
 	p.add("media_library_primary_tag", &media_lib_primary_tag, "artist", [](std::string v) {
 			if (v == "artist")
 				return MPD_TAG_ARTIST;

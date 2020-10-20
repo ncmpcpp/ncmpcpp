@@ -339,6 +339,8 @@
 #
 #media_library_albums_split_by_date = yes
 #
+#media_library_hide_album_dates = no
+#
 ## Available values: wrapped, normal.
 ##
 #default_find_mode = wrapped

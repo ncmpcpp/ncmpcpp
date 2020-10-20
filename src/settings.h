@@ -168,6 +168,7 @@ struct Configuration
 	bool visualizer_in_stereo;
 	bool data_fetching_delay;
 	bool media_library_sort_by_mtime;
+    bool media_lib_hide_album_dates;
 	bool tag_editor_extended_numeration;
 	bool discard_colors_if_item_is_selected;
 	bool store_lyrics_in_song_dir;
