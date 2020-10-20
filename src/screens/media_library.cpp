@@ -1115,7 +1115,9 @@ std::string AlbumToString(const AlbumEntry &ae)
 					result += ae.entry().tag();
 				result += " - ";
 			}
-		}if (Config.media_lib_primary_tag != MPD_TAG_DATE && !Config.media_lib_hide_album_dates && !ae.entry().date().empty())
+		}
+
+		if (Config.media_lib_primary_tag != MPD_TAG_DATE && !Config.media_lib_hide_album_dates && !ae.entry().date().empty())
 			result += "(" + ae.entry().date() + ") ";
 		result += ae.entry().album().empty() ? "<no album>" : ae.entry().album();
 	}
