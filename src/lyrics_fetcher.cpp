@@ -23,6 +23,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <numeric>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -185,11 +186,29 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist,
 		result.second = msgNotFound;
 		return result;
 	}
-	
+
 	data = unescapeHtmlUtf8(urls[0]);
-	
+
 	URL = data.c_str();
-	return LyricsFetcher::fetch("", "");
+
+	std::string data2;
+	CURLcode code2 = Curl::perform(data2, URL, google_url, true);
+
+	if (code2 != CURLE_OK) {
+		result.second = curl_easy_strerror(code2);
+		return result;
+	}
+
+	{
+		auto content = getContent(regex(), data2);
+		auto lyricsStr = std::accumulate(content.begin(), content.end(), std::string(""));
+		postProcess(lyricsStr);
+		result.first = true;
+		result.second = lyricsStr;
+	}
+
+	return result;
+
 }
 
 bool GoogleLyricsFetcher::isURLOk(const std::string &url)
