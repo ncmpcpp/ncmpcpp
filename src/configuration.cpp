@@ -156,7 +156,6 @@ bool configure(int argc, char **argv)
 		if (vm.count("test-lyrics-fetchers"))
 		{
 			std::vector<std::tuple<std::string, std::string, std::string>> fetcher_data = {
-				std::make_tuple("lyricwiki", "rihanna", "umbrella"),
 				std::make_tuple("azlyrics", "rihanna", "umbrella"),
 				std::make_tuple("genius", "rihanna", "umbrella"),
 				std::make_tuple("sing365", "rihanna", "umbrella"),
