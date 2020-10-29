@@ -29,6 +29,7 @@
   for potentially improved bottom part of the spectrum visualizer in terminals
   with transparent background.
 * Add support for fetching lyrics from tags.
+* Add `exclude_pattern` option to a configuration file.
 
 # ncmpcpp-0.9.2 (2021-01-24)
 * Revert suppression of output of all external commands as that makes e.g album

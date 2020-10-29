@@ -468,13 +468,15 @@ void MediaLibrary::update()
 		sunfilter_songs.set(ReapplyFilter::Yes, true);
 		auto &album = Albums.current()->value();
 		size_t idx = 0;
+		boost::regex re(Config.exclude_pattern);
 		for (MPD::SongIterator s = getSongsFromAlbum(album), end;
 		     s != end; ++s, ++idx)
 		{
 			if (idx < Songs.size())
 				Songs[idx].value() = std::move(*s);
 			else
-				Songs.addItem(std::move(*s));
+				if (Config.exclude_pattern.empty() || !boost::regex_match(s->getURI(), re))
+					Songs.addItem(std::move(*s));
 		};
 		if (idx < Songs.size())
 			Songs.resizeList(idx);
