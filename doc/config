@@ -37,9 +37,14 @@
 #
 #mpd_crossfade_time = 5
 #
-# Exclude pattern for random song action
-# http://www.boost.org/doc/libs/1_46_1/libs/regex/doc/html/boost_regex/syntax/perl_syntax.html
+# Exclude pattern for random song action. Applied to song's file path.
+# http://www.boost.org/doc/libs/1_83_0/libs/regex/doc/html/boost_regex/syntax/perl_syntax.html
 #random_exclude_pattern = "^(temp|midi_songs).*"
+#
+# Exclude pattern for random song/tag action, search engine, media library (but not browser!)
+# Applied to song's file path.
+# http://www.boost.org/doc/libs/1_83_0/libs/regex/doc/html/boost_regex/syntax/perl_syntax.html
+#exclude_pattern = "^(temp|incoming)/.*"
 #
 ##### music visualizer #####
 ##
