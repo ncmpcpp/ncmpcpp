@@ -41,6 +41,9 @@
 # http://www.boost.org/doc/libs/1_46_1/libs/regex/doc/html/boost_regex/syntax/perl_syntax.html
 #random_exclude_pattern = "^(temp|midi_songs).*"
 #
+# Exclude pattern for whole database
+#db_exclude_pattern = "^(temp|incoming)/.*"
+#
 ##### music visualizer #####
 ##
 ## In order to make music visualizer work with MPD you need to use the fifo
