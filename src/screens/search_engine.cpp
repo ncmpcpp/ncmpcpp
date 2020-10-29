@@ -470,8 +470,10 @@ void SearchEngine::Search()
 			Mpd.AddSearch(MPD_TAG_DATE, itsConstraints[9]);
 		if (!itsConstraints[10].empty())
 			Mpd.AddSearch(MPD_TAG_COMMENT, itsConstraints[10]);
+		boost::regex re(Config.exclude_pattern);
 		for (MPD::SongIterator s = Mpd.CommitSearchSongs(), end; s != end; ++s)
-			w.addItem(std::move(*s));
+			if (Config.exclude_pattern.empty() || !boost::regex_match(s->getURI(), re))
+				w.addItem(std::move(*s));
 		return;
 	}
 
@@ -510,6 +512,7 @@ void SearchEngine::Search()
 	}
 
 	LocaleStringComparison cmp(std::locale(), Config.ignore_leading_the);
+	boost::regex re(Config.exclude_pattern);
 	for (; s != end; ++s)
 	{
 		bool any_found = true, found = true;
@@ -587,7 +590,8 @@ void SearchEngine::Search()
 		}
 		
 		if (any_found && found)
-			w.addItem(*s);
+			if (Config.exclude_pattern.empty() || !boost::regex_match(s->getURI(), re))
+				w.addItem(*s);
 	}
 }
 

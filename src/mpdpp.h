@@ -558,8 +558,8 @@ struct Connection
 	
 	int AddSong(const std::string &, int = -1); // returns id of added song
 	int AddSong(const Song &, int = -1); // returns id of added song
-	bool AddRandomTag(mpd_tag_type, size_t, std::mt19937 &rng);
-	bool AddRandomSongs(size_t number, const std::string &random_exclude_pattern, std::mt19937 &rng);
+	bool AddRandomTag(mpd_tag_type, size_t, const std::string &exclude_pattern, std::mt19937 &rng);
+	bool AddRandomSongs(size_t number, const std::string &random_exclude_pattern, const std::string &exclude_pattern, std::mt19937 &rng);
 	bool Add(const std::string &path);
 	void Delete(unsigned int pos);
 	void DeleteRange(unsigned begin, unsigned end);

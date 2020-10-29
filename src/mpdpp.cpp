@@ -581,7 +581,7 @@ bool Connection::Add(const std::string &path)
 	return result;
 }
 
-bool Connection::AddRandomTag(mpd_tag_type tag, size_t number, std::mt19937 &rng)
+bool Connection::AddRandomTag(mpd_tag_type tag, size_t number, const std::string &exclude_pattern, std::mt19937 &rng)
 {
 	std::vector<std::string> tags(
 		std::make_move_iterator(GetList(tag)),
@@ -592,6 +592,7 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number, std::mt19937 &rng
 
 	std::shuffle(tags.begin(), tags.end(), rng);
 	auto it = tags.begin();
+	boost::regex re(exclude_pattern);
 	for (size_t i = 0; i < number && it != tags.end(); ++i)
 	{
 		StartSearch(true);
@@ -602,13 +603,14 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number, std::mt19937 &rng
 			paths.push_back(s->getURI());
 		StartCommandsList();
 		for (const auto &path : paths)
-			AddSong(path);
+			if (exclude_pattern.empty() || !boost::regex_match(path, re))
+				AddSong(path);
 		CommitCommandsList();
 	}
 	return true;
 }
 
-bool Connection::AddRandomSongs(size_t number, const std::string &random_exclude_pattern, std::mt19937 &rng)
+bool Connection::AddRandomSongs(size_t number, const std::string &random_exclude_pattern, const std::string &exclude_pattern, std::mt19937 &rng)
 {
 	prechecksNoCommandsList();
 	std::vector<std::string> files;
@@ -620,7 +622,7 @@ bool Connection::AddRandomSongs(size_t number, const std::string &random_exclude
 	}
 	mpd_response_finish(m_connection.get());
 	checkErrors();
-	
+
 	if (number > files.size())
 	{
 		//if (itsErrorHandler)
@@ -633,8 +635,10 @@ bool Connection::AddRandomSongs(size_t number, const std::string &random_exclude
 		StartCommandsList();
 		auto it = files.begin();
 		boost::regex re(random_exclude_pattern);
+		boost::regex re2(exclude_pattern);
 		for (size_t i = 0; i < number && it != files.end(); ++it) {
-			if (random_exclude_pattern.empty() || !boost::regex_match((*it), re)) {
+			if ((random_exclude_pattern.empty() || !boost::regex_match((*it), re))
+			&&  (exclude_pattern.empty() || !boost::regex_match((*it), re2))) {
 				AddSong(*it);
 				i++;
 			}
