@@ -948,6 +948,8 @@ Key::Type Window::getInputChar(int key)
 			m_mouse_event.y = (raw_y - 33) & 0xff;
 			return define_mouse_event(key);
 		}
+		case 'P': // st
+			return Key::Delete;
 		case 'Z':
 			return Key::Shift | Key::Tab;
 		case '[': // F1 to F5 in tty
