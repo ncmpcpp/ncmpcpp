@@ -69,7 +69,9 @@ const NC::FormattedColor &toColor(size_t number, size_t max, bool wrap = true)
 }
 
 Visualizer::Visualizer()
-: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border())),
+: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
+#	ifdef HAVE_FFTW3_H
+	,
   DFT_SIZE(1 << Config.visualizer_spectrum_dft_size),
   DFT_PAD(std::max(0, (1 << Config.visualizer_spectrum_dft_size) - (1 << (Config.visualizer_spectrum_dft_size - 2)))),
   DYNAMIC_RANGE(100),
@@ -77,6 +79,7 @@ Visualizer::Visualizer()
   HZ_MAX(Config.visualizer_spectrum_hz_max),
   GAIN(0),
   SMOOTH_CHARS(ToWString("▁▂▃▄▅▆▇█"))
+#endif
 {
 	ResetFD();
 #	ifdef HAVE_FFTW3_H
