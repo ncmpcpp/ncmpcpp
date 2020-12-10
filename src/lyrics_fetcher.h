@@ -55,20 +55,6 @@ std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher);
 
 /**********************************************************************/
 
-struct LyricwikiFetcher : public LyricsFetcher
-{
-	virtual const char *name() const override { return "lyricwiki.com"; }
-	virtual Result fetch(const std::string &artist, const std::string &title) override;
-	
-protected:
-	virtual const char *urlTemplate() const override { return "http://lyrics.wikia.com/api.php?action=lyrics&fmt=xml&func=getSong&artist=%artist%&song=%title%"; }
-	virtual const char *regex() const override { return "<url>(.*?)</url>"; }
-	
-	virtual bool notLyrics(const std::string &data) const override;
-};
-
-/**********************************************************************/
-
 struct GoogleLyricsFetcher : public LyricsFetcher
 {
 	virtual Result fetch(const std::string &artist, const std::string &title);
