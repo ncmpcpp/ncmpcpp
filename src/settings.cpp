@@ -291,44 +291,24 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			boundsCheck<std::wstring::size_type>(result.size(), 2, 2);
 			return result;
 	});
-	p.add("visualizer_smooth_look", &visualizer_smooth_look, "no", yes_no);
-	p.add("visualizer_cubic_interp", &visualizer_cubic_interp, "yes", yes_no);
-	p.add("visualizer_dft_size", &visualizer_dft_size,
-			"16384", [](std::string v) {
+	p.add("visualizer_autoscale", &visualizer_autoscale, "yes", yes_no);
+	p.add("visualizer_spectrum_smooth_look", &visualizer_spectrum_smooth_look, "no", yes_no);
+	p.add("visualizer_spectrum_dft_size", &visualizer_spectrum_dft_size,
+			"14", [](std::string v) {
 			return verbose_lexical_cast<uint32_t>(v);
 			});
-	p.add("visualizer_dft_pad", &visualizer_dft_pad,
-			"12288", [](std::string v) {
-			auto result = verbose_lexical_cast<uint32_t>(v);
-			upperBoundCheck<uint32_t>(result, Config.visualizer_dft_size-1);
-			return result;
-			});
-	p.add("visualizer_dynamic_range", &visualizer_dynamic_range,
-			"100", [](std::string v) {
-			auto result = verbose_lexical_cast<double>(v);
-			lowerBoundCheck<double>(result, 0);
-			return result;
-			});
-	p.add("visualizer_hz_min", &visualizer_hz_min,
+	p.add("visualizer_spectrum_hz_min", &visualizer_spectrum_hz_min,
 			"20", [](std::string v) {
 			auto result = verbose_lexical_cast<double>(v);
 			lowerBoundCheck<double>(result, 1);
 			return result;
 			});
-	p.add("visualizer_hz_max", &visualizer_hz_max,
+	p.add("visualizer_spectrum_hz_max", &visualizer_spectrum_hz_max,
 			"20000", [](std::string v) {
 			auto result = verbose_lexical_cast<double>(v);
-			lowerBoundCheck<double>(result, Config.visualizer_hz_min+1);
+			lowerBoundCheck<double>(result, Config.visualizer_spectrum_hz_min+1);
 			return result;
 			});
-	p.add("visualizer_gain", &visualizer_gain,
-			"0", [](std::string v) {
-			return verbose_lexical_cast<double>(v);
-			});
-	p.add("visualizer_smooth_chars", &visualizer_smooth_chars, "▁▂▃▄▅▆▇█", [](std::string s) {
-			auto result = ToWString(std::move(s));
-			return result;
-	});
 	p.add("visualizer_color", &visualizer_colors,
 	      "blue, cyan, green, yellow, magenta, red", list_of<NC::FormattedColor>);
 	p.add("system_encoding", &system_encoding, "", [](std::string encoding) {

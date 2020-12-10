@@ -99,31 +99,19 @@ Defines visualizer's look (string has to be exactly 2 characters long: first one
 .B visualizer_color = COLORS
 Comma separated list of colors to be used in music visualization.
 .TP
-.B visualizer_smooth_look = yes/no
+.B visualizer_autoscale = yes/no
+Automatically scale visualizer size.
+.TP
+.B visualizer_spectrum_smooth_look = yes/no
 For spectrum visualizer, use unicode block characters for a smoother, more continuous look.
 .TP
-.B visualizer_smooth_chars = STRING
-For spectrum visualizer, specify the characters used for smooth look. Last character should be the full height character, others should be increasing fractional heights.
+.B visualizer_spectrum_dft_size = NUMBER
+For spectrum visualizer, DFT size, larger values creates potentially smoother output at lower frequencies, at the cost of performance. Internally, the actual DFT size is 2^(visualizer_dft_size), with the last 2^(visualizer_dft_size-2) of it padded with zeros.
 .TP
-.B visualizer_cubic_interp = yes/no
-For spectrum visualizer, use cubic interpolation in between DFT bins as a cheaper alternative to raising DFT size.
-.TP
-.B visualizer_dft_size = NUMBER
-For spectrum visualizer, DFT size, larger values creates potentially smoother output at lower frequencies, at the cost of performance.
-.TP
-.B visualizer_dft_pad = NUMBER
-For spectrum visualizer, number of zeros to pad DFT, must be less than DFT size.
-.TP
-.B visualizer_dynamic_range = dB
-For spectrum visualizer, dynamic range of visualizer, larger dynamic range means a wider range of volumes will be displayed.
-.TP
-.B visualizer_gain = dB
-For spectrum visualizer, gain of visualizer, larger/smaller values shift bars up/down.
-.TP
-.B visualizer_hz_min = Hz
+.B visualizer_spectrum_hz_min = Hz
 For spectrum visualizer, left-most frequency of visualizer, must be less than HZ MAX.
 .TP
-.B visualizer_hz_max = Hz
+.B visualizer_spectrum_hz_max = Hz
 For spectrum visualizer, right-most frequency of visualizer, must be greater than HZ MIN.
 .TP
 .B system_encoding = ENCODING

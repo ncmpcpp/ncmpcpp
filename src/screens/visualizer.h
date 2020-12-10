@@ -96,6 +96,7 @@ private:
 	const double HZ_MIN;
 	const double HZ_MAX;
 	const double GAIN;
+	const std::wstring SMOOTH_CHARS;
 	std::vector<double> m_dft_logspace;
 	std::vector<std::pair<size_t, double>> m_bar_heights;
 

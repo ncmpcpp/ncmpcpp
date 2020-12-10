@@ -41,6 +41,7 @@
 #include "screens/screen_switcher.h"
 #include "status.h"
 #include "enums.h"
+#include "utility/wide_string.h"
 
 using Samples = std::vector<int16_t>;
 
@@ -69,12 +70,13 @@ const NC::FormattedColor &toColor(size_t number, size_t max, bool wrap = true)
 
 Visualizer::Visualizer()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border())),
-  DFT_SIZE(Config.visualizer_dft_size),
-  DFT_PAD(Config.visualizer_dft_pad),
-  DYNAMIC_RANGE(Config.visualizer_dynamic_range),
-  HZ_MIN(Config.visualizer_hz_min),
-  HZ_MAX(Config.visualizer_hz_max),
-  GAIN(Config.visualizer_gain)
+  DFT_SIZE(1 << Config.visualizer_spectrum_dft_size),
+  DFT_PAD(std::max(0, (1 << Config.visualizer_spectrum_dft_size) - (1 << (Config.visualizer_spectrum_dft_size - 2)))),
+  DYNAMIC_RANGE(100),
+  HZ_MIN(Config.visualizer_spectrum_hz_min),
+  HZ_MAX(Config.visualizer_spectrum_hz_max),
+  GAIN(0),
+  SMOOTH_CHARS(ToWString("▁▂▃▄▅▆▇█"))
 {
 	ResetFD();
 #	ifdef HAVE_FFTW3_H
@@ -167,6 +169,7 @@ void Visualizer::update()
 #	ifdef HAVE_FFTW3_H
 	if (Config.visualizer_type == VisualizerType::Spectrum)
 	{
+		m_read_samples = DFT_SIZE - DFT_PAD;
 		draw = &Visualizer::DrawFrequencySpectrum;
 		drawStereo = &Visualizer::DrawFrequencySpectrumStereo;
 	}
@@ -174,25 +177,26 @@ void Visualizer::update()
 #	endif // HAVE_FFTW3_H
 	if (Config.visualizer_type == VisualizerType::WaveFilled)
 	{
+		m_read_samples = 44100 / fps;
 		draw = &Visualizer::DrawSoundWaveFill;
 		drawStereo = &Visualizer::DrawSoundWaveFillStereo;
 	}
 	else if (Config.visualizer_type == VisualizerType::Ellipse)
 	{
+		m_read_samples = 44100 / fps;
 		draw = &Visualizer::DrawSoundEllipse;
 		drawStereo = &Visualizer::DrawSoundEllipseStereo;
 	}
 	else
 	{
+		m_read_samples = 44100 / fps;
 		draw = &Visualizer::DrawSoundWave;
 		drawStereo = &Visualizer::DrawSoundWaveStereo;
 	}
+	m_sample_buffer.resize(m_read_samples);
+	m_temp_sample_buffer.resize(m_read_samples);
 
-#	ifdef HAVE_FFTW3_H
-	// don't scale for spectrum visualizer
-	if (Config.visualizer_type != VisualizerType::Spectrum)
-#	endif // HAVE_FFTW3_H
-	{
+	if (Config.visualizer_autoscale) {
 		m_auto_scale_multiplier += 1.0/fps;
 		for (auto &sample : m_sample_buffer)
 		{
@@ -514,20 +518,20 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 			bool reverse = false;
 
 			// select character to draw
-			if (Config.visualizer_smooth_look) {
+			if (Config.visualizer_spectrum_smooth_look) {
 				// smooth
-				const size_t &size = Config.visualizer_smooth_chars.size();
+				const size_t &size = SMOOTH_CHARS.size();
 				const int idx = static_cast<int>(size*h) % size;
 				if (j < h-1 || idx == size-1) {
 					// full height
-					ch = Config.visualizer_smooth_chars[size-1];
+					ch = SMOOTH_CHARS[size-1];
 				} else {
 					// fractional height
 					if (flipped) {
-						ch = Config.visualizer_smooth_chars[size-idx-2];
+						ch = SMOOTH_CHARS[size-idx-2];
 						color = NC::FormattedColor(color.color(), {NC::Format::Reverse});
 					} else {
-						ch = Config.visualizer_smooth_chars[idx];
+						ch = SMOOTH_CHARS[idx];
 					}
 				}
 			} else  {
@@ -554,44 +558,44 @@ double Visualizer::Interpolate(size_t x, size_t h_idx)
 {
 	const double &x_next = m_bar_heights[h_idx].first;
 	const double &h_next = m_bar_heights[h_idx].second;
-	if (Config.visualizer_cubic_interp) {
-		double dh = 0;
-		if (h_idx == 0) {
-			// no data points on left, linear extrap
-			if (h_idx < m_bar_heights.size()-1) {
-				const double &x_next2 = m_bar_heights[h_idx+1].first;
-				const double &h_next2 = m_bar_heights[h_idx+1].second;
-				dh = (h_next2 - h_next) / (x_next2 - x_next);
-			}
-			return h_next - dh*(x_next-x);
-		} else if (h_idx == 1) {
-			// one data point on left, linear interp
-			const double &x_prev = m_bar_heights[h_idx-1].first;
-			const double &h_prev = m_bar_heights[h_idx-1].second;
-			dh = (h_next - h_prev) / (x_next - x_prev);
-			return h_next - dh*(x_next-x);
-		} else if (h_idx < m_bar_heights.size()-1) {
-			// two data points on both sides, cubic interp
-			// see https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Interpolation_on_an_arbitrary_interval
-			const double &x_prev2 = m_bar_heights[h_idx-2].first;
-			const double &h_prev2 = m_bar_heights[h_idx-2].second;
-			const double &x_prev = m_bar_heights[h_idx-1].first;
-			const double &h_prev = m_bar_heights[h_idx-1].second;
+
+	double dh = 0;
+	if (h_idx == 0) {
+		// no data points on left, linear extrap
+		if (h_idx < m_bar_heights.size()-1) {
 			const double &x_next2 = m_bar_heights[h_idx+1].first;
 			const double &h_next2 = m_bar_heights[h_idx+1].second;
-
-			const double m0 = (h_prev - h_prev2) / (x_prev - x_prev2);
-			const double m1 = (h_next2 - h_next) / (x_next2 - x_next);
-			const double t = (x - x_prev) / (x_next - x_prev);
-			const double h00 = 2*t*t*t - 3*t*t + 1;
-			const double h10 = t*t*t - 2*t*t + t;
-			const double h01 = -2*t*t*t + 3*t*t;
-			const double h11 = t*t*t - t*t;
-
-			return h00*h_prev + h10*(x_next-x_prev)*m0 + h01*h_next + h11*(x_next-x_prev)*m1;
+			dh = (h_next2 - h_next) / (x_next2 - x_next);
 		}
-		// less than two data points on right, no interp, should never happen unless VERY low DFT size
+		return h_next - dh*(x_next-x);
+	} else if (h_idx == 1) {
+		// one data point on left, linear interp
+		const double &x_prev = m_bar_heights[h_idx-1].first;
+		const double &h_prev = m_bar_heights[h_idx-1].second;
+		dh = (h_next - h_prev) / (x_next - x_prev);
+		return h_next - dh*(x_next-x);
+	} else if (h_idx < m_bar_heights.size()-1) {
+		// two data points on both sides, cubic interp
+		// see https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Interpolation_on_an_arbitrary_interval
+		const double &x_prev2 = m_bar_heights[h_idx-2].first;
+		const double &h_prev2 = m_bar_heights[h_idx-2].second;
+		const double &x_prev = m_bar_heights[h_idx-1].first;
+		const double &h_prev = m_bar_heights[h_idx-1].second;
+		const double &x_next2 = m_bar_heights[h_idx+1].first;
+		const double &h_next2 = m_bar_heights[h_idx+1].second;
+
+		const double m0 = (h_prev - h_prev2) / (x_prev - x_prev2);
+		const double m1 = (h_next2 - h_next) / (x_next2 - x_next);
+		const double t = (x - x_prev) / (x_next - x_prev);
+		const double h00 = 2*t*t*t - 3*t*t + 1;
+		const double h10 = t*t*t - 2*t*t + t;
+		const double h01 = -2*t*t*t + 3*t*t;
+		const double h11 = t*t*t - t*t;
+
+		return h00*h_prev + h10*(x_next-x_prev)*m0 + h01*h_next + h11*(x_next-x_prev)*m1;
 	}
+
+	// less than two data points on right, no interp, should never happen unless VERY low DFT size
 	return h_next;
 }
 
