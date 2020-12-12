@@ -53,6 +53,7 @@ Visualizer *myVisualizer;
 namespace {
 
 const int fps = 25;
+const uint32_t MIN_DFT_SIZE = 14;
 
 // toColor: a scaling function for coloring. For numbers 0 to max this function
 // returns a coloring from the lowest color to the highest, and colors will not
@@ -72,8 +73,8 @@ Visualizer::Visualizer()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
 #	ifdef HAVE_FFTW3_H
 	,
-  DFT_SIZE(1 << Config.visualizer_spectrum_dft_size),
-  DFT_PAD(std::max(0, (1 << Config.visualizer_spectrum_dft_size) - (1 << (Config.visualizer_spectrum_dft_size - 2)))),
+  DFT_NONZERO_SIZE(1 << Config.visualizer_spectrum_dft_size),
+  DFT_TOTAL_SIZE(Config.visualizer_spectrum_dft_size >= MIN_DFT_SIZE ? 1 << (Config.visualizer_spectrum_dft_size) : 1<<MIN_DFT_SIZE),
   DYNAMIC_RANGE(100),
   HZ_MIN(Config.visualizer_spectrum_hz_min),
   HZ_MAX(Config.visualizer_spectrum_hz_max),
@@ -83,7 +84,7 @@ Visualizer::Visualizer()
 {
 	ResetFD();
 #	ifdef HAVE_FFTW3_H
-	m_read_samples = DFT_SIZE - DFT_PAD;
+	m_read_samples = DFT_NONZERO_SIZE;
 #	else
 	m_read_samples = 44100 / fps;
 #	endif // HAVE_FFTW3_H
@@ -95,12 +96,12 @@ Visualizer::Visualizer()
 	memset(m_temp_sample_buffer.data(), 0, m_sample_buffer.size()*sizeof(int16_t));
 
 #	ifdef HAVE_FFTW3_H
-	m_fftw_results = DFT_SIZE/2+1;
+	m_fftw_results = DFT_TOTAL_SIZE/2+1;
 	m_freq_magnitudes.resize(m_fftw_results);
-	m_fftw_input = static_cast<double *>(fftw_malloc(sizeof(double)*DFT_SIZE));
-	memset(m_fftw_input, 0, sizeof(double)*DFT_SIZE);
+	m_fftw_input = static_cast<double *>(fftw_malloc(sizeof(double)*DFT_TOTAL_SIZE));
+	memset(m_fftw_input, 0, sizeof(double)*DFT_TOTAL_SIZE);
 	m_fftw_output = static_cast<fftw_complex *>(fftw_malloc(sizeof(fftw_complex)*m_fftw_results));
-	m_fftw_plan = fftw_plan_dft_r2c_1d(DFT_SIZE, m_fftw_input, m_fftw_output, FFTW_ESTIMATE);
+	m_fftw_plan = fftw_plan_dft_r2c_1d(DFT_TOTAL_SIZE, m_fftw_input, m_fftw_output, FFTW_ESTIMATE);
 	m_dft_logspace.reserve(500);
 	m_bar_heights.reserve(100);
 #	endif // HAVE_FFTW3_H
@@ -172,7 +173,7 @@ void Visualizer::update()
 #	ifdef HAVE_FFTW3_H
 	if (Config.visualizer_type == VisualizerType::Spectrum)
 	{
-		m_read_samples = DFT_SIZE - DFT_PAD;
+		m_read_samples = DFT_NONZERO_SIZE;
 		draw = &Visualizer::DrawFrequencySpectrum;
 		drawStereo = &Visualizer::DrawFrequencySpectrumStereo;
 	}
@@ -451,7 +452,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 		m_freq_magnitudes[i] = sqrt(
 			m_fftw_output[i][0]*m_fftw_output[i][0]
 		+	m_fftw_output[i][1]*m_fftw_output[i][1]
-		) / (DFT_SIZE - DFT_PAD);
+		) / (DFT_NONZERO_SIZE);
 
 	const size_t win_width = w.getWidth();
 
@@ -613,14 +614,14 @@ void Visualizer::ApplyWindow(double *output, int16_t *input, ssize_t samples)
 	const double pi = boost::math::constants::pi<double>();
 	for (unsigned i = 0; i < samples; ++i)
 	{
-		double window = a0 - a1*cos(2*pi*i/(DFT_SIZE-DFT_PAD-1)) + a2*cos(4*pi*i/(DFT_SIZE-DFT_PAD-1));
+		double window = a0 - a1*cos(2*pi*i/(DFT_NONZERO_SIZE-1)) + a2*cos(4*pi*i/(DFT_NONZERO_SIZE-1));
 		output[i] = window * input[i] / INT16_MAX;
 	}
 }
 
 double Visualizer::Bin2Hz(size_t bin)
 {
-	return bin*44100/DFT_SIZE;
+	return bin*44100/DFT_TOTAL_SIZE;
 }
 
 // Generate log-scaled vector of frequencies from HZ_MIN to HZ_MAX

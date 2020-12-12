@@ -90,8 +90,8 @@ private:
 	double *m_fftw_input;
 	fftw_complex *m_fftw_output;
 	fftw_plan m_fftw_plan;
-	const uint32_t DFT_SIZE;
-	const uint32_t DFT_PAD;
+	const uint32_t DFT_NONZERO_SIZE;
+	const uint32_t DFT_TOTAL_SIZE;
 	const double DYNAMIC_RANGE;
 	const double HZ_MIN;
 	const double HZ_MAX;

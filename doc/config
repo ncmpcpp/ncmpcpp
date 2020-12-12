@@ -99,44 +99,25 @@
 ##
 #
 ## Use unicode block characters for a smoother, more continuous look.
+## This will override the visualizer_look option. With transparent terminals
+## and visualizer_in_stereo set, artifacts may be visible on the bottom half of
+## the visualization.
 #
-#visualizer_smooth_look = yes
+#visualizer_spectrum_smooth_look = yes
 #
-## Specify the characters used for smooth look. Last character should be the
-## full height character, others should be increasing fractional heights
+## A value between 0 and 5 inclusive. Specifying a larger value makes the
+## visualizer look at a larger slice of time, which results less jumpy
+## visualizer output.
 #
-#visualizer_smooth_chars =  "▁▂▃▄▅▆▇█"
-#
-## Use cubic interpolation in between DFT bins as a cheaper alternative to
-## raising DFT size
-#
-#visualizer_cubic_interp = yes
-#
-## DFT size, larger values creates potentially smoother output at lower
-## frequencies, at the cost of performance
-#
-#visualizer_dft_size = 16384
-#
-## Number of zeros to pad DFT, must be less than DFT size
-#
-#visualizer_dft_pad = 12288
-#
-## Dynamic range of visualizer in dB, larger dynamic range means a wider range
-## of volumes will be displayed
-#
-#visualizer_dynamic_range = 100
-#
-## Gain of visualizer in dB, larger/smaller values shift bars up/down
-#
-#visualizer_gain = 0
+#visualizer_spectrum_dft_size = 2
 #
 ## Left-most frequency of visualizer in Hz, must be less than HZ MAX
 #
-#visualizer_hz_min = 20
+#visualizer_spectrum_hz_min = 20
 #
 ## Right-most frequency of visualizer in Hz, must be greater than HZ MIN
 #
-#visualizer_hz_max = 20000
+#visualizer_spectrum_hz_max = 20000
 #
 ##### system encoding #####
 ##
