@@ -294,10 +294,10 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("visualizer_autoscale", &visualizer_autoscale, "yes", yes_no);
 	p.add("visualizer_spectrum_smooth_look", &visualizer_spectrum_smooth_look, "yes", yes_no);
 	p.add("visualizer_spectrum_dft_size", &visualizer_spectrum_dft_size,
-			"12", [](std::string v) {
+			"2", [](std::string v) {
       uint32_t result = verbose_lexical_cast<uint32_t>(v);
-      boundsCheck<uint32_t>(result, 0, 5);
-			return result + 12;
+      boundsCheck<uint32_t>(result, 0, 4);
+			return result + 14;
 			});
 	p.add("visualizer_spectrum_hz_min", &visualizer_spectrum_hz_min,
 			"20", [](std::string v) {

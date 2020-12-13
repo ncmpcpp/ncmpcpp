@@ -95,7 +95,7 @@
 #visualizer_color = 41, 83, 119, 155, 185, 215, 209, 203, 197, 161
 #
 ##
-## Note: The next few visualization options apply to the spectrum visualizer
+## Note: The next few visualization options apply to the spectrum visualizer.
 ##
 #
 ## Use unicode block characters for a smoother, more continuous look.
@@ -105,8 +105,8 @@
 #
 #visualizer_spectrum_smooth_look = yes
 #
-## A value between 0 and 5 inclusive. Specifying a larger value makes the
-## visualizer look at a larger slice of time, which results less jumpy
+## A value between 0 and 4 inclusive. Specifying a larger value makes the
+## visualizer look at a larger slice of time, which results in less jumpy
 ## visualizer output.
 #
 #visualizer_spectrum_dft_size = 2
