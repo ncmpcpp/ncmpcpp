@@ -52,7 +52,7 @@ Visualizer *myVisualizer;
 
 namespace {
 
-const int fps = 25;
+const int fps = 30;
 const uint32_t MIN_DFT_SIZE = 14;
 
 // toColor: a scaling function for coloring. For numbers 0 to max this function
