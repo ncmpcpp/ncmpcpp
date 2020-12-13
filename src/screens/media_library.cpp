@@ -79,10 +79,8 @@ MPD::SongIterator getSongsFromAlbum(const AlbumEntry &album)
 	if (!album.isAllTracksEntry())
 	{
 		Mpd.AddSearch(MPD_TAG_ALBUM, album.entry().album());
-		if(!isAlbumOnly) {
-			if (Config.media_library_albums_split_by_date)
-				Mpd.AddSearch(MPD_TAG_DATE, album.entry().date());
-		}
+		if (Config.media_library_albums_split_by_date)
+			Mpd.AddSearch(MPD_TAG_DATE, album.entry().date());
 	}
 	return Mpd.CommitSearchSongs();
 }
@@ -310,28 +308,15 @@ void MediaLibrary::update()
 				unsigned idx = 0;
 				while (!(tag = s->get(Config.media_lib_primary_tag, idx++)).empty())
 				{
-					if (isAlbumOnly) {
-						auto key = std::make_tuple(
-							"",
-							s->getAlbum(),
-							"");
-						auto it = albums.find(key);
-						if (it == albums.end())
-							albums[std::move(key)] = s->getMTime();
-						else
-							it->second = s->getMTime();
-					}
-					else {
-						auto key = std::make_tuple(
-							std::move(tag),
-							s->getAlbum(),
-							Date_(s->getDate()));
-						auto it = albums.find(key);
-						if (it == albums.end())
-							albums[std::move(key)] = s->getMTime();
-						else
-							it->second = s->getMTime();
-					}
+					auto key = std::make_tuple(
+						isAlbumOnly ? "" : std::move(tag),
+						s->getAlbum(),
+						Date_(s->getDate()));
+					auto it = albums.find(key);
+					if (it == albums.end())
+						albums[std::move(key)] = s->getMTime();
+					else
+						it->second = s->getMTime();
 				}
 			}
 			size_t idx = 0;
@@ -897,7 +882,8 @@ void MediaLibrary::updateTimer()
 
 void MediaLibrary::toggleColumnsMode()
 {
-	if (isAlbumOnly) {
+	if (isAlbumOnly)
+	{
 		hasTwoColumns = 0;
 		isAlbumOnly = 0;
 	}
@@ -918,13 +904,15 @@ void MediaLibrary::toggleColumnsMode()
 		{
 			std::string item_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));
-			if(!isAlbumOnly) {
-				std::string and_mtime = Config.media_library_sort_by_mtime ? " and mtime" : "";
-				Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
-			}
-			else {
+			if (isAlbumOnly)
+			{
 				std::string and_mtime = Config.media_library_sort_by_mtime ? " (sorted by mtime)" : "";
 				Albums.setTitle("Albums" + and_mtime);
+			}
+			else
+			{
+				std::string and_mtime = Config.media_library_sort_by_mtime ? " and mtime" : "";
+				Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
 			}
 		}
 	}
@@ -956,13 +944,15 @@ void MediaLibrary::toggleSortMode()
 		{
 			std::string item_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));
-			if(!isAlbumOnly) {
-				std::string and_mtime = Config.media_library_sort_by_mtime ? (" " "and mtime") : "";
-				Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
-			}
-			else {
+			if (isAlbumOnly)
+			{
 				std::string and_mtime = Config.media_library_sort_by_mtime ? " (sorted by mtime)" : "";
 				Albums.setTitle("Albums" + and_mtime);
+			}
+			else
+			{
+				std::string and_mtime = Config.media_library_sort_by_mtime ? (" " "and mtime") : "";
+				Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
 			}
 		}
 	}
@@ -1106,15 +1096,13 @@ std::string AlbumToString(const AlbumEntry &ae)
 		result = "All tracks";
 	else
 	{
-		if (hasTwoColumns)
+		if (!isAlbumOnly && hasTwoColumns)
 		{
-			if(!isAlbumOnly) {
-				if (ae.entry().tag().empty())
-					result += Config.empty_tag;
-				else
-					result += ae.entry().tag();
-				result += " - ";
-			}
+			if (ae.entry().tag().empty())
+				result += Config.empty_tag;
+			else
+				result += ae.entry().tag();
+			result += " - ";
 		}
 
 		if (Config.media_lib_primary_tag != MPD_TAG_DATE && !Config.media_lib_hide_album_dates && !ae.entry().date().empty())
@@ -1180,7 +1168,7 @@ bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, c
 	std::string date = s.getDate();
 
 	auto equals_fun_argument = [&](AlbumEntry &e) {
-		return (!hasTwoColumns || e.entry().tag() == primary_tag)
+		return (isAlbumOnly || !hasTwoColumns || e.entry().tag() == primary_tag)
 		&& e.entry().album() == album
 		&& (!Config.media_library_albums_split_by_date || e.entry().date() == date);
 	};
