@@ -301,6 +301,12 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
       boundsCheck<uint32_t>(result, 0, 4);
 			return result + 14;
 			});
+	p.add("visualizer_spectrum_gain", &visualizer_spectrum_gain,
+			"20", [](std::string v) {
+			auto result = verbose_lexical_cast<double>(v);
+			boundsCheck<double>(result, 0, 100);
+			return result;
+			});
 	p.add("visualizer_spectrum_hz_min", &visualizer_spectrum_hz_min,
 			"20", [](std::string v) {
 			auto result = verbose_lexical_cast<double>(v);

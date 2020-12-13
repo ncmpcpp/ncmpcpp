@@ -16,8 +16,9 @@
 * Add `media_library_hide_album_dates` option to a configuration file.
 * Improve look of the frequency spectrum visualizer.
 * Add `visualizer_spectrum_smooth_look`, `visualizer_spectrum_dft_size`,
-  `visualizer_spectrum_hz_min` and `visualizer_spectrum_hz_max` options to a
-  configuration file for controlling the look of the new spectrum visualizer.
+  `visualizer_spectrum_gain`, `visualizer_spectrum_hz_min` and
+  `visualizer_spectrum_hz_max` options to a configuration file for controlling
+  the look of the new spectrum visualizer.
 * Add `visualizer_autoscale` option to a configuration file.
 * Allow for editing multiple titles in the Tag Editor.
 * Allow setting `visualizer_sync_interval` to 0 (a new default) to disable

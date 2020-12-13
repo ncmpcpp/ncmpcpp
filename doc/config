@@ -111,6 +111,8 @@
 #
 #visualizer_spectrum_dft_size = 2
 #
+#visualizer_spectrum_gain = 20
+#
 ## Left-most frequency of visualizer in Hz, must be less than HZ MAX
 #
 #visualizer_spectrum_hz_min = 20

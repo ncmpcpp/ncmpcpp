@@ -75,10 +75,10 @@ Visualizer::Visualizer()
 	,
   DFT_NONZERO_SIZE(1 << Config.visualizer_spectrum_dft_size),
   DFT_TOTAL_SIZE(Config.visualizer_spectrum_dft_size >= MIN_DFT_SIZE ? 1 << (Config.visualizer_spectrum_dft_size) : 1<<MIN_DFT_SIZE),
-  DYNAMIC_RANGE(100),
+  DYNAMIC_RANGE(100-Config.visualizer_spectrum_gain),
   HZ_MIN(Config.visualizer_spectrum_hz_min),
   HZ_MAX(Config.visualizer_spectrum_hz_max),
-  GAIN(0),
+  GAIN(Config.visualizer_spectrum_gain),
   SMOOTH_CHARS(ToWString("▁▂▃▄▅▆▇█"))
 #endif
 {
