@@ -173,6 +173,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::ShowServerInfo, "Show server info");
 
 	key_section(w, "Global");
+	key(w, Type::Play, "Play");
 	key(w, Type::Stop, "Stop");
 	key(w, Type::Pause, "Pause");
 	key(w, Type::Next, "Next track");
@@ -247,6 +248,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::MoveSelectedItemsDown, "Move selected item(s) down");
 	key(w, Type::MoveSelectedItemsTo, "Move selected item(s) to cursor position");
 	key(w, Type::Add, "Add item to playlist");
+	key(w, Type::Load, "Load stored playlist");
 #	ifdef HAVE_TAGLIB_H
 	key(w, Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H

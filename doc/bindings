@@ -147,6 +147,8 @@
 ## The following actions are not bound to any key/command:
 ##
 ##  - set_volume
+##  - load
+##  - play
 ##
 #
 #def_key "mouse"
