@@ -90,10 +90,8 @@ Visualizer::Visualizer()
 #	endif // HAVE_FFTW3_H
 	if (Config.visualizer_in_stereo)
 		m_read_samples *= 2;
-	m_sample_buffer.resize(m_read_samples);
-	m_temp_sample_buffer.resize(m_read_samples);
-	memset(m_sample_buffer.data(), 0, m_sample_buffer.size()*sizeof(int16_t));
-	memset(m_temp_sample_buffer.data(), 0, m_sample_buffer.size()*sizeof(int16_t));
+	m_sample_buffer.resize(m_read_samples, 0);
+	m_temp_sample_buffer.resize(m_read_samples, 0);
 
 #	ifdef HAVE_FFTW3_H
 	m_fftw_results = DFT_TOTAL_SIZE/2+1;
@@ -110,12 +108,11 @@ Visualizer::Visualizer()
 void Visualizer::switchTo()
 {
 	SwitchTo::execute(this);
-	w.clear();
+	Clear();
 	SetFD();
 	// negative infinity to toggle output in update() at least once
 	m_timer = boost::posix_time::neg_infin;
 	drawHeader();
-	memset(m_sample_buffer.data(), 0, m_sample_buffer.size()*sizeof(int16_t));
 #	ifdef HAVE_FFTW3_H
 	GenLogspace();
 	m_bar_heights.reserve(w.getWidth());
@@ -638,6 +635,12 @@ void Visualizer::GenLogspace()
 #endif // HAVE_FFTW3_H
 
 /**********************************************************************/
+
+void Visualizer::Clear()
+{
+	w.clear();
+	std::fill(m_sample_buffer.begin(), m_sample_buffer.end(), 0);
+}
 
 void Visualizer::ToggleVisualizationType()
 {

@@ -54,7 +54,7 @@ struct Visualizer: Screen<NC::Window>, Tabbable
 	virtual bool isLockable() override { return true; }
 	virtual bool isMergable() override { return true; }
 
-	// private members
+	void Clear();
 	void ToggleVisualizationType();
 	void SetFD();
 	void ResetFD();

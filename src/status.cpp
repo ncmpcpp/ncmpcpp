@@ -518,7 +518,7 @@ void Status::Changes::playerState()
 			}
 #			ifdef ENABLE_VISUALIZER
 			if (isVisible(myVisualizer))
-				myVisualizer->main().clear();
+				myVisualizer->Clear();
 #			endif // ENABLE_VISUALIZER
 			break;
 		default:
