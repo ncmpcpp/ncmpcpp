@@ -46,6 +46,19 @@ bool yes_no(const std::string &v)
 		invalid_value(v);
 }
 
+std::vector<int> parse_ratio(const std::string &s)
+{
+	std::vector<int> ret;
+	std::vector<std::string> temp;
+
+	boost::split(temp, s, boost::is_any_of(":"));
+
+	for (auto i : temp)
+		ret.push_back(std::stoi(i));
+
+	return ret;
+}
+
 bool integers_in_range(const std::string &v)
 {
 	std::vector<std::string> temp;
@@ -66,26 +79,26 @@ bool integers_in_range(const std::string &v)
 	return true;
 }
 
-std::string check_ratio_two(const std::string &v)
+std::vector<int> check_ratio_two(const std::string &v)
 {
 	boost::regex expr{"^[1-9][0-9]*:[1-9][0-9]*$"};
 	if (!boost::regex_match(v, expr))
 		invalid_value(v);
 
 	if (integers_in_range(v))
-		return v;
+		return parse_ratio(v);
 	else
 		invalid_value(v);
 }
 
-std::string check_ratio_three(const std::string &v)
+std::vector<int> check_ratio_three(const std::string &v)
 {
 	boost::regex expr{"^[1-9][0-9]*:[1-9][0-9]*:[1-9][0-9]*$"};
 	if (!boost::regex_match(v, expr))
 		invalid_value(v);
 
 	if (integers_in_range(v))
-		return v;
+		return parse_ratio(v);
 	else
 		invalid_value(v);
 }

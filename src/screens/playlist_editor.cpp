@@ -66,8 +66,7 @@ PlaylistEditor::PlaylistEditor()
 , m_window_timeout(Config.data_fetching_delay ? 250 : BaseScreen::defaultWindowTimeout)
 , m_fetching_delay(boost::posix_time::milliseconds(Config.data_fetching_delay ? 250 : -1))
 {
-	const std::string ratio = Config.playlist_editor_column_width_ratio;
-	std::vector<int> ratio_vector = parse_ratio(ratio);
+	std::vector<int> ratio_vector = Config.playlist_editor_column_width_ratio;
 	int ra = ratio_vector[0];
 	int rb = ratio_vector[1];
 
@@ -114,8 +113,7 @@ void PlaylistEditor::resize()
 	size_t x_offset, width;
 	getWindowResizeParams(x_offset, width);
 	
-	const std::string ratio = Config.playlist_editor_column_width_ratio;
-	std::vector<int> ratio_vector = parse_ratio(ratio);
+	std::vector<int> ratio_vector = Config.playlist_editor_column_width_ratio;
 	int ra = ratio_vector[0];
 	int rb = ratio_vector[1];
 

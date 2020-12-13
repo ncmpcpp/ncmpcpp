@@ -194,8 +194,7 @@ MediaLibrary::MediaLibrary()
 	hasTwoColumns = 0;
 	isAlbumOnly = 0;
 
-	const std::string ratio = Config.media_library_column_width_ratio_three;
-	std::vector<int> ratio_vector = parse_ratio(ratio);
+	std::vector<int> ratio_vector = Config.media_library_column_width_ratio_three;
 	int ra = ratio_vector[0];
 	int rb = ratio_vector[1];
 	int rc = ratio_vector[2];
@@ -249,8 +248,7 @@ void MediaLibrary::resize()
 	getWindowResizeParams(x_offset, width);
 	if (!hasTwoColumns)
 	{
-		const std::string ratio = Config.media_library_column_width_ratio_three;
-		std::vector<int> ratio_vector = parse_ratio(ratio);
+		std::vector<int> ratio_vector = Config.media_library_column_width_ratio_three;
 		int ra = ratio_vector[0];
 		int rb = ratio_vector[1];
 		int rc = ratio_vector[2];
@@ -264,8 +262,7 @@ void MediaLibrary::resize()
 	}
 	else
 	{
-		const std::string ratio = Config.media_library_column_width_ratio_two;
-		std::vector<int> ratio_vector = parse_ratio(ratio);
+		std::vector<int> ratio_vector = Config.media_library_column_width_ratio_two;
 		int ra = ratio_vector[0];
 		int rb = ratio_vector[1];
 
