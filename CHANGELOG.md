@@ -2,23 +2,23 @@
 * Restore curses window after running external command.
 * Pass lyrics filename in single quotes to shell.
 * Add support for fetching lyrics from zeneszoveg.hu.
-* Add 'Play' action for starting playback in stopped state.
-* Properly expand '~' in mpd_host when preceded by a password.
-* Add support for message_delay_time equal to 0.
+* Add `Play` action for starting playback in stopped state.
+* Properly expand `~` in mpd_host when preceded by a password.
+* Add support for `message_delay_time` equal to 0.
 * Add support for album only view in the Media Library.
-* Add 'random_exclude_pattern' option to a configuration file.
-* Add 'connected_message_on_startup' option to a configuration file.
+* Add `random_exclude_pattern` option to a configuration file.
+* Add `connected_message_on_startup` option to a configuration file.
 * Fix compilation with GCC 10.
 * Remove Lyricwiki fetcher as the site closed down.
 * Remove Lyricsmania fetcher as it no longer works.
 * Fix Genius and Tekstowo fetchers.
-* Add dedicated 'Load' action for loading playlists.
-* Add 'media_library_hide_album_dates' option to a configuration file.
+* Add dedicated `Load` action for loading playlists.
+* Add `media_library_hide_album_dates` option to a configuration file.
 * Improve the look of the frequency spectrum visualizer.
-* Add 'visualizer_spectrum_smooth_look', 'visualizer_spectrum_dft_size',
-  'visualizer_spectrum_hz_min' and 'visualizer_spectrum_hz_max' options to a
+* Add `visualizer_spectrum_smooth_look`, `visualizer_spectrum_dft_size`,
+  `visualizer_spectrum_hz_min` and `visualizer_spectrum_hz_max` options to a
   configuration file for controlling the look of the new spectrum visualizer.
-* Add 'visualizer_autoscale' option to a configuration file.
+* Add `visualizer_autoscale` option to a configuration file.
 
 # ncmpcpp-0.8.2 (2018-04-11)
 * Help screen: fixed display of EoF keycode
@@ -30,14 +30,14 @@
 * Fixed compilation with ICU >= 61.
 
 # ncmpcpp-0.8.1 (2017-10-11)
-* Setting 'colors_enabled' to 'no' no longer results in a crash.
-* Using '--quiet' command line argument no longer results in a crash.
+* Setting `colors_enabled` to `no` no longer results in a crash.
+* Using `--quiet` command line argument no longer results in a crash.
 * If songs in media library have no track numbers, sort them by their display format.
 * Fixed a situation in which songs added to playlist from media library or playlist editor screens would not be immediately marked as such.
 * Do not start prompt with the current search constraint when applying a new one.
 
 # ncmpcpp-0.8 (2017-05-21)
-* Configuration variable 'execute_on_player_state_change' was added.
+* Configuration variable `execute_on_player_state_change` was added.
 * Support for controlling whether ncmpcpp should display multiple tags as-is or make an effort to hide duplicate values (show_duplicate_tags configuration variable, enabled by default).
 * Support for filtering of lists was brought back from the dead.
 * Require C++14 compatible compiler during compilation.
@@ -50,15 +50,15 @@
 * When an attempt to write tags fails, show detailed error message.
 * Support for fetching lyrics for selected items in background was added.
 * Application will now exit if stdin is closed.
-* Configuration variable 'visualizer_sample_multiplier' was deprecated and will be removed in 0.9.
+* Configuration variable `visualizer_sample_multiplier` was deprecated and will be removed in 0.9.
 * Wide character version of ncurses is now required.
-* Added 'statusbar_time_color' and 'player_state_color' configuration variables for further customization of statusbar.
+* Added `statusbar_time_color` and `player_state_color` configuration variables for further customization of statusbar.
 * Setting foreground color only now preserves current background color.
-* Format information can now be attached to selected color variables in the configuration file. Because of that variable 'progressbar_boldness' is now deprecated in favor of extended 'progressbar_color' and 'progressbar_elapsed_color' (for more information see example configuration file).
+* Format information can now be attached to selected color variables in the configuration file. Because of that variable `progressbar_boldness` is now deprecated in favor of extended `progressbar_color` and `progressbar_elapsed_color` (for more information see example configuration file).
 * Lyrics and last_fm can now be startup screens and are lockable.
-* Action 'update_environment' now also synchronizes status with MPD.
+* Action `update_environment` now also synchronizes status with MPD.
 * Fixed an issue that could cause some MPD events to be missed.
-* Action 'jump_to_playing_song' is not runnable now if there is no playing song.
+* Action `jump_to_playing_song` is not runnable now if there is no playing song.
 * Fixed fetching artist info in language other than English.
 * Added test that checks if lyrics fetchers work (available via command line parameter --test-lyrics-fetchers).
 * Fixed fetching lyrics from justsomelyrics.com.
@@ -66,12 +66,12 @@
 * Seek immediately after invoking appropriate action once.
 * Added support for locating current song in playlist editor.
 * Disable autocenter mode while searching and filtering.
-* Added '--quiet' comand line argument that supresses messages shown at startup.
+* Added `--quiet` comand line argument that supresses messages shown at startup.
 * Multiple songs in Media library are now added to playlist in the same order they are displayed.
-* Added configuration option 'media_library_albums_split_by_date' that determines whether albums in media library should be split by date.
-* Added configuration option 'ignore_diacritics' that allows for ignoring diacritics while searching (boost compiled with ICU support is required).
+* Added configuration option `media_library_albums_split_by_date` that determines whether albums in media library should be split by date.
+* Added configuration option `ignore_diacritics` that allows for ignoring diacritics while searching (boost compiled with ICU support is required).
 * Added support for reading multiple bindings files (the ones in ~/.ncmpcpp/bindings and $XDG_CONFIG_HOME/ncmpcpp/bindings are read by default).
-* 'main_window_highlight_color' and 'active_column_color' configuration options are now deprecated in favor of 'current_item_prefix'/'current_item_suffix' and 'current_item_inactive_column_prefix'/'current_item_inactive_column_suffix' (note that now highlight of inactive column is customizable instead of the active one in presence of multiple columns).
+* `main_window_highlight_color` and `active_column_color` configuration options are now deprecated in favor of `current_item_prefix`/`current_item_suffix` and `current_item_inactive_column_prefix`/`current_item_inactive_column_suffix` (note that now highlight of inactive column is customizable instead of the active one in presence of multiple columns).
 
 # ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.
@@ -88,7 +88,7 @@
 # ncmpcpp-0.7.5 (2016-08-17)
 * Action chains can be now used for seeking.
 * Fixed fetching artist info from last.fm.
-* Default value of regular_expressions was changed from 'basic' to 'perl' to work around boost issue (#12222).
+* Default value of regular_expressions was changed from `basic` to `perl` to work around boost issue (#12222).
 * Fixed crash occuring when searching backward in an empty list.
 
 # ncmpcpp 0.7.4 (2016-04-17)
@@ -108,7 +108,7 @@
 * Confirmation before shuffling a playlist can now be disabled.
 
 # ncmpcpp-0.7 (2015-11-22)
-* Playlist sorting dialog now contains 'Album artist' option.
+* Playlist sorting dialog now contains `Album artist` option.
 * Default keybindings were corrected to allow tag edition in the right column of tag editor.
 * Mouse is properly kept disabled if it was disabled in the configuration file.
 
@@ -140,14 +140,14 @@
 * Selecting items no longer depends on space mode and is bound by default to Insert key.
 * Support for Alt, Ctrl and Shift modifiers as well as Escape key was added.
 * Action that updates the environment can now be used in bindings configuration file.
-* Monolithic 'press_space' action was split into 'add_item_to_playlist', 'toggle_lyrics_update_on_song_change' and 'toggle_visualization_type'.
-* Monolithic 'press_enter' action was split into 'enter_directory', 'play_item', run_action' and 'toggle_output'.
+* Monolithic `press_space` action was split into `add_item_to_playlist`, `toggle_lyrics_update_on_song_change` and `toggle_visualization_type`.
+* Monolithic `press_enter` action was split into `enter_directory`, `play_item`, `run_action` and `toggle_output`.
 * Sorting actions were rebound to Ctrl-S.
 * Support for range selection was added (bound to Ctrl-V by default). In addition, sorting, reversing and shuffling items in playlist now works on ranges.
 * Support for selecting found items was added (bound to Ctrl-_ by default).
 * Tracks in media library are now properly sorted for track numbers greater than 99.
-* Value of 'visualizer_sync_interval' is now restricted to be greater than 9.
-* Output of the visualizer now scales automatically as long as 'visualizer_sample_multiplier' is set to 1.
+* Value of `visualizer_sync_interval` is now restricted to be greater than 9.
+* Output of the visualizer now scales automatically as long as `visualizer_sample_multiplier` is set to 1.
 * Command line switch that prints current song to the standard output is available once again.
 * Defined action chains are now shown in help screen.
 * Action chains for selecting an item and scrolling up/down are now bound to Shift-Up and Shift-Down respectively.
@@ -174,7 +174,7 @@
 * Fix title of a pop-up which shows during adding selected items to the current playlist.
 * Correctly deal with leading separator while parsing filenames in tag editor.
 * Fix initial incorrect window size that was occuring in some cases.
-* Unknown and invalid configuration options can now be ignored using command line option 'ignore-config-errors'.
+* Unknown and invalid configuration options can now be ignored using command line option `ignore-config-errors`.
 
 # ncmpcpp-0.6.3 (2015-03-02)
 * Fix floating point exception when adding a specific number of random items.
@@ -196,7 +196,7 @@
 * Trying to fetch lyrics from an empty list doesn't crash the application anymore.
 
 # ncmpcpp-0.6 (2014-10-25)
-* Feature 'locate song' no more has a chance to crash the program.
+* Feature `locate song` no more has a chance to crash the program.
 * Following lyrics of current song now works properly with consume mode active.
 * Deletion of empty playlists in playlist editor now works properly.
 * Toggling consume mode with crossfade mode active displays proper info.
@@ -266,7 +266,7 @@
 * bugfixes
 
 # ncmpcpp-0.5.7 (2011-04-21)
-* convert input path to utf8 before calling 'add' command
+* convert input path to utf8 before calling `add` command
 * extras: add program that copies Artist to AlbumArtist for mp3/ogg/flac files
 * lyrics fetcher: add support for lyricsvip.com
 * lyrics fetcher: skip lyricwiki if there's licence restriction on lyrics
@@ -274,12 +274,12 @@
 * search engine: fix error occuring while trying to select first album in results
 
 # ncmpcpp-0.5.6 (2011-01-02)
-* settings: make displaying 'empty tag' entry optional
+* settings: make displaying `empty tag` entry optional
 * bugfixes
 
 # ncmpcpp-0.5.5 (2010-08-04)
 * new feature: select album around cursor
-* new feature: 'replay' function
+* new feature: `replay` function
 * fixed feature: display separators between albums
 * playlist: support for adding last.fm streams
 * browser: support for operations on m3u playlists not created by MPD
@@ -289,7 +289,7 @@
 * lyrics: support for storing lyrics in song's directory
 * artist info: support for preffered language
 * settings: support for custom visualization color
-* settings: support for 'empty' part of progressbar in progressbar_look
+* settings: support for `empty` part of progressbar in progressbar_look
 * settings: new config option: titles_visibility
 * song format: support for limiting maximal length of a tag
 * a lot of minor fixes
@@ -451,7 +451,7 @@
 * fixed compilation for Mac OS X and *BSD
 * fixed compilation for older gcc versions
 * extended configuration (e.g. all colors can be user-defined)
-* 'repeat one song' mode works with random mode now
+* `repeat one song` mode works with random mode now
 * incremental seeking (old behaviour is still available through config)
 * a bunch of fixes and improvements
 
