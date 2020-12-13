@@ -12,6 +12,7 @@
 * Remove Lyricwiki fetcher as the site closed down.
 * Remove Lyricsmania fetcher as it no longer works.
 * Fix Genius and Tekstowo fetchers.
+* Add dedicated 'Load' action for loading playlists.
 
 # ncmpcpp-0.8.2 (2018-04-11)
 * Help screen: fixed display of EoF keycode
