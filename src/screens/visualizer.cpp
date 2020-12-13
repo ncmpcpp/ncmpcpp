@@ -22,6 +22,7 @@
 
 #ifdef ENABLE_VISUALIZER
 
+#include <algorithm>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <cerrno>
@@ -30,6 +31,7 @@
 #include <fstream>
 #include <limits>
 #include <fcntl.h>
+#include <cassert>
 
 #include "global.h"
 #include "settings.h"
@@ -39,6 +41,7 @@
 #include "screens/screen_switcher.h"
 #include "status.h"
 #include "enums.h"
+#include "utility/wide_string.h"
 
 using Samples = std::vector<int16_t>;
 
@@ -50,6 +53,7 @@ Visualizer *myVisualizer;
 namespace {
 
 const int fps = 25;
+const uint32_t MIN_DFT_SIZE = 14;
 
 // toColor: a scaling function for coloring. For numbers 0 to max this function
 // returns a coloring from the lowest color to the highest, and colors will not
@@ -67,17 +71,39 @@ const NC::FormattedColor &toColor(size_t number, size_t max, bool wrap = true)
 
 Visualizer::Visualizer()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
+#	ifdef HAVE_FFTW3_H
+	,
+  DFT_NONZERO_SIZE(1 << Config.visualizer_spectrum_dft_size),
+  DFT_TOTAL_SIZE(Config.visualizer_spectrum_dft_size >= MIN_DFT_SIZE ? 1 << (Config.visualizer_spectrum_dft_size) : 1<<MIN_DFT_SIZE),
+  DYNAMIC_RANGE(100),
+  HZ_MIN(Config.visualizer_spectrum_hz_min),
+  HZ_MAX(Config.visualizer_spectrum_hz_max),
+  GAIN(0),
+  SMOOTH_CHARS(ToWString("▁▂▃▄▅▆▇█"))
+#endif
 {
 	ResetFD();
-	m_samples = 44100/fps;
-	if (Config.visualizer_in_stereo)
-		m_samples *= 2;
 #	ifdef HAVE_FFTW3_H
-	m_fftw_results = m_samples/2+1;
+	m_read_samples = DFT_NONZERO_SIZE;
+#	else
+	m_read_samples = 44100 / fps;
+#	endif // HAVE_FFTW3_H
+	if (Config.visualizer_in_stereo)
+		m_read_samples *= 2;
+	m_sample_buffer.resize(m_read_samples);
+	m_temp_sample_buffer.resize(m_read_samples);
+	memset(m_sample_buffer.data(), 0, m_sample_buffer.size()*sizeof(int16_t));
+	memset(m_temp_sample_buffer.data(), 0, m_sample_buffer.size()*sizeof(int16_t));
+
+#	ifdef HAVE_FFTW3_H
+	m_fftw_results = DFT_TOTAL_SIZE/2+1;
 	m_freq_magnitudes.resize(m_fftw_results);
-	m_fftw_input = static_cast<double *>(fftw_malloc(sizeof(double)*m_samples));
+	m_fftw_input = static_cast<double *>(fftw_malloc(sizeof(double)*DFT_TOTAL_SIZE));
+	memset(m_fftw_input, 0, sizeof(double)*DFT_TOTAL_SIZE);
 	m_fftw_output = static_cast<fftw_complex *>(fftw_malloc(sizeof(fftw_complex)*m_fftw_results));
-	m_fftw_plan = fftw_plan_dft_r2c_1d(m_samples, m_fftw_input, m_fftw_output, FFTW_ESTIMATE);
+	m_fftw_plan = fftw_plan_dft_r2c_1d(DFT_TOTAL_SIZE, m_fftw_input, m_fftw_output, FFTW_ESTIMATE);
+	m_dft_logspace.reserve(500);
+	m_bar_heights.reserve(100);
 #	endif // HAVE_FFTW3_H
 }
 
@@ -88,6 +114,11 @@ void Visualizer::switchTo()
 	SetFD();
 	m_timer = boost::posix_time::from_time_t(0);
 	drawHeader();
+	memset(m_sample_buffer.data(), 0, m_sample_buffer.size()*sizeof(int16_t));
+#	ifdef HAVE_FFTW3_H
+	GenLogspace();
+	m_bar_heights.reserve(w.getWidth());
+#	endif // HAVE_FFTW3_H
 }
 
 void Visualizer::resize()
@@ -97,6 +128,10 @@ void Visualizer::resize()
 	w.resize(width, MainHeight);
 	w.moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
+#	ifdef HAVE_FFTW3_H
+	GenLogspace();
+	m_bar_heights.reserve(w.getWidth());
+#	endif // HAVE_FFTW3_H
 }
 
 std::wstring Visualizer::title()
@@ -111,11 +146,19 @@ void Visualizer::update()
 
 	// PCM in format 44100:16:1 (for mono visualization) and
 	// 44100:16:2 (for stereo visualization) is supported.
-	Samples samples(m_samples);
-	ssize_t data = read(m_fifo, samples.data(),
-	                    samples.size() * sizeof(Samples::value_type));
-	if (data < 0) // no data available in fifo
+	const int buf_size = sizeof(int16_t)*m_read_samples;
+	ssize_t data = read(m_fifo, m_temp_sample_buffer.data(), buf_size);
+	if (data <= 0) // no data available in fifo
 		return;
+
+	{
+		// create int8_t pointers for arithmetic
+		int8_t *const sdata = (int8_t *)m_sample_buffer.data();
+		int8_t *const temp_sdata = (int8_t *)m_temp_sample_buffer.data();
+		int8_t *const sdata_end = sdata + buf_size;
+		memmove(sdata, sdata + data, buf_size - data);
+		memcpy(sdata_end - data, temp_sdata, data);
+	}
 
 	if (m_output_id != -1 && Global::Timer - m_timer > Config.visualizer_sync_interval)
 	{
@@ -130,6 +173,7 @@ void Visualizer::update()
 #	ifdef HAVE_FFTW3_H
 	if (Config.visualizer_type == VisualizerType::Spectrum)
 	{
+		m_read_samples = DFT_NONZERO_SIZE;
 		draw = &Visualizer::DrawFrequencySpectrum;
 		drawStereo = &Visualizer::DrawFrequencySpectrumStereo;
 	}
@@ -137,52 +181,58 @@ void Visualizer::update()
 #	endif // HAVE_FFTW3_H
 	if (Config.visualizer_type == VisualizerType::WaveFilled)
 	{
+		m_read_samples = 44100 / fps;
 		draw = &Visualizer::DrawSoundWaveFill;
 		drawStereo = &Visualizer::DrawSoundWaveFillStereo;
 	}
 	else if (Config.visualizer_type == VisualizerType::Ellipse)
 	{
+		m_read_samples = 44100 / fps;
 		draw = &Visualizer::DrawSoundEllipse;
 		drawStereo = &Visualizer::DrawSoundEllipseStereo;
 	}
 	else
 	{
+		m_read_samples = 44100 / fps;
 		draw = &Visualizer::DrawSoundWave;
 		drawStereo = &Visualizer::DrawSoundWaveStereo;
 	}
+	m_sample_buffer.resize(m_read_samples);
+	m_temp_sample_buffer.resize(m_read_samples);
 
-	const ssize_t samples_read = data/sizeof(int16_t);
-	m_auto_scale_multiplier += 1.0/fps;
-	for (auto &sample : samples)
-	{
-		double scale = std::numeric_limits<int16_t>::min();
-		scale /= sample;
-		scale = fabs(scale);
-		if (scale < m_auto_scale_multiplier)
-			m_auto_scale_multiplier = scale;
-	}
-	for (auto &sample : samples)
-	{
-		int32_t tmp = sample;
-		if (m_auto_scale_multiplier <= 50.0) // limit the auto scale
-			tmp *= m_auto_scale_multiplier;
-		if (tmp < std::numeric_limits<int16_t>::min())
-			sample = std::numeric_limits<int16_t>::min();
-		else if (tmp > std::numeric_limits<int16_t>::max())
-			sample = std::numeric_limits<int16_t>::max();
-		else
-			sample = tmp;
+	if (Config.visualizer_autoscale) {
+		m_auto_scale_multiplier += 1.0/fps;
+		for (auto &sample : m_sample_buffer)
+		{
+			double scale = std::numeric_limits<int16_t>::min();
+			scale /= sample;
+			scale = fabs(scale);
+			if (scale < m_auto_scale_multiplier)
+				m_auto_scale_multiplier = scale;
+		}
+		for (auto &sample : m_sample_buffer)
+		{
+			int32_t tmp = sample;
+			if (m_auto_scale_multiplier <= 50.0) // limit the auto scale
+				tmp *= m_auto_scale_multiplier;
+			if (tmp < std::numeric_limits<int16_t>::min())
+				sample = std::numeric_limits<int16_t>::min();
+			else if (tmp > std::numeric_limits<int16_t>::max())
+				sample = std::numeric_limits<int16_t>::max();
+			else
+				sample = tmp;
+		}
 	}
 
 	w.clear();
 	if (Config.visualizer_in_stereo)
 	{
-		auto chan_samples = samples_read/2;
+		auto chan_samples = m_read_samples/2;
 		int16_t buf_left[chan_samples], buf_right[chan_samples];
-		for (ssize_t i = 0, j = 0; i < samples_read; i += 2, ++j)
+		for (ssize_t i = 0, j = 0; i < m_read_samples; i += 2, ++j)
 		{
-			buf_left[j] = samples[i];
-			buf_right[j] = samples[i+1];
+			buf_left[j] = m_sample_buffer[i];
+			buf_right[j] = m_sample_buffer[i+1];
 		}
 		size_t half_height = w.getHeight()/2;
 
@@ -190,7 +240,7 @@ void Visualizer::update()
 	}
 	else
 	{
-		(this->*draw)(samples.data(), samples_read, 0, w.getHeight());
+		(this->*draw)(m_sample_buffer.data(), m_read_samples, 0, w.getHeight());
 	}
 	w.refresh();
 }
@@ -393,42 +443,111 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 	// If right channel is drawn, bars descend from the top to the bottom.
 	const bool flipped = y_offset > 0;
 
-	// copy samples to fftw input array
-	for (unsigned i = 0; i < m_samples; ++i)
-		m_fftw_input[i] = i < samples ? buf[i] : 0;
+	// copy samples to fftw input array and apply Hamming window
+	ApplyWindow(m_fftw_input, buf, samples);
 	fftw_execute(m_fftw_plan);
 
-	// Count magnitude of each frequency and scale it to fit the screen.
+	// Count magnitude of each frequency and normalize
 	for (size_t i = 0; i < m_fftw_results; ++i)
 		m_freq_magnitudes[i] = sqrt(
 			m_fftw_output[i][0]*m_fftw_output[i][0]
 		+	m_fftw_output[i][1]*m_fftw_output[i][1]
-		)/2e4*height;
+		) / (DFT_NONZERO_SIZE);
 
 	const size_t win_width = w.getWidth();
-	// Cut bandwidth a little to achieve better look.
-	const double bins_per_bar = m_fftw_results/win_width * 7/10;
-	double bar_height;
-	size_t bar_bound_height;
+
+	double prev_bar_height = 0;
+	size_t cur_bin = 0;
+	while (cur_bin < m_fftw_results && Bin2Hz(cur_bin) < m_dft_logspace[0])
+	{
+		++cur_bin;
+	}
+	m_bar_heights.clear();
 	for (size_t x = 0; x < win_width; ++x)
 	{
-		bar_height = 0;
-		for (int j = 0; j < bins_per_bar; ++j)
-			bar_height += m_freq_magnitudes[x*bins_per_bar+j];
-		// Buff higher frequencies.
-		bar_height *= log2(2 + x) * 100.0/win_width;
-		// Moderately normalize the heights.
-		bar_height = pow(bar_height, 0.5);
+		double bar_height = 0;
 
-		bar_bound_height = std::min(std::size_t(bar_height/bins_per_bar), height);
-		for (size_t j = 0; j < bar_bound_height; ++j)
+		// accumulate bins
+		size_t count = 0;
+		// check right bound
+		while (cur_bin < m_fftw_results && Bin2Hz(cur_bin) < m_dft_logspace[x])
+		{
+			// check left bound if not first index
+			if (x == 0 || Bin2Hz(cur_bin) >= m_dft_logspace[x-1])
+			{
+				bar_height += m_freq_magnitudes[cur_bin];
+				++count;
+			}
+			++cur_bin;
+		}
+
+		if (count == 0)
+			continue;
+
+		// average bins
+		bar_height /= count;
+		prev_bar_height = bar_height;
+
+		// log scale bar heights
+		bar_height = (20 * log10(bar_height) + DYNAMIC_RANGE + GAIN) / DYNAMIC_RANGE;
+		// Scale bar height between 0 and height
+		bar_height = bar_height > 0 ? bar_height * height : 0;
+		bar_height = bar_height > height ? height : bar_height;
+
+		m_bar_heights.emplace_back(std::make_pair(x, bar_height));
+	}
+
+	size_t h_idx = 0;
+	for (size_t x = 0; x < win_width; ++x)
+	{
+		const size_t &i = m_bar_heights[h_idx].first;
+		const double &bar_height = m_bar_heights[h_idx].second;
+		double h = 0;
+
+		if (x == i) {
+			// this data point exists
+			h = bar_height;
+			if (h_idx < m_bar_heights.size()-1)
+				++h_idx;
+		} else {
+			// data point does not exist, need to interpolate
+			h = Interpolate(x, h_idx);
+		}
+
+		for (size_t j = 0; j < h; ++j)
 		{
 			size_t y = flipped ? y_offset+j : y_offset+height-j-1;
-			auto c = toColor(j, height);
+			auto color = toColor(j, height);
+			std::wstring ch;
+			bool reverse = false;
+
+			// select character to draw
+			if (Config.visualizer_spectrum_smooth_look) {
+				// smooth
+				const size_t &size = SMOOTH_CHARS.size();
+				const int idx = static_cast<int>(size*h) % size;
+				if (j < h-1 || idx == size-1) {
+					// full height
+					ch = SMOOTH_CHARS[size-1];
+				} else {
+					// fractional height
+					if (flipped) {
+						ch = SMOOTH_CHARS[size-idx-2];
+						color = NC::FormattedColor(color.color(), {NC::Format::Reverse});
+					} else {
+						ch = SMOOTH_CHARS[idx];
+					}
+				}
+			} else  {
+				// default, non-smooth
+				ch = Config.visualizer_chars[1];
+			}
+
+			// draw character on screen
 			w << NC::XY(x, y)
-			  << c
-			  << Config.visualizer_chars[1]
-			  << NC::FormattedColor::End<>(c);
+			  << color
+			  << ch
+			  << NC::FormattedColor::End<>(color);
 		}
 	}
 }
@@ -437,6 +556,86 @@ void Visualizer::DrawFrequencySpectrumStereo(int16_t *buf_left, int16_t *buf_rig
 {
 	DrawFrequencySpectrum(buf_left, samples, 0, height);
 	DrawFrequencySpectrum(buf_right, samples, height, w.getHeight() - height);
+}
+
+double Visualizer::Interpolate(size_t x, size_t h_idx)
+{
+	const double &x_next = m_bar_heights[h_idx].first;
+	const double &h_next = m_bar_heights[h_idx].second;
+
+	double dh = 0;
+	if (h_idx == 0) {
+		// no data points on left, linear extrap
+		if (h_idx < m_bar_heights.size()-1) {
+			const double &x_next2 = m_bar_heights[h_idx+1].first;
+			const double &h_next2 = m_bar_heights[h_idx+1].second;
+			dh = (h_next2 - h_next) / (x_next2 - x_next);
+		}
+		return h_next - dh*(x_next-x);
+	} else if (h_idx == 1) {
+		// one data point on left, linear interp
+		const double &x_prev = m_bar_heights[h_idx-1].first;
+		const double &h_prev = m_bar_heights[h_idx-1].second;
+		dh = (h_next - h_prev) / (x_next - x_prev);
+		return h_next - dh*(x_next-x);
+	} else if (h_idx < m_bar_heights.size()-1) {
+		// two data points on both sides, cubic interp
+		// see https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Interpolation_on_an_arbitrary_interval
+		const double &x_prev2 = m_bar_heights[h_idx-2].first;
+		const double &h_prev2 = m_bar_heights[h_idx-2].second;
+		const double &x_prev = m_bar_heights[h_idx-1].first;
+		const double &h_prev = m_bar_heights[h_idx-1].second;
+		const double &x_next2 = m_bar_heights[h_idx+1].first;
+		const double &h_next2 = m_bar_heights[h_idx+1].second;
+
+		const double m0 = (h_prev - h_prev2) / (x_prev - x_prev2);
+		const double m1 = (h_next2 - h_next) / (x_next2 - x_next);
+		const double t = (x - x_prev) / (x_next - x_prev);
+		const double h00 = 2*t*t*t - 3*t*t + 1;
+		const double h10 = t*t*t - 2*t*t + t;
+		const double h01 = -2*t*t*t + 3*t*t;
+		const double h11 = t*t*t - t*t;
+
+		return h00*h_prev + h10*(x_next-x_prev)*m0 + h01*h_next + h11*(x_next-x_prev)*m1;
+	}
+
+	// less than two data points on right, no interp, should never happen unless VERY low DFT size
+	return h_next;
+}
+
+void Visualizer::ApplyWindow(double *output, int16_t *input, ssize_t samples)
+{
+	// Use Blackman window for low sidelobes and fast sidelobe rolloff
+	// don't care too much about mainlobe width
+	const double alpha = 0.16;
+	const double a0 = (1 - alpha) / 2;
+	const double a1 = 0.5;
+	const double a2 = alpha / 2;
+	const double pi = boost::math::constants::pi<double>();
+	for (unsigned i = 0; i < samples; ++i)
+	{
+		double window = a0 - a1*cos(2*pi*i/(DFT_NONZERO_SIZE-1)) + a2*cos(4*pi*i/(DFT_NONZERO_SIZE-1));
+		output[i] = window * input[i] / INT16_MAX;
+	}
+}
+
+double Visualizer::Bin2Hz(size_t bin)
+{
+	return bin*44100/DFT_TOTAL_SIZE;
+}
+
+// Generate log-scaled vector of frequencies from HZ_MIN to HZ_MAX
+void Visualizer::GenLogspace()
+{
+	// Calculate number of extra bins needed between 0 HZ and HZ_MIN
+	const size_t win_width = w.getWidth();
+	const size_t left_bins = (log10(HZ_MIN) - win_width*log10(HZ_MIN)) / (log10(HZ_MIN) - log10(HZ_MAX));
+	// Generate logspaced frequencies
+	m_dft_logspace.resize(win_width);
+	const double log_scale = log10(HZ_MAX) / (left_bins + m_dft_logspace.size() - 1);
+	for (int i = left_bins; i < m_dft_logspace.size() + left_bins; ++i) {
+		m_dft_logspace[i - left_bins] = pow(10, i * log_scale);
+	}
 }
 #endif // HAVE_FFTW3_H
 

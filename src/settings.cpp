@@ -291,6 +291,26 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			boundsCheck<std::wstring::size_type>(result.size(), 2, 2);
 			return result;
 	});
+	p.add("visualizer_autoscale", &visualizer_autoscale, "yes", yes_no);
+	p.add("visualizer_spectrum_smooth_look", &visualizer_spectrum_smooth_look, "yes", yes_no);
+	p.add("visualizer_spectrum_dft_size", &visualizer_spectrum_dft_size,
+			"12", [](std::string v) {
+      uint32_t result = verbose_lexical_cast<uint32_t>(v);
+      boundsCheck<uint32_t>(result, 0, 5);
+			return result + 12;
+			});
+	p.add("visualizer_spectrum_hz_min", &visualizer_spectrum_hz_min,
+			"20", [](std::string v) {
+			auto result = verbose_lexical_cast<double>(v);
+			lowerBoundCheck<double>(result, 1);
+			return result;
+			});
+	p.add("visualizer_spectrum_hz_max", &visualizer_spectrum_hz_max,
+			"20000", [](std::string v) {
+			auto result = verbose_lexical_cast<double>(v);
+			lowerBoundCheck<double>(result, Config.visualizer_spectrum_hz_min+1);
+			return result;
+			});
 	p.add("visualizer_color", &visualizer_colors,
 	      "blue, cyan, green, yellow, magenta, red", list_of<NC::FormattedColor>);
 	p.add("system_encoding", &system_encoding, "", [](std::string encoding) {

@@ -71,19 +71,34 @@ private:
 #	ifdef HAVE_FFTW3_H
 	void DrawFrequencySpectrum(int16_t *, ssize_t, size_t, size_t);
 	void DrawFrequencySpectrumStereo(int16_t *, int16_t *, ssize_t, size_t);
+	void ApplyWindow(double *, int16_t *, ssize_t);
+	void GenLogspace();
+	double Bin2Hz(size_t);
+	double Interpolate(size_t, size_t);
 #	endif // HAVE_FFTW3_H
 
 	int m_output_id;
 	boost::posix_time::ptime m_timer;
 
 	int m_fifo;
-	size_t m_samples;
+	size_t m_read_samples;
+	std::vector<int16_t> m_sample_buffer;
+	std::vector<int16_t> m_temp_sample_buffer;
 	double m_auto_scale_multiplier;
 #	ifdef HAVE_FFTW3_H
 	size_t m_fftw_results;
 	double *m_fftw_input;
 	fftw_complex *m_fftw_output;
 	fftw_plan m_fftw_plan;
+	const uint32_t DFT_NONZERO_SIZE;
+	const uint32_t DFT_TOTAL_SIZE;
+	const double DYNAMIC_RANGE;
+	const double HZ_MIN;
+	const double HZ_MAX;
+	const double GAIN;
+	const std::wstring SMOOTH_CHARS;
+	std::vector<double> m_dft_logspace;
+	std::vector<std::pair<size_t, double>> m_bar_heights;
 
 	std::vector<double> m_freq_magnitudes;
 #	endif // HAVE_FFTW3_H
