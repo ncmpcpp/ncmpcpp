@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 	cerr_buffer = std::cerr.rdbuf();
 	std::cerr.rdbuf(errorlog.rdbuf());
 	
-	sigignore(SIGPIPE);
+	signal(SIGPIPE, SIG_IGN);
 	signal(SIGWINCH, sighandler);
 
 	Mpd.setNoidleCallback(Status::update);
