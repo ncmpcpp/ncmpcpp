@@ -1,7 +1,19 @@
-ncmpcpp-0.9 (????-??-??)
-* Restore curses window after running external command
+# ncmpcpp-0.9 (2020-12-??)
+* Restore curses window after running external command.
+* Pass lyrics filename in single quotes to shell.
+* Add support for fetching lyrics from zeneszoveg.hu.
+* Add 'Play' action for starting playback in stopped state.
+* Properly expand '~' in mpd_host when preceded by a password.
+* Add support for message_delay_time equal to 0.
+* Add support for album only view in the Media Library.
+* Add 'random_exclude_pattern' option to a configuration file.
+* Add 'connected_message_on_startup' option to a configuration file.
+* Fix compilation with GCC 10.
+* Remove Lyricwiki fetcher as the site closed down.
+* Remove Lyricsmania fetcher as it no longer works.
+* Fix Genius and Tekstowo fetchers.
 
-ncmpcpp-0.8.2 (2018-04-11)
+# ncmpcpp-0.8.2 (2018-04-11)
 * Help screen: fixed display of EoF keycode
 * Fixed possible integer overflow when resizing screen
 * Fixed fetching lyrics from lyricsmania.com, metrolyrics.com and sing365.com
@@ -10,14 +22,14 @@ ncmpcpp-0.8.2 (2018-04-11)
 * Reset position of a window when fetching lyrics
 * Fixed compilation with ICU >= 61.
 
-ncmpcpp-0.8.1 (2017-10-11)
+# ncmpcpp-0.8.1 (2017-10-11)
 * Setting 'colors_enabled' to 'no' no longer results in a crash.
 * Using '--quiet' command line argument no longer results in a crash.
 * If songs in media library have no track numbers, sort them by their display format.
 * Fixed a situation in which songs added to playlist from media library or playlist editor screens would not be immediately marked as such.
 * Do not start prompt with the current search constraint when applying a new one.
 
-ncmpcpp-0.8 (2017-05-21)
+# ncmpcpp-0.8 (2017-05-21)
 * Configuration variable 'execute_on_player_state_change' was added.
 * Support for controlling whether ncmpcpp should display multiple tags as-is or make an effort to hide duplicate values (show_duplicate_tags configuration variable, enabled by default).
 * Support for filtering of lists was brought back from the dead.
@@ -54,10 +66,10 @@ ncmpcpp-0.8 (2017-05-21)
 * Added support for reading multiple bindings files (the ones in ~/.ncmpcpp/bindings and $XDG_CONFIG_HOME/ncmpcpp/bindings are read by default).
 * 'main_window_highlight_color' and 'active_column_color' configuration options are now deprecated in favor of 'current_item_prefix'/'current_item_suffix' and 'current_item_inactive_column_prefix'/'current_item_inactive_column_suffix' (note that now highlight of inactive column is customizable instead of the active one in presence of multiple columns).
 
-ncmpcpp-0.7.7 (2016-10-31)
+# ncmpcpp-0.7.7 (2016-10-31)
 * Fixed compilation on 32bit platforms.
 
-ncmpcpp-0.7.6 (2016-10-30)
+# ncmpcpp-0.7.6 (2016-10-30)
 * Fixed assertion failure on trying to search backwards in an empty list.
 * Updated installation instructions in INSTALL file.
 * Make sure that stream of random numbers is not deterministic.
@@ -66,39 +78,38 @@ ncmpcpp-0.7.6 (2016-10-30)
 * Tilde will now be expanded to home directory in visualizer_fifo_path, execute_on_song_change and external_editor configuration variables.
 * Fixed lyricwiki and justsomelyrics fetchers.
 
-ncmpcpp-0.7.5 (2016-08-17)
+# ncmpcpp-0.7.5 (2016-08-17)
 * Action chains can be now used for seeking.
 * Fixed fetching artist info from last.fm.
 * Default value of regular_expressions was changed from 'basic' to 'perl' to work around boost issue (#12222).
 * Fixed crash occuring when searching backward in an empty list.
 
-ncmpcpp 0.7.4 (2016-04-17)
+# ncmpcpp 0.7.4 (2016-04-17)
 * Fetching lyrics from lyricwiki.org was fixed.
 * Configure script now continues without errors if ICU library was not found.
 
-ncmpcpp 0.7.3 (2016-01-20)
+# ncmpcpp 0.7.3 (2016-01-20)
 * Home and End keys are now recognized in a few specific terminal emulators.
 
-ncmpcpp-0.7.2 (2016-01-16)
+# ncmpcpp-0.7.2 (2016-01-16)
 * Attempt to add non-song item to playlist from search engine doesn't trigger assertion failure anymore.
 * Fetching lyrics from metrolyrics.com was fixed.
 * Alternative UI separator color is now respected regardless of the header_visibility flag.
 
-ncmpcpp-0.7.1 (2016-01-01)
+# ncmpcpp-0.7.1 (2016-01-01)
 * Selected songs in media library can now be added to playlists.
 * Confirmation before shuffling a playlist can now be disabled.
 
-ncmpcpp-0.7 (2015-11-22)
+# ncmpcpp-0.7 (2015-11-22)
 * Playlist sorting dialog now contains 'Album artist' option.
 * Default keybindings were corrected to allow tag edition in the right column of tag editor.
 * Mouse is properly kept disabled if it was disabled in the configuration file.
 
-ncmpcpp-0.6.8 (2015-11-11)
+# ncmpcpp-0.6.8 (2015-11-11)
 * Application is now compatible with MPD >= 0.20.
 * Check for readline library was fixed.
 
-ncmpcpp-0.7_beta1 (2015-11-04)
-
+# ncmpcpp-0.7_beta1 (2015-11-04)
 * Visualizer has now support for multiple colors (visualizer_color configuration variable takes the list of colors to be used).
 * Visualizer has now support for two more modes: sound wave filled and sound ellipse.
 * Visualizer's spectrum mode now scales better along with window's width.
@@ -134,15 +145,14 @@ ncmpcpp-0.7_beta1 (2015-11-04)
 * Defined action chains are now shown in help screen.
 * Action chains for selecting an item and scrolling up/down are now bound to Shift-Up and Shift-Down respectively.
 
-ncmpcpp-0.6.7 (2015-09-12)
+# ncmpcpp-0.6.7 (2015-09-12)
 * Fetching artist info from last.fm was fixed.
 
-ncmpcpp-0.6.6 (2015-09-07)
+# ncmpcpp-0.6.6 (2015-09-07)
 * A typo in the example configuration file was fixed.
 * Fetching lyrics from lyricwiki.com was fixed.
 
-ncmpcpp-0.6.5 (2015-07-05)
-
+# ncmpcpp-0.6.5 (2015-07-05)
 * Description of mouse wheel usage on volume is now correct.
 * Configure script now fails if either readline or pthread specific headers are not present.
 * Searching in text fields now respects regular expression configuration.
@@ -153,28 +163,24 @@ ncmpcpp-0.6.5 (2015-07-05)
 * Assertion failure when resizing terminal window with no active MPD connection is fixed.
 * Lyrics fetchers were updated to work with sites that changed their HTML structure.
 
-ncmpcpp-0.6.4 (2015-05-02)
-
+# ncmpcpp-0.6.4 (2015-05-02)
 * Fix title of a pop-up which shows during adding selected items to the current playlist.
 * Correctly deal with leading separator while parsing filenames in tag editor.
 * Fix initial incorrect window size that was occuring in some cases.
 * Unknown and invalid configuration options can now be ignored using command line option 'ignore-config-errors'.
 
-ncmpcpp-0.6.3 (2015-03-02)
-
+# ncmpcpp-0.6.3 (2015-03-02)
 * Fix floating point exception when adding a specific number of random items.
 * Passwords are no longer added to the input history.
 * It is now possible to put more than one specific flag consecutively in formats.
 * Bash completion file was removed as it no longer works.
 * Description of available configuration options in man page was updated.
 
-ncmpcpp-0.6.2 (2014-12-13)
-
+# ncmpcpp-0.6.2 (2014-12-13)
 * Delete key now aditionally binds by default to action that deletes files in browser.
 * Fix incremental seeking so that it doesn't reset after 30 seconds.
 
-ncmpcpp-0.6.1 (2014-11-06)
-
+# ncmpcpp-0.6.1 (2014-11-06)
 * Comment tag is now properly written to mp3 files.
 * Only ID3v2.4 tags are now saved to mp3 files.
 * Mouse scrolling with newer ncurses API now works properly.
@@ -182,28 +188,24 @@ ncmpcpp-0.6.1 (2014-11-06)
 * Adding songs from a playlist in playlist editor now works properly with fetch delay.
 * Trying to fetch lyrics from an empty list doesn't crash the application anymore.
 
-ncmpcpp-0.6 (2014-10-25)
-
+# ncmpcpp-0.6 (2014-10-25)
 * Feature 'locate song' no more has a chance to crash the program.
 * Following lyrics of current song now works properly with consume mode active.
 * Deletion of empty playlists in playlist editor now works properly.
 * Toggling consume mode with crossfade mode active displays proper info.
 * Support for regular expressions works properly now.
 
-ncmpcpp-0.6_beta5 (2014-10-04)
-
+# ncmpcpp-0.6_beta5 (2014-10-04)
 * Corrupted tags no longer cause assertion failures.
 * MPD connection attempts are now made at most once per second.
 * Deletion of playlists in both browser and playlist editor is now properly handled.
 * Various actions no longer cause the program to crash when invoked with empty playlist.
 
-ncmpcpp-0.6_beta4 (2014-09-19)
-
+# ncmpcpp-0.6_beta4 (2014-09-19)
 * Jumping to current song in playlist doesn't trigger assertion failures anymore.
 * Readline's completion feature is now properly disabled.
 
-ncmpcpp-0.6_beta3 (2014-09-14)
-
+# ncmpcpp-0.6_beta3 (2014-09-14)
 * Handling of server events has been improved.
 * Readline now ignores escape key.
 * Cropping a playlist now works only if its length is bigger than 1.
@@ -217,8 +219,7 @@ ncmpcpp-0.6_beta3 (2014-09-14)
 * ncmpcpp now works properly with password protected server.
 * Data fetching delay in media library and playlist editor is now optional.
 
-ncmpcpp-0.6_beta2 (2014-09-03)
-
+# ncmpcpp-0.6_beta2 (2014-09-03)
 * Fixed the issue that prevented MPD flags toggling from working properly.
 * Song change event is now properly handled after song ends with consume flag active.
 * ncmpcpp now operates in raw terminal mode and ignores SIGINT.
@@ -226,8 +227,7 @@ ncmpcpp-0.6_beta2 (2014-09-03)
 * Build failures due to the missing include are now fixed.
 * Playlist cropping now works as expected if no item is selected.
 
-ncmpcpp-0.6_beta1 (2014-09-03)
-
+# ncmpcpp-0.6_beta1 (2014-09-03)
 * Support for polling communication mode has been removed. Additionally, MPD version >= 0.16 is required.
 * Keybinding system has been redesigned: "keys" file is now deprecated; "bindings" file is used instead. It has support for many features, including binding to non-ascii characters and macros.
 * Support for readline library was added.
@@ -238,13 +238,11 @@ ncmpcpp-0.6_beta1 (2014-09-03)
 * Broken compatibility of various actions with filtered lists has been corrected.
 * Tons of other small changes and improvements were made.
 
-ncmpcpp-0.5.10 (2012-04-01)
-
+# ncmpcpp-0.5.10 (2012-04-01)
 * fix compilation with gcc 4.7
 * fix building without curl support
 
-ncmpcpp-0.5.9 (2012-03-17)
-
+# ncmpcpp-0.5.9 (2012-03-17)
 * new feature: support for fetching lyrics for currently playing song in background
 * new feature: support for stereo visualization
 * new feature: support for merging screens together
@@ -254,15 +252,13 @@ ncmpcpp-0.5.9 (2012-03-17)
 * lyrics fetcher: add support for lololyrics.com
 * various bugfixes
 
-ncmpcpp-0.5.8 (2011-10-11)
-
+# ncmpcpp-0.5.8 (2011-10-11)
 * lyrics fetcher: add support for justsomelyrics.com
 * add command line switch -s/--screen for switching screen at startup
 * add proper support for asx/cue/m3u/pls/xspf playlists
 * bugfixes
 
-ncmpcpp-0.5.7 (2011-04-21)
-
+# ncmpcpp-0.5.7 (2011-04-21)
 * convert input path to utf8 before calling 'add' command
 * extras: add program that copies Artist to AlbumArtist for mp3/ogg/flac files
 * lyrics fetcher: add support for lyricsvip.com
@@ -270,13 +266,11 @@ ncmpcpp-0.5.7 (2011-04-21)
 * tag editor: do not convert filenames back to utf8 while reading files using taglib
 * search engine: fix error occuring while trying to select first album in results
 
-ncmpcpp-0.5.6 (2011-01-02)
-
+# ncmpcpp-0.5.6 (2011-01-02)
 * settings: make displaying 'empty tag' entry optional
 * bugfixes
 
-ncmpcpp-0.5.5 (2010-08-04)
-
+# ncmpcpp-0.5.5 (2010-08-04)
 * new feature: select album around cursor
 * new feature: 'replay' function
 * fixed feature: display separators between albums
@@ -293,8 +287,7 @@ ncmpcpp-0.5.5 (2010-08-04)
 * song format: support for limiting maximal length of a tag
 * a lot of minor fixes
 
-ncmpcpp-0.5.4 (2010-06-03)
-
+# ncmpcpp-0.5.4 (2010-06-03)
 * new feature: toggle bitrate visibility at runtime
 * new feature: locate song in tag editor
 * new feature: separators between albums in playlist
@@ -305,19 +298,16 @@ ncmpcpp-0.5.4 (2010-06-03)
 * browser: critical bugfix in feature "remove directory physically from hdd"
 * a few other bugfixes
 
-ncmpcpp-0.5.3 (2010-04-04)
-
+# ncmpcpp-0.5.3 (2010-04-04)
 * new feature: new movement keys: {Up,Down}{Album,Artist}
 * new feature: make displaying volume level in statusbar optional
 * new feature: jump from browser to playlist editor
 * bugfixes
 
-ncmpcpp-0.5.2 (2010-02-26)
-
+# ncmpcpp-0.5.2 (2010-02-26)
 * bugfixes
 
-ncmpcpp-0.5.1 (2010-02-15)
-
+# ncmpcpp-0.5.1 (2010-02-15)
 * new feature: customizable startup screen
 * new feature: locate song in media library
 * new feature: support for built-in mpd searching in search engine
@@ -329,8 +319,7 @@ ncmpcpp-0.5.1 (2010-02-15)
 * make displaying dates of albums in media library optional
 * several bugfixes
 
-ncmpcpp-0.5 (2009-12-31)
-
+# ncmpcpp-0.5 (2009-12-31)
 * bash completion support
 * libmpdclient2 support
 * "idle" command support
@@ -344,16 +333,14 @@ ncmpcpp-0.5 (2009-12-31)
 * tag editor: support for numerating tracks using xx/xx format
 * a lot of minor fixes
 
-ncmpcpp-0.4.1 (2009-10-03)
-
+# ncmpcpp-0.4.1 (2009-10-03)
 * support for writing performer, composer and disc tags into ogg and flac files
 * support for custom prefix/suffix of now playing song
 * support for system charset encoding autodetection
 * support for underlined text
 * optimizations and bugfixes
 
-ncmpcpp-0.4 (2009-09-09)
-
+# ncmpcpp-0.4 (2009-09-09)
 * new screen: music visualizer with sound wave/frequency spectrum modes
 * new feature: alternative user interface
 * new feature: command line switch for displaying now playing song
@@ -371,8 +358,7 @@ ncmpcpp-0.4 (2009-09-09)
 * marker for full filename (F) has been replaced with directory (D)
 * a lot of other minor improvements and bugfixes
 
-ncmpcpp-0.3.5 (2009-06-24)
-
+# ncmpcpp-0.3.5 (2009-06-24)
 * new feature: custom command execution on song change
 * new feature: allow for physical files and directories deletion
 * new feature: add local directories recursively
@@ -382,16 +368,14 @@ ncmpcpp-0.3.5 (2009-06-24)
 * text scrolling in header was made optional
 * some bugfixes
 
-ncmpcpp-0.3.4 (2009-05-19)
-
+# ncmpcpp-0.3.4 (2009-05-19)
 * new feature: search in help, lyrics and info screen
 * new feature: two columns view in media library
 * new feature: input box history
 * make displaying hidden files in local browser optional
 * bugfixes
 
-ncmpcpp-0.3.3 (2009-04-02)
-
+# ncmpcpp-0.3.3 (2009-04-02)
 * new feature: cyclic scrolling
 * support for single mode (requires >=mpd-0.15_alpha*)
 * support for consume mode (requires >=mpd-0.15_alpha*)
@@ -399,8 +383,7 @@ ncmpcpp-0.3.3 (2009-04-02)
 * support for WIN32
 * improvements and bugfixes
 
-ncmpcpp-0.3.2 (2009-03-17)
-
+# ncmpcpp-0.3.2 (2009-03-17)
 * new feature: locate currently playing song in browser
 * new feature: stop playing after current song
 * new feature: move item(s) in playlist to actual cursor's position
@@ -412,8 +395,7 @@ ncmpcpp-0.3.2 (2009-03-17)
 * improved searching in screens
 * minor improvements and bugfixes
 
-ncmpcpp-0.3.1 (2009-02-23)
-
+# ncmpcpp-0.3.1 (2009-02-23)
 * support for columns in browser and search engine
 * support for lyricsplugin database
 * support for any tag in search engine
@@ -423,24 +405,21 @@ ncmpcpp-0.3.1 (2009-02-23)
 * new feature: open lyrics in external editor
 * other minor improvements and bugfixes
 
-ncmpcpp-0.3 (2009-01-22)
-
+# ncmpcpp-0.3 (2009-01-22)
 * general core rewrite
 * new screen - clock
 * support for asian wide characters
 * support for non-utf8 encodings
 * a lot of bugfixes
 
-ncmpcpp-0.2.5 (2008-12-05)
-
+# ncmpcpp-0.2.5 (2008-12-05)
 * support for unix domain sockets
 * support for adding to playlist files outside mpd music directory (requires mpd >= 0.14_alpha*)
 * support for browsing local directories tree (requires mpd >= 0.14_alpha*)
 * support for searching in current playlist
 * many bugfixes
 
-ncmpcpp-0.2.4 (2008-10-12)
-
+# ncmpcpp-0.2.4 (2008-10-12)
 * fixed bug with not null terminated strings on mac os x
 * support for renaming files in tiny tag editor
 * support for editing composer, performer and disc tag in mp3 files
@@ -453,8 +432,7 @@ ncmpcpp-0.2.4 (2008-10-12)
 * changed place of storing config files
 * list of recently used patterns in tag editor is now remembered
 
-ncmpcpp-0.2.3 (2008-09-20)
-
+# ncmpcpp-0.2.3 (2008-09-20)
 * new screen - complex tag editor (with albums/directories view)
 * brand new song info screen (old one removed)
 * support for renaming files and directories
@@ -470,8 +448,7 @@ ncmpcpp-0.2.3 (2008-09-20)
 * incremental seeking (old behaviour is still available through config)
 * a bunch of fixes and improvements
 
-ncmpcpp-0.2.2 (2008-09-05)
-
+# ncmpcpp-0.2.2 (2008-09-05)
 * new screen - playlist editor
 * new playlist view - columns
 * playlist view switcher added (key 'p' by default)
@@ -483,8 +460,7 @@ ncmpcpp-0.2.2 (2008-09-05)
 * moving items improved
 * lots of minor fixes
 
-ncmpcpp-0.2.1 (2008-08-27)
-
+# ncmpcpp-0.2.1 (2008-08-27)
 * support for composer, performer and disc tag
 * customizable keybindings
 * "add" option added
@@ -492,8 +468,7 @@ ncmpcpp-0.2.1 (2008-08-27)
 * "repeat one song" mode added (works only if ncmpcpp is running)
 * minor fixes, improvements etc.
 
-ncmpcpp-0.2 (2008-08-20)
-
+# ncmpcpp-0.2 (2008-08-20)
 * libmpd dependency dropped
 * pkgconfig is not needed anymore
 * ncmpcpp now shows more info if it cannot connect to mpd
@@ -510,15 +485,13 @@ ncmpcpp-0.2 (2008-08-20)
 * sorting items in browser is case insensitive now
 * many fixes and improvements
 
-ncmpcpp-0.1.2 (2008-08-12)
-
+# ncmpcpp-0.1.2 (2008-08-12)
 * parts of interface are hideable now
 * new screen - media library
 * new option - crop (it removes all songs from playlist except the playing one)
 * many fixes and optimizations
 
-ncmpcpp-0.1.1 (2008-08-07)
-
+# ncmpcpp-0.1.1 (2008-08-07)
 * add example configuration file
 * configure.in now works as expected
 * taglib dependency is optional now
