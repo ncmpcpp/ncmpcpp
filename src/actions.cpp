@@ -1034,6 +1034,27 @@ void Add::run()
 	}
 }
 
+bool Load::canBeRun()
+{
+	return myScreen != myPlaylistEditor;
+}
+
+void Load::run()
+{
+	using Global::wFooter;
+
+	std::string path;
+	{
+		Statusbar::ScopedLock slock;
+		Statusbar::put() << "Load playlist: ";
+		path = wFooter->prompt();
+	}
+
+	Statusbar::put() << "Loading...";
+	wFooter->refresh();
+	Mpd.LoadPlaylist(path);
+}
+
 bool SeekForward::canBeRun()
 {
 	return Status::State::player() != MPD::psStop && Status::State::totalTime() > 0;
@@ -2753,6 +2774,7 @@ void populateActions()
 	insert_action(new Actions::MoveSelectedItemsDown());
 	insert_action(new Actions::MoveSelectedItemsTo());
 	insert_action(new Actions::Add());
+	insert_action(new Actions::Load());
 	insert_action(new Actions::PlayItem());
 	insert_action(new Actions::SeekForward());
 	insert_action(new Actions::SeekBackward());
