@@ -14,6 +14,11 @@
 * Fix Genius and Tekstowo fetchers.
 * Add dedicated 'Load' action for loading playlists.
 * Add 'media_library_hide_album_dates' option to a configuration file.
+* Improve the look of the frequency spectrum visualizer.
+* Add 'visualizer_spectrum_smooth_look', 'visualizer_spectrum_dft_size',
+  'visualizer_spectrum_hz_min' and 'visualizer_spectrum_hz_max' options to a
+  configuration file for controlling the look of the new spectrum visualizer.
+* Add 'visualizer_autoscale' option to a configuration file.
 
 # ncmpcpp-0.8.2 (2018-04-11)
 * Help screen: fixed display of EoF keycode
