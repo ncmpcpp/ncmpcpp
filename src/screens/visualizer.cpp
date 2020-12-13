@@ -160,12 +160,15 @@ void Visualizer::update()
 		memcpy(sdata_end - data, temp_sdata, data);
 	}
 
-	if (m_output_id != -1 && Global::Timer - m_timer > Config.visualizer_sync_interval)
+	if (Config.visualizer_sync_interval > boost::posix_time::seconds(0))
 	{
-		Mpd.DisableOutput(m_output_id);
-		usleep(50000);
-		Mpd.EnableOutput(m_output_id);
-		m_timer = Global::Timer;
+		if (m_output_id != -1 && Global::Timer - m_timer > Config.visualizer_sync_interval)
+		{
+			Mpd.DisableOutput(m_output_id);
+			usleep(50000);
+			Mpd.EnableOutput(m_output_id);
+			m_timer = Global::Timer;
+		}
 	}
 
 	void (Visualizer::*draw)(int16_t *, ssize_t, size_t, size_t);

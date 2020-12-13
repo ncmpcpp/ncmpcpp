@@ -69,13 +69,11 @@
 #visualizer_in_stereo = yes
 #
 ##
-## Note: Below parameter defines how often ncmpcpp has to "synchronize"
-## visualizer and audio outputs.  30 seconds is optimal value, but if you
-## experience synchronization problems, set it to lower value.  Keep in mind
-## that sane values start with >=10.
+## Note: set below to >=10 only if you have synchronization issues with
+## visualization and audio.
 ##
 #
-#visualizer_sync_interval = 30
+#visualizer_sync_interval = 0
 #
 ##
 ## Note: To enable spectrum frequency visualization you need to compile ncmpcpp

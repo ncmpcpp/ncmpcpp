@@ -279,10 +279,11 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("visualizer_fifo_path", &visualizer_fifo_path, "/tmp/mpd.fifo", adjust_path);
 	p.add("visualizer_output_name", &visualizer_output_name, "Visualizer feed");
 	p.add("visualizer_in_stereo", &visualizer_in_stereo, "yes", yes_no);
-	p.add("visualizer_sync_interval", &visualizer_sync_interval, "30",
+	p.add("visualizer_sync_interval", &visualizer_sync_interval, "0",
 	      [](std::string v) {
 		      unsigned sync_interval = verbose_lexical_cast<unsigned>(v);
-		      lowerBoundCheck<unsigned>(sync_interval, 10);
+		      if (sync_interval > 0)
+			      lowerBoundCheck<unsigned>(sync_interval, 10);
 		      return boost::posix_time::seconds(sync_interval);
 	});
 	p.add("visualizer_type", &visualizer_type, "wave");
