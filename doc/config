@@ -86,6 +86,8 @@
 ##
 #visualizer_type = wave
 #
+#visualizer_autoscale = no
+#
 #visualizer_look = ●▮
 #
 #visualizer_color = blue, cyan, green, yellow, magenta, red
