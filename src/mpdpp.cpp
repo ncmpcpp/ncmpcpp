@@ -602,7 +602,7 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number, std::mt19937 &rng
 	return true;
 }
 
-bool Connection::AddRandomSongs(size_t number, std::string random_exclude_pattern, std::mt19937 &rng)
+bool Connection::AddRandomSongs(size_t number, const std::string &random_exclude_pattern, std::mt19937 &rng)
 {
 	prechecksNoCommandsList();
 	std::vector<std::string> files;

@@ -547,7 +547,7 @@ struct Connection
 	int AddSong(const std::string &, int = -1); // returns id of added song
 	int AddSong(const Song &, int = -1); // returns id of added song
 	bool AddRandomTag(mpd_tag_type, size_t, std::mt19937 &rng);
-	bool AddRandomSongs(size_t number, std::string random_exclude_pattern, std::mt19937 &rng);
+	bool AddRandomSongs(size_t number, const std::string &random_exclude_pattern, std::mt19937 &rng);
 	void Add(const std::string &path);
 	void Delete(unsigned int pos);
 	void PlaylistDelete(const std::string &playlist, unsigned int pos);
