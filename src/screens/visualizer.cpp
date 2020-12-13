@@ -229,7 +229,7 @@ void Visualizer::update()
 	{
 		auto chan_samples = m_read_samples/2;
 		int16_t buf_left[chan_samples], buf_right[chan_samples];
-		for (ssize_t i = 0, j = 0; i < m_read_samples; i += 2, ++j)
+		for (size_t i = 0, j = 0; i < m_read_samples; i += 2, ++j)
 		{
 			buf_left[j] = m_sample_buffer[i];
 			buf_right[j] = m_sample_buffer[i+1];
@@ -456,7 +456,6 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 
 	const size_t win_width = w.getWidth();
 
-	double prev_bar_height = 0;
 	size_t cur_bin = 0;
 	while (cur_bin < m_fftw_results && Bin2Hz(cur_bin) < m_dft_logspace[0])
 	{
@@ -486,7 +485,6 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 
 		// average bins
 		bar_height /= count;
-		prev_bar_height = bar_height;
 
 		// log scale bar heights
 		bar_height = (20 * log10(bar_height) + DYNAMIC_RANGE + GAIN) / DYNAMIC_RANGE;
@@ -519,13 +517,12 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 			size_t y = flipped ? y_offset+j : y_offset+height-j-1;
 			auto color = toColor(j, height);
 			std::wstring ch;
-			bool reverse = false;
-
+	
 			// select character to draw
 			if (Config.visualizer_spectrum_smooth_look) {
 				// smooth
 				const size_t &size = SMOOTH_CHARS.size();
-				const int idx = static_cast<int>(size*h) % size;
+				const size_t idx = static_cast<size_t>(size*h) % size;
 				if (j < h-1 || idx == size-1) {
 					// full height
 					ch = SMOOTH_CHARS[size-1];
@@ -633,7 +630,7 @@ void Visualizer::GenLogspace()
 	// Generate logspaced frequencies
 	m_dft_logspace.resize(win_width);
 	const double log_scale = log10(HZ_MAX) / (left_bins + m_dft_logspace.size() - 1);
-	for (int i = left_bins; i < m_dft_logspace.size() + left_bins; ++i) {
+	for (size_t i = left_bins; i < m_dft_logspace.size() + left_bins; ++i) {
 		m_dft_logspace[i - left_bins] = pow(10, i * log_scale);
 	}
 }
