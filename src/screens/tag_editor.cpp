@@ -730,7 +730,7 @@ void TagEditor::runAction()
 	{
 		MPD::Song::GetFunction get = SongInfo::Tags[id].Get;
 		MPD::MutableSong::SetFunction set = SongInfo::Tags[id].Set;
-		if (id > 0 && w == TagTypes)
+		if (w == TagTypes)
 		{
 			Statusbar::ScopedLock slock;
 			Statusbar::put() << NC::Format::Bold << TagTypes->current()->value() << NC::Format::NoBold << ": ";

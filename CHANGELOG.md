@@ -19,6 +19,7 @@
   `visualizer_spectrum_hz_min` and `visualizer_spectrum_hz_max` options to a
   configuration file for controlling the look of the new spectrum visualizer.
 * Add `visualizer_autoscale` option to a configuration file.
+* Allow for editing multiple titles in the Tag Editor.
 
 # ncmpcpp-0.8.2 (2018-04-11)
 * Help screen: fixed display of EoF keycode
