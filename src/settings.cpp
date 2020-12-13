@@ -251,7 +251,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 					+ "\" to preserve current behavior");
 			};
 		});
-	p.add<void>("active_column_color", nullptr, "", [this](std::string v) {
+	p.add<void>("active_column_color", nullptr, "", [](std::string v) {
 			if (!v.empty())
 			{
 				deprecated(

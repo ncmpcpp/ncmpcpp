@@ -224,7 +224,7 @@ bool TinyTagEditor::getTags()
 	
 	w.highlight(8);
 
-	auto print_key_value = [this](NC::Buffer &buf, const char *key, const auto &value) {
+	auto print_key_value = [](NC::Buffer &buf, const char *key, const auto &value) {
 		buf << NC::Format::Bold
 		    << Config.color1
 		    << key
