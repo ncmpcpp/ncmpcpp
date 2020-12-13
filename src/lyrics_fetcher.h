@@ -116,7 +116,7 @@ struct GeniusFetcher : public GoogleLyricsFetcher
 	virtual const char *name() const override { return "genius.com"; }
 
 protected:
-	virtual const char *regex() const override { return "<div class=\"lyrics\">(.*?)</div>"; }
+	virtual const char *regex() const override { return "<div class=\"Lyrics__Container.*?\">(.*?)</div>"; }
 };
 
 struct JahLyricsFetcher : public GoogleLyricsFetcher
@@ -140,7 +140,7 @@ struct TekstowoFetcher : public GoogleLyricsFetcher
 	virtual const char *name() const override { return "tekstowo.pl"; }
 
 protected:
-	virtual const char *regex() const override { return "<div class=\"song-text\">.*?</h2>(.*?)<a"; }
+	virtual const char *regex() const override { return "<div class=\"song-text\".*?>.*?</h2>(.*?)<a"; }
 };
 
 struct ZeneszovegFetcher : public GoogleLyricsFetcher
