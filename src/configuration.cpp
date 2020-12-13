@@ -159,7 +159,6 @@ bool configure(int argc, char **argv)
 				std::make_tuple("azlyrics", "rihanna", "umbrella"),
 				std::make_tuple("genius", "rihanna", "umbrella"),
 				std::make_tuple("sing365", "rihanna", "umbrella"),
-				std::make_tuple("lyricsmania", "rihanna", "umbrella"),
 				std::make_tuple("metrolyrics", "rihanna", "umbrella"),
 				std::make_tuple("justsomelyrics", "rihanna", "umbrella"),
 				std::make_tuple("jahlyrics", "sean kingston", "dry your eyes"),

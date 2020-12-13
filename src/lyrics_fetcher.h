@@ -79,14 +79,6 @@ protected:
 	virtual bool isURLOk(const std::string &url) override;
 };
 
-struct LyricsmaniaFetcher : public GoogleLyricsFetcher
-{
-	virtual const char *name() const override { return "lyricsmania.com"; }
-	
-protected:
-	virtual const char *regex() const override { return "<div class=\"lyrics-body\".*?</div>(.*?)</div>"; }
-};
-
 struct Sing365Fetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const override { return "lyrics007.com"; }
