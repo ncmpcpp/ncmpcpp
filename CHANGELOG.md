@@ -13,6 +13,7 @@
 * Remove Lyricsmania fetcher as it no longer works.
 * Fix Genius and Tekstowo fetchers.
 * Add dedicated 'Load' action for loading playlists.
+* Add 'media_library_hide_album_dates' option to a configuration file.
 
 # ncmpcpp-0.8.2 (2018-04-11)
 * Help screen: fixed display of EoF keycode
