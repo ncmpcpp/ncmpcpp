@@ -342,7 +342,7 @@ void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offse
 
 		for (int32_t j = 0; j < point_y; ++j)
 		{
-			auto c = toColor(j, height);
+			auto c = toColor(j, height, false);
 			size_t y = flipped ? y_offset+j : y_offset+height-j-1;
 			w << NC::XY(x, y)
 			  << c
@@ -513,7 +513,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 		for (size_t j = 0; j < h; ++j)
 		{
 			size_t y = flipped ? y_offset+j : y_offset+height-j-1;
-			auto color = toColor(j, height);
+			auto color = toColor(j, height, false);
 			std::wstring ch;
 	
 			// select character to draw
