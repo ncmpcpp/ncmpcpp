@@ -133,18 +133,9 @@ void Visualizer::update()
 	// PCM in format 44100:16:1 (for mono visualization) and
 	// 44100:16:2 (for stereo visualization) is supported.
 	const int buf_size = sizeof(int16_t)*m_read_samples;
-	ssize_t data = read(m_fifo, m_temp_sample_buffer.data(), buf_size);
-	if (data <= 0) // no data available in fifo
+	ssize_t bytes_read = read(m_fifo, m_temp_sample_buffer.data(), buf_size);
+	if (bytes_read <= 0) // no data available in fifo
 		return;
-
-	{
-		// create int8_t pointers for arithmetic
-		int8_t *const sdata = (int8_t *)m_sample_buffer.data();
-		int8_t *const temp_sdata = (int8_t *)m_temp_sample_buffer.data();
-		int8_t *const sdata_end = sdata + buf_size;
-		memmove(sdata, sdata + data, buf_size - data);
-		memcpy(sdata_end - data, temp_sdata, data);
-	}
 
 	if (m_output_id != -1 && Global::Timer - m_timer > Config.visualizer_sync_interval)
 	{
@@ -153,30 +144,41 @@ void Visualizer::update()
 		Mpd.EnableOutput(m_output_id);
 		m_timer = Global::Timer;
 	}
-
+	
 	if (Config.visualizer_autoscale)
 	{
 		m_auto_scale_multiplier += 1.0/Config.visualizer_fps;
-		for (auto &sample : m_sample_buffer)
+		const auto begin = m_temp_sample_buffer.begin();
+		const auto end = m_temp_sample_buffer.begin() + bytes_read/sizeof(int16_t);
+		for (auto sample = begin; sample != end; ++sample)
 		{
 			double scale = std::numeric_limits<int16_t>::min();
-			scale /= sample;
+			scale /= *sample;
 			scale = fabs(scale);
 			if (scale < m_auto_scale_multiplier)
 				m_auto_scale_multiplier = scale;
 		}
-		for (auto &sample : m_sample_buffer)
+		for (auto sample = begin; sample != end; ++sample)
 		{
-			int32_t tmp = sample;
+			int32_t tmp = *sample;
 			if (m_auto_scale_multiplier <= 50.0) // limit the auto scale
 				tmp *= m_auto_scale_multiplier;
 			if (tmp < std::numeric_limits<int16_t>::min())
-				sample = std::numeric_limits<int16_t>::min();
+				*sample = std::numeric_limits<int16_t>::min();
 			else if (tmp > std::numeric_limits<int16_t>::max())
-				sample = std::numeric_limits<int16_t>::max();
+				*sample = std::numeric_limits<int16_t>::max();
 			else
-				sample = tmp;
+				*sample = tmp;
 		}
+	}
+
+	{
+		// create int8_t pointers for arithmetic
+		int8_t *const sdata = (int8_t *)m_sample_buffer.data();
+		int8_t *const temp_sdata = (int8_t *)m_temp_sample_buffer.data();
+		int8_t *const sdata_end = sdata + buf_size;
+		memmove(sdata, sdata + bytes_read, buf_size - bytes_read);
+		memcpy(sdata_end - bytes_read, temp_sdata, bytes_read);
 	}
 
 	w.clear();
@@ -210,7 +212,7 @@ int Visualizer::windowTimeout()
 
 /**********************************************************************/
 
-void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
+void Visualizer::DrawSoundWave(const int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
 	const size_t half_height = height/2;
 	const size_t base_y = y_offset+half_height;
@@ -262,7 +264,7 @@ void Visualizer::DrawSoundWave(int16_t *buf, ssize_t samples, size_t y_offset, s
 	}
 }
 
-void Visualizer::DrawSoundWaveStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
+void Visualizer::DrawSoundWaveStereo(const int16_t *buf_left, const int16_t *buf_right, ssize_t samples, size_t height)
 {
 	DrawSoundWave(buf_left, samples, 0, height);
 	DrawSoundWave(buf_right, samples, height, w.getHeight() - height);
@@ -274,7 +276,7 @@ void Visualizer::DrawSoundWaveStereo(int16_t *buf_left, int16_t *buf_right, ssiz
 // instead of a single line the entire height is filled. In stereo mode, the top
 // half of the screen is dedicated to the right channel, the bottom the left
 // channel.
-void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
+void Visualizer::DrawSoundWaveFill(const int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
 	// if right channel is drawn, bars descend from the top to the bottom
 	const bool flipped = y_offset > 0;
@@ -309,7 +311,7 @@ void Visualizer::DrawSoundWaveFill(int16_t *buf, ssize_t samples, size_t y_offse
 	}
 }
 
-void Visualizer::DrawSoundWaveFillStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
+void Visualizer::DrawSoundWaveFillStereo(const int16_t *buf_left, const int16_t *buf_right, ssize_t samples, size_t height)
 {
 	DrawSoundWaveFill(buf_left, samples, 0, height);
 	DrawSoundWaveFill(buf_right, samples, height, w.getHeight() - height);
@@ -318,7 +320,7 @@ void Visualizer::DrawSoundWaveFillStereo(int16_t *buf_left, int16_t *buf_right, 
 /**********************************************************************/
 
 // Draws the sound wave as an ellipse with origin in the center of the screen.
-void Visualizer::DrawSoundEllipse(int16_t *buf, ssize_t samples, size_t, size_t height)
+void Visualizer::DrawSoundEllipse(const int16_t *buf, ssize_t samples, size_t, size_t height)
 {
 	const size_t half_width = w.getWidth()/2;
 	const size_t half_height = height/2;
@@ -361,7 +363,7 @@ void Visualizer::DrawSoundEllipse(int16_t *buf, ssize_t samples, size_t, size_t 
 // circle. This visualizer assume the font height is twice the length of the
 // font's width. If the font is skinner or wider than this, instead of a circle
 // it will be an ellipse.
-void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t half_height)
+void Visualizer::DrawSoundEllipseStereo(const int16_t *buf_left, const int16_t *buf_right, ssize_t samples, size_t half_height)
 {
 	const size_t width = w.getWidth();
 	const size_t left_half_width = width/2;
@@ -393,7 +395,7 @@ void Visualizer::DrawSoundEllipseStereo(int16_t *buf_left, int16_t *buf_right, s
 /**********************************************************************/
 
 #ifdef HAVE_FFTW3_H
-void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
+void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size_t y_offset, size_t height)
 {
 	// If right channel is drawn, bars descend from the top to the bottom.
 	const bool flipped = y_offset > 0;
@@ -504,7 +506,7 @@ void Visualizer::DrawFrequencySpectrum(int16_t *buf, ssize_t samples, size_t y_o
 	}
 }
 
-void Visualizer::DrawFrequencySpectrumStereo(int16_t *buf_left, int16_t *buf_right, ssize_t samples, size_t height)
+void Visualizer::DrawFrequencySpectrumStereo(const int16_t *buf_left, const int16_t *buf_right, ssize_t samples, size_t height)
 {
 	DrawFrequencySpectrum(buf_left, samples, 0, height);
 	DrawFrequencySpectrum(buf_right, samples, height, w.getHeight() - height);
@@ -555,7 +557,7 @@ double Visualizer::Interpolate(size_t x, size_t h_idx)
 	return h_next;
 }
 
-void Visualizer::ApplyWindow(double *output, int16_t *input, ssize_t samples)
+void Visualizer::ApplyWindow(double *output, const int16_t *input, ssize_t samples)
 {
 	// Use Blackman window for low sidelobes and fast sidelobe rolloff
 	// don't care too much about mainlobe width
@@ -694,7 +696,7 @@ void Visualizer::FindOutputID()
 
 void Visualizer::ResetAutoScaleMultiplier()
 {
-	m_auto_scale_multiplier = std::numeric_limits<double>::infinity();
+	m_auto_scale_multiplier = 1;
 }
 
 #endif // ENABLE_VISUALIZER

@@ -62,16 +62,16 @@ struct Visualizer: Screen<NC::Window>, Tabbable
 	void ResetAutoScaleMultiplier();
 
 private:
-	void DrawSoundWave(int16_t *, ssize_t, size_t, size_t);
-	void DrawSoundWaveStereo(int16_t *, int16_t *, ssize_t, size_t);
-	void DrawSoundWaveFill(int16_t *, ssize_t, size_t, size_t);
-	void DrawSoundWaveFillStereo(int16_t *, int16_t *, ssize_t, size_t);
-	void DrawSoundEllipse(int16_t *, ssize_t, size_t, size_t);
-	void DrawSoundEllipseStereo(int16_t *, int16_t *, ssize_t, size_t);
+	void DrawSoundWave(const int16_t *, ssize_t, size_t, size_t);
+	void DrawSoundWaveStereo(const int16_t *, const int16_t *, ssize_t, size_t);
+	void DrawSoundWaveFill(const int16_t *, ssize_t, size_t, size_t);
+	void DrawSoundWaveFillStereo(const int16_t *, const int16_t *, ssize_t, size_t);
+	void DrawSoundEllipse(const int16_t *, ssize_t, size_t, size_t);
+	void DrawSoundEllipseStereo(const int16_t *, const int16_t *, ssize_t, size_t);
 #	ifdef HAVE_FFTW3_H
-	void DrawFrequencySpectrum(int16_t *, ssize_t, size_t, size_t);
-	void DrawFrequencySpectrumStereo(int16_t *, int16_t *, ssize_t, size_t);
-	void ApplyWindow(double *, int16_t *, ssize_t);
+	void DrawFrequencySpectrum(const int16_t *, ssize_t, size_t, size_t);
+	void DrawFrequencySpectrumStereo(const int16_t *, const int16_t *, ssize_t, size_t);
+	void ApplyWindow(double *, const int16_t *, ssize_t);
 	void GenLogspace();
 	double Bin2Hz(size_t);
 	double Interpolate(size_t, size_t);
@@ -79,8 +79,8 @@ private:
 
 	void SetVisualizationType();
 
-	void (Visualizer::*draw)(int16_t *, ssize_t, size_t, size_t);
-	void (Visualizer::*drawStereo)(int16_t *, int16_t *, ssize_t, size_t);
+	void (Visualizer::*draw)(const int16_t *, ssize_t, size_t, size_t);
+	void (Visualizer::*drawStereo)(const int16_t *, const int16_t *, ssize_t, size_t);
 
 	int m_output_id;
 	boost::posix_time::ptime m_timer;
