@@ -105,13 +105,13 @@
 #
 #visualizer_spectrum_smooth_look = yes
 #
-## A value between 1 and 7 inclusive. Specifying a larger value makes the
+## A value between 1 and 5 inclusive. Specifying a larger value makes the
 ## visualizer look at a larger slice of time, which results in less jumpy
 ## visualizer output.
 #
-#visualizer_spectrum_dft_size = 4
+#visualizer_spectrum_dft_size = 3
 #
-#visualizer_spectrum_gain = 20
+#visualizer_spectrum_gain = 10
 #
 ## Left-most frequency of visualizer in Hz, must be less than HZ MAX
 #

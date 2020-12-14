@@ -52,7 +52,7 @@ Visualizer *myVisualizer;
 
 namespace {
 
-const int fps = 30;
+const size_t fps = 30;
 const uint32_t MIN_DFT_SIZE = 14;
 
 // toColor: a scaling function for coloring. For numbers 0 to max this function
@@ -83,16 +83,7 @@ Visualizer::Visualizer()
 #endif
 {
 	ResetFD();
-#	ifdef HAVE_FFTW3_H
-	m_read_samples = DFT_NONZERO_SIZE;
-#	else
-	m_read_samples = 44100 / fps;
-#	endif // HAVE_FFTW3_H
-	if (Config.visualizer_in_stereo)
-		m_read_samples *= 2;
-	m_sample_buffer.resize(m_read_samples, 0);
-	m_temp_sample_buffer.resize(m_read_samples, 0);
-
+	SetVisualizationType();
 #	ifdef HAVE_FFTW3_H
 	m_fftw_results = DFT_TOTAL_SIZE/2+1;
 	m_freq_magnitudes.resize(m_fftw_results);
@@ -166,39 +157,8 @@ void Visualizer::update()
 		m_timer = Global::Timer;
 	}
 
-	void (Visualizer::*draw)(int16_t *, ssize_t, size_t, size_t);
-	void (Visualizer::*drawStereo)(int16_t *, int16_t *, ssize_t, size_t);
-#	ifdef HAVE_FFTW3_H
-	if (Config.visualizer_type == VisualizerType::Spectrum)
+	if (Config.visualizer_autoscale)
 	{
-		m_read_samples = DFT_NONZERO_SIZE;
-		draw = &Visualizer::DrawFrequencySpectrum;
-		drawStereo = &Visualizer::DrawFrequencySpectrumStereo;
-	}
-	else
-#	endif // HAVE_FFTW3_H
-	if (Config.visualizer_type == VisualizerType::WaveFilled)
-	{
-		m_read_samples = 44100 / fps;
-		draw = &Visualizer::DrawSoundWaveFill;
-		drawStereo = &Visualizer::DrawSoundWaveFillStereo;
-	}
-	else if (Config.visualizer_type == VisualizerType::Ellipse)
-	{
-		m_read_samples = 44100 / fps;
-		draw = &Visualizer::DrawSoundEllipse;
-		drawStereo = &Visualizer::DrawSoundEllipseStereo;
-	}
-	else
-	{
-		m_read_samples = 44100 / fps;
-		draw = &Visualizer::DrawSoundWave;
-		drawStereo = &Visualizer::DrawSoundWaveStereo;
-	}
-	m_sample_buffer.resize(m_read_samples);
-	m_temp_sample_buffer.resize(m_read_samples);
-
-	if (Config.visualizer_autoscale) {
 		m_auto_scale_multiplier += 1.0/fps;
 		for (auto &sample : m_sample_buffer)
 		{
@@ -634,6 +594,41 @@ void Visualizer::GenLogspace()
 }
 #endif // HAVE_FFTW3_H
 
+void Visualizer::SetVisualizationType()
+{
+	switch (Config.visualizer_type)
+	{
+	case VisualizerType::Wave:
+		m_read_samples = std::max(44100 / fps, w.getWidth());
+		draw = &Visualizer::DrawSoundWave;
+		drawStereo = &Visualizer::DrawSoundWaveStereo;
+		break;
+	case VisualizerType::WaveFilled:
+		m_read_samples = std::max(44100 / fps, w.getWidth());
+		draw = &Visualizer::DrawSoundWaveFill;
+		drawStereo = &Visualizer::DrawSoundWaveFillStereo;
+		break;
+#	ifdef HAVE_FFTW3_H
+	case VisualizerType::Spectrum:
+		m_read_samples = DFT_NONZERO_SIZE;
+		draw = &Visualizer::DrawFrequencySpectrum;
+		drawStereo = &Visualizer::DrawFrequencySpectrumStereo;
+		break;
+#	endif // HAVE_FFTW3_H
+	case VisualizerType::Ellipse:
+		m_read_samples = 44100 / fps;
+		draw = &Visualizer::DrawSoundEllipse;
+		drawStereo = &Visualizer::DrawSoundEllipseStereo;
+		break;
+	}
+	if (Config.visualizer_in_stereo)
+		m_read_samples *= 2;
+	m_sample_buffer.resize(m_read_samples);
+	m_temp_sample_buffer.resize(m_read_samples);
+	std::fill(m_sample_buffer.begin(), m_sample_buffer.end(), 0);
+	std::fill(m_temp_sample_buffer.begin(), m_temp_sample_buffer.end(), 0);
+}
+
 /**********************************************************************/
 
 void Visualizer::Clear()
@@ -665,6 +660,7 @@ void Visualizer::ToggleVisualizationType()
 			Config.visualizer_type = VisualizerType::Wave;
 			break;
 	}
+	SetVisualizationType();
 	Statusbar::printf("Visualization type: %1%", Config.visualizer_type);
 }
 

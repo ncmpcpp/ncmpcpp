@@ -77,6 +77,11 @@ private:
 	double Interpolate(size_t, size_t);
 #	endif // HAVE_FFTW3_H
 
+	void SetVisualizationType();
+
+	void (Visualizer::*draw)(int16_t *, ssize_t, size_t, size_t);
+	void (Visualizer::*drawStereo)(int16_t *, int16_t *, ssize_t, size_t);
+
 	int m_output_id;
 	boost::posix_time::ptime m_timer;
 
