@@ -287,7 +287,13 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 		      lowerBoundCheck<unsigned>(sync_interval, 10);
 		      return boost::posix_time::seconds(sync_interval);
 	});
-	p.add("visualizer_type", &visualizer_type, "wave");
+	p.add("visualizer_type", &visualizer_type,
+#ifdef HAVE_FFTW3_H
+	      "spectrum"
+#else
+	      "ellipse"
+#endif
+		);
 	p.add("visualizer_look", &visualizer_chars, "●▮", [](std::string s) {
 			auto result = ToWString(std::move(s));
 			boundsCheck<std::wstring::size_type>(result.size(), 2, 2);

@@ -82,7 +82,7 @@
 #
 ## Available values: spectrum, wave, wave_filled, ellipse.
 ##
-#visualizer_type = wave
+#visualizer_type = spectrum
 #
 #visualizer_fps = 60
 #
