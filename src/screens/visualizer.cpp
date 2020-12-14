@@ -52,8 +52,6 @@ Visualizer *myVisualizer;
 
 namespace {
 
-const uint32_t MIN_DFT_SIZE = 14;
-
 // toColor: a scaling function for coloring. For numbers 0 to max this function
 // returns a coloring from the lowest color to the highest, and colors will not
 // loop from 0 to max.
@@ -73,7 +71,7 @@ Visualizer::Visualizer()
 #	ifdef HAVE_FFTW3_H
 	,
   DFT_NONZERO_SIZE(1 << Config.visualizer_spectrum_dft_size),
-  DFT_TOTAL_SIZE(Config.visualizer_spectrum_dft_size >= MIN_DFT_SIZE ? 1 << (Config.visualizer_spectrum_dft_size) : 1<<MIN_DFT_SIZE),
+  DFT_TOTAL_SIZE(1 << (Config.visualizer_spectrum_dft_size + 2)),
   DYNAMIC_RANGE(100-Config.visualizer_spectrum_gain),
   HZ_MIN(Config.visualizer_spectrum_hz_min),
   HZ_MAX(Config.visualizer_spectrum_hz_max),
