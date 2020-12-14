@@ -52,7 +52,6 @@ Visualizer *myVisualizer;
 
 namespace {
 
-const size_t fps = 30;
 const uint32_t MIN_DFT_SIZE = 14;
 
 // toColor: a scaling function for coloring. For numbers 0 to max this function
@@ -159,7 +158,7 @@ void Visualizer::update()
 
 	if (Config.visualizer_autoscale)
 	{
-		m_auto_scale_multiplier += 1.0/fps;
+		m_auto_scale_multiplier += 1.0/Config.visualizer_fps;
 		for (auto &sample : m_sample_buffer)
 		{
 			double scale = std::numeric_limits<int16_t>::min();
@@ -206,7 +205,7 @@ void Visualizer::update()
 int Visualizer::windowTimeout()
 {
 	if (m_fifo >= 0 && Status::State::player() == MPD::psPlay)
-		return 1000/fps;
+		return 1000/Config.visualizer_fps;
 	else
 		return Screen<WindowType>::windowTimeout();
 }
@@ -599,12 +598,12 @@ void Visualizer::SetVisualizationType()
 	switch (Config.visualizer_type)
 	{
 	case VisualizerType::Wave:
-		m_read_samples = std::max(44100 / fps, w.getWidth());
+		m_read_samples = std::max(44100 / Config.visualizer_fps, w.getWidth());
 		draw = &Visualizer::DrawSoundWave;
 		drawStereo = &Visualizer::DrawSoundWaveStereo;
 		break;
 	case VisualizerType::WaveFilled:
-		m_read_samples = std::max(44100 / fps, w.getWidth());
+		m_read_samples = std::max(44100 / Config.visualizer_fps, w.getWidth());
 		draw = &Visualizer::DrawSoundWaveFill;
 		drawStereo = &Visualizer::DrawSoundWaveFillStereo;
 		break;
@@ -616,7 +615,7 @@ void Visualizer::SetVisualizationType()
 		break;
 #	endif // HAVE_FFTW3_H
 	case VisualizerType::Ellipse:
-		m_read_samples = 44100 / fps;
+		m_read_samples = 44100 / Config.visualizer_fps;
 		draw = &Visualizer::DrawSoundEllipse;
 		drawStereo = &Visualizer::DrawSoundEllipseStereo;
 		break;

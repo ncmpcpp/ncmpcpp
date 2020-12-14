@@ -84,6 +84,8 @@
 ##
 #visualizer_type = wave
 #
+#visualizer_fps = 60
+#
 #visualizer_autoscale = no
 #
 #visualizer_look = ●▮

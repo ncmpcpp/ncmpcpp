@@ -293,12 +293,18 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			boundsCheck<std::wstring::size_type>(result.size(), 2, 2);
 			return result;
 	});
+	p.add("visualizer_fps", &visualizer_fps,
+			"60", [](std::string v) {
+			uint32_t result = verbose_lexical_cast<uint32_t>(v);
+			boundsCheck<uint32_t>(result, 30, 144);
+			return result;
+			});
 	p.add("visualizer_autoscale", &visualizer_autoscale, "no", yes_no);
 	p.add("visualizer_spectrum_smooth_look", &visualizer_spectrum_smooth_look, "yes", yes_no);
 	p.add("visualizer_spectrum_dft_size", &visualizer_spectrum_dft_size,
 			"3", [](std::string v) {
-      uint32_t result = verbose_lexical_cast<uint32_t>(v);
-      boundsCheck<uint32_t>(result, 1, 5);
+			auto result = verbose_lexical_cast<size_t>(v);
+			boundsCheck<size_t>(result, 1, 5);
 			return result + 11;
 			});
 	p.add("visualizer_spectrum_gain", &visualizer_spectrum_gain,

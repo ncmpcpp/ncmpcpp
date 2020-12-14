@@ -20,6 +20,7 @@
   `visualizer_spectrum_hz_max` options to a configuration file for controlling
   the look of the new spectrum visualizer.
 * Add `visualizer_autoscale` option to a configuration file.
+* Add `visualizer_fps` option to a configuration file (60 by default).
 * Allow for editing multiple titles in the Tag Editor.
 * Allow setting `visualizer_sync_interval` to 0 (a new default) to disable
   synchronization attempts.
