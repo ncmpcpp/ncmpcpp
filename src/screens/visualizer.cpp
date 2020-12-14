@@ -80,7 +80,7 @@ Visualizer::Visualizer()
 #endif
 {
 	ResetFD();
-	SetVisualizationType();
+	InitVisualization();
 #	ifdef HAVE_FFTW3_H
 	m_fftw_results = DFT_TOTAL_SIZE/2+1;
 	m_freq_magnitudes.resize(m_fftw_results);
@@ -114,6 +114,7 @@ void Visualizer::resize()
 	w.resize(width, MainHeight);
 	w.moveTo(x_offset, MainStartY);
 	hasToBeResized = 0;
+	InitVisualization();
 #	ifdef HAVE_FFTW3_H
 	GenLogspace();
 	m_bar_heights.reserve(w.getWidth());
@@ -593,7 +594,7 @@ void Visualizer::GenLogspace()
 }
 #endif // HAVE_FFTW3_H
 
-void Visualizer::SetVisualizationType()
+void Visualizer::InitVisualization()
 {
 	switch (Config.visualizer_type)
 	{
@@ -660,7 +661,7 @@ void Visualizer::ToggleVisualizationType()
 			Config.visualizer_type = VisualizerType::Wave;
 			break;
 	}
-	SetVisualizationType();
+	InitVisualization();
 	Statusbar::printf("Visualization type: %1%", Config.visualizer_type);
 }
 

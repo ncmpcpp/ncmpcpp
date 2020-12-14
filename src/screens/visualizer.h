@@ -77,7 +77,7 @@ private:
 	double Interpolate(size_t, size_t);
 #	endif // HAVE_FFTW3_H
 
-	void SetVisualizationType();
+	void InitVisualization();
 
 	void (Visualizer::*draw)(const int16_t *, ssize_t, size_t, size_t);
 	void (Visualizer::*drawStereo)(const int16_t *, const int16_t *, ssize_t, size_t);
