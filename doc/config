@@ -105,11 +105,11 @@
 #
 #visualizer_spectrum_smooth_look = yes
 #
-## A value between 0 and 4 inclusive. Specifying a larger value makes the
+## A value between 1 and 7 inclusive. Specifying a larger value makes the
 ## visualizer look at a larger slice of time, which results in less jumpy
 ## visualizer output.
 #
-#visualizer_spectrum_dft_size = 2
+#visualizer_spectrum_dft_size = 4
 #
 #visualizer_spectrum_gain = 20
 #
