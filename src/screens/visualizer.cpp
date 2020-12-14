@@ -615,7 +615,8 @@ void Visualizer::SetVisualizationType()
 		break;
 #	endif // HAVE_FFTW3_H
 	case VisualizerType::Ellipse:
-		m_read_samples = 44100 / Config.visualizer_fps;
+		// Keep constant amount of samples on the screen regardless of fps.
+		m_read_samples = 44100 / 25;
 		draw = &Visualizer::DrawSoundEllipse;
 		drawStereo = &Visualizer::DrawSoundEllipseStereo;
 		break;
