@@ -599,12 +599,16 @@ void Visualizer::InitVisualization()
 	switch (Config.visualizer_type)
 	{
 	case VisualizerType::Wave:
-		m_read_samples = std::max(44100 / Config.visualizer_fps, w.getWidth());
+		// Guarantee integral amount of samples per column.
+		m_read_samples = ceil(44100.0 / Config.visualizer_fps / w.getWidth());
+		m_read_samples *= w.getWidth();
 		draw = &Visualizer::DrawSoundWave;
 		drawStereo = &Visualizer::DrawSoundWaveStereo;
 		break;
 	case VisualizerType::WaveFilled:
-		m_read_samples = std::max(44100 / Config.visualizer_fps, w.getWidth());
+		// Guarantee integral amount of samples per column.
+		m_read_samples = ceil(44100.0 / Config.visualizer_fps / w.getWidth());
+		m_read_samples *= w.getWidth();
 		draw = &Visualizer::DrawSoundWaveFill;
 		drawStereo = &Visualizer::DrawSoundWaveFillStereo;
 		break;
