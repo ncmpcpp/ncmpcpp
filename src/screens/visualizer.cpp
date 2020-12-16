@@ -33,6 +33,9 @@
 #include <fcntl.h>
 #include <cassert>
 
+#include <arpa/inet.h>
+#include <sys/socket.h>
+
 #include "global.h"
 #include "settings.h"
 #include "status.h"
@@ -68,6 +71,9 @@ const NC::FormattedColor &toColor(size_t number, size_t max, bool wrap = true)
 
 Visualizer::Visualizer()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
+, m_sample_consumption_rate(5)
+, m_sample_consumption_rate_up_ctr(0)
+, m_sample_consumption_rate_dn_ctr(0)
 #	ifdef HAVE_FFTW3_H
 	,
   DFT_NONZERO_SIZE(1 << Config.visualizer_spectrum_dft_size),
@@ -131,13 +137,6 @@ void Visualizer::update()
 	if (m_fifo < 0)
 		return;
 
-	// PCM in format 44100:16:1 (for mono visualization) and
-	// 44100:16:2 (for stereo visualization) is supported.
-	const int buf_size = sizeof(int16_t)*m_read_samples;
-	ssize_t bytes_read = read(m_fifo, m_temp_sample_buffer.data(), buf_size);
-	if (bytes_read <= 0) // no data available in fifo
-		return;
-
 	if (m_output_id != -1 && Global::Timer - m_timer > Config.visualizer_sync_interval)
 	{
 		Mpd.DisableOutput(m_output_id);
@@ -145,52 +144,82 @@ void Visualizer::update()
 		Mpd.EnableOutput(m_output_id);
 		m_timer = Global::Timer;
 	}
-	
-	if (Config.visualizer_autoscale)
+
+	// PCM in format 44100:16:1 (for mono visualization) and
+	// 44100:16:2 (for stereo visualization) is supported.
+	ssize_t bytes_read = read(m_fifo, m_incoming_samples.data(),
+	                          sizeof(int16_t) * m_incoming_samples.size());
+	if (bytes_read > 0)
 	{
-		m_auto_scale_multiplier += 1.0/Config.visualizer_fps;
-		const auto begin = m_temp_sample_buffer.begin();
-		const auto end = m_temp_sample_buffer.begin() + bytes_read/sizeof(int16_t);
-		for (auto sample = begin; sample != end; ++sample)
+		const auto begin = m_incoming_samples.begin();
+		const auto end = m_incoming_samples.begin() + bytes_read/sizeof(int16_t);
+
+		if (Config.visualizer_autoscale)
 		{
-			double scale = std::numeric_limits<int16_t>::min();
-			scale /= *sample;
-			scale = fabs(scale);
-			if (scale < m_auto_scale_multiplier)
-				m_auto_scale_multiplier = scale;
+			m_auto_scale_multiplier += 1.0/Config.visualizer_fps;
+			for (auto sample = begin; sample != end; ++sample)
+			{
+				double scale = std::numeric_limits<int16_t>::min();
+				scale /= *sample;
+				scale = fabs(scale);
+				if (scale < m_auto_scale_multiplier)
+					m_auto_scale_multiplier = scale;
+			}
+			for (auto sample = begin; sample != end; ++sample)
+			{
+				int32_t tmp = *sample;
+				if (m_auto_scale_multiplier <= 50.0) // limit the auto scale
+					tmp *= m_auto_scale_multiplier;
+				if (tmp < std::numeric_limits<int16_t>::min())
+					*sample = std::numeric_limits<int16_t>::min();
+				else if (tmp > std::numeric_limits<int16_t>::max())
+					*sample = std::numeric_limits<int16_t>::max();
+				else
+					*sample = tmp;
+			}
 		}
-		for (auto sample = begin; sample != end; ++sample)
-		{
-			int32_t tmp = *sample;
-			if (m_auto_scale_multiplier <= 50.0) // limit the auto scale
-				tmp *= m_auto_scale_multiplier;
-			if (tmp < std::numeric_limits<int16_t>::min())
-				*sample = std::numeric_limits<int16_t>::min();
-			else if (tmp > std::numeric_limits<int16_t>::max())
-				*sample = std::numeric_limits<int16_t>::max();
-			else
-				*sample = tmp;
-		}
+		m_buffered_samples.put(begin, end);
 	}
 
+	size_t requested_samples =
+		44100.0 / Config.visualizer_fps * pow(1.1, m_sample_consumption_rate);
+	if (Config.visualizer_in_stereo)
+		requested_samples *= 2;
+
+	Statusbar::printf("Samples: %1%, %2%, %3%", m_buffered_samples.size(),
+	                  requested_samples, m_sample_consumption_rate);
+
+	size_t new_samples = m_buffered_samples.move(requested_samples, m_rendered_samples);
+	if (new_samples == 0)
+		return;
+
+	if (m_buffered_samples.size() > 0)
 	{
-		// create int8_t pointers for arithmetic
-		int8_t *const sdata = (int8_t *)m_sample_buffer.data();
-		int8_t *const temp_sdata = (int8_t *)m_temp_sample_buffer.data();
-		int8_t *const sdata_end = sdata + buf_size;
-		memmove(sdata, sdata + bytes_read, buf_size - bytes_read);
-		memcpy(sdata_end - bytes_read, temp_sdata, bytes_read);
+		if (++m_sample_consumption_rate_up_ctr > 8)
+		{
+			m_sample_consumption_rate_up_ctr = 0;
+			++m_sample_consumption_rate;
+		}
+	}
+	else if (m_sample_consumption_rate > 0)
+	{
+		if (++m_sample_consumption_rate_dn_ctr > 2)
+		{
+			m_sample_consumption_rate_dn_ctr = 0;
+			--m_sample_consumption_rate;
+		}
+		m_sample_consumption_rate_up_ctr = 0;
 	}
 
 	w.clear();
 	if (Config.visualizer_in_stereo)
 	{
-		auto chan_samples = m_read_samples/2;
+		auto chan_samples = m_rendered_samples.size()/2;
 		int16_t buf_left[chan_samples], buf_right[chan_samples];
-		for (size_t i = 0, j = 0; i < m_read_samples; i += 2, ++j)
+		for (size_t i = 0, j = 0; i < m_rendered_samples.size(); i += 2, ++j)
 		{
-			buf_left[j] = m_sample_buffer[i];
-			buf_right[j] = m_sample_buffer[i+1];
+			buf_left[j] = m_rendered_samples[i];
+			buf_right[j] = m_rendered_samples[i+1];
 		}
 		size_t half_height = w.getHeight()/2;
 
@@ -198,14 +227,14 @@ void Visualizer::update()
 	}
 	else
 	{
-		(this->*draw)(m_sample_buffer.data(), m_read_samples, 0, w.getHeight());
+		(this->*draw)(m_rendered_samples.data(), m_rendered_samples.size(), 0, w.getHeight());
 	}
 	w.refresh();
 }
 
 int Visualizer::windowTimeout()
 {
-	if (m_fifo >= 0 && Status::State::player() == MPD::psPlay)
+	if (m_fifo >= 0)// && Status::State::player() == MPD::psPlay)
 		return 1000/Config.visualizer_fps;
 	else
 		return Screen<WindowType>::windowTimeout();
@@ -596,42 +625,51 @@ void Visualizer::GenLogspace()
 
 void Visualizer::InitVisualization()
 {
+	size_t rendered_samples = 0;
 	switch (Config.visualizer_type)
 	{
 	case VisualizerType::Wave:
 		// Guarantee integral amount of samples per column.
-		m_read_samples = ceil(44100.0 / Config.visualizer_fps / w.getWidth());
-		m_read_samples *= w.getWidth();
+		rendered_samples = ceil(44100.0 / Config.visualizer_fps / w.getWidth());
+		rendered_samples *= w.getWidth();
+		// Slow the scolling 10 times to make it watchable.
+		rendered_samples *= 10;
 		draw = &Visualizer::DrawSoundWave;
 		drawStereo = &Visualizer::DrawSoundWaveStereo;
 		break;
 	case VisualizerType::WaveFilled:
 		// Guarantee integral amount of samples per column.
-		m_read_samples = ceil(44100.0 / Config.visualizer_fps / w.getWidth());
-		m_read_samples *= w.getWidth();
+		rendered_samples = ceil(44100.0 / Config.visualizer_fps / w.getWidth());
+		rendered_samples *= w.getWidth();
+		// Slow the scolling 10 times to make it watchable.
+		rendered_samples *= 10;
 		draw = &Visualizer::DrawSoundWaveFill;
 		drawStereo = &Visualizer::DrawSoundWaveFillStereo;
 		break;
 #	ifdef HAVE_FFTW3_H
 	case VisualizerType::Spectrum:
-		m_read_samples = DFT_NONZERO_SIZE;
+		rendered_samples = DFT_NONZERO_SIZE;
 		draw = &Visualizer::DrawFrequencySpectrum;
 		drawStereo = &Visualizer::DrawFrequencySpectrumStereo;
 		break;
 #	endif // HAVE_FFTW3_H
 	case VisualizerType::Ellipse:
 		// Keep constant amount of samples on the screen regardless of fps.
-		m_read_samples = 44100 / 25;
+		rendered_samples = 44100 / 30;
 		draw = &Visualizer::DrawSoundEllipse;
 		drawStereo = &Visualizer::DrawSoundEllipseStereo;
 		break;
 	}
 	if (Config.visualizer_in_stereo)
-		m_read_samples *= 2;
-	m_sample_buffer.resize(m_read_samples);
-	m_temp_sample_buffer.resize(m_read_samples);
-	std::fill(m_sample_buffer.begin(), m_sample_buffer.end(), 0);
-	std::fill(m_temp_sample_buffer.begin(), m_temp_sample_buffer.end(), 0);
+		rendered_samples *= 2;
+	m_rendered_samples.resize(rendered_samples);
+
+	// Keep 500ms worth of samples in the incoming buffer.
+	size_t buffered_samples = 44100.0 / 2;
+	if (Config.visualizer_in_stereo)
+		buffered_samples *= 2;
+	m_incoming_samples.resize(buffered_samples);
+	m_buffered_samples.resize(buffered_samples);
 }
 
 /**********************************************************************/
@@ -639,7 +677,7 @@ void Visualizer::InitVisualization()
 void Visualizer::Clear()
 {
 	w.clear();
-	std::fill(m_sample_buffer.begin(), m_sample_buffer.end(), 0);
+	std::fill(m_rendered_samples.begin(), m_rendered_samples.end(), 0);
 }
 
 void Visualizer::ToggleVisualizationType()
@@ -671,6 +709,38 @@ void Visualizer::ToggleVisualizationType()
 
 void Visualizer::SetFD()
 {
+/*
+	if (m_fifo >= 0)
+		return;
+
+	sockaddr_in si_me;
+
+	if ((m_fifo = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+	{
+		Statusbar::printf("socket failed: %s", strerror(errno));
+		return;
+	}
+
+	int flags = fcntl(m_fifo, F_GETFL, 0);
+	fcntl(m_fifo, F_SETFL, flags | O_NONBLOCK);
+
+	memset(&si_me, 0, sizeof(si_me));
+
+	si_me.sin_family = AF_INET;
+	si_me.sin_port = htons(5555);
+	si_me.sin_addr.s_addr = INADDR_ANY;
+
+	// bind socket to port
+	if (bind(m_fifo, (sockaddr *)&si_me, sizeof(si_me)) < 0)
+	{
+		Statusbar::printf("bind failed: %s", strerror(errno));
+		return;
+
+	}
+
+	return;
+*/
+
 	if (m_fifo < 0 && (m_fifo = open(Config.visualizer_fifo_path.c_str(), O_RDONLY | O_NONBLOCK)) < 0)
 		Statusbar::printf("Couldn't open \"%1%\" for reading PCM data: %2%",
 			Config.visualizer_fifo_path, strerror(errno)
@@ -679,6 +749,8 @@ void Visualizer::SetFD()
 
 void Visualizer::ResetFD()
 {
+	if (m_fifo > 0)
+		close(m_fifo);
 	m_fifo = -1;
 }
 

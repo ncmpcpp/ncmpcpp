@@ -29,10 +29,12 @@
 #include "curses/window.h"
 #include "interfaces.h"
 #include "screens/screen.h"
+#include "utility/sample_buffer.h"
 
 #ifdef HAVE_FFTW3_H
 # include <fftw3.h>
 #endif
+
 
 struct Visualizer: Screen<NC::Window>, Tabbable
 {
@@ -86,9 +88,14 @@ private:
 	boost::posix_time::ptime m_timer;
 
 	int m_fifo;
-	size_t m_read_samples;
-	std::vector<int16_t> m_sample_buffer;
-	std::vector<int16_t> m_temp_sample_buffer;
+
+	std::vector<int16_t> m_rendered_samples;
+	std::vector<int16_t> m_incoming_samples;
+	SampleBuffer m_buffered_samples;
+	size_t m_sample_consumption_rate;
+	size_t m_sample_consumption_rate_up_ctr;
+	size_t m_sample_consumption_rate_dn_ctr;
+
 	double m_auto_scale_multiplier;
 #	ifdef HAVE_FFTW3_H
 	size_t m_fftw_results;

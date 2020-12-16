@@ -18,61 +18,30 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef NCMPCPP_LASTFM_SERVICE_H
-#define NCMPCPP_LASTFM_SERVICE_H
+#ifndef NCMPCPP_SAMPLE_BUFFER_H
+#define NCMPCPP_SAMPLE_BUFFER_H
 
-#include "config.h"
+#include <cstdint>
+#include <vector>
 
-#include <map>
-#include <string>
-
-#include "curses/scrollpad.h"
-
-namespace LastFm {
-
-struct Service
+struct SampleBuffer
 {
-	typedef std::map<std::string, std::string> Arguments;
-	typedef std::pair<bool, std::string> Result;
-	
-	Service(Arguments args) : m_arguments(args) { }
+	typedef std::vector<int16_t>::iterator Iterator;
 
-	virtual const char *name() = 0;
-	virtual Result fetch();
-	
-	virtual void beautifyOutput(NC::Scrollpad &w) = 0;
-	
-protected:
-	virtual bool argumentsOk() = 0;
-	virtual bool actionFailed(const std::string &data);
-	
-	virtual Result processData(const std::string &data) = 0;
-	
-	virtual const char *methodName() = 0;
-	
-	Arguments m_arguments;
+	SampleBuffer() : m_offset(0) { }
+
+	void put(Iterator begin, Iterator end);
+	size_t move(size_t elems, std::vector<int16_t> &dest);
+
+	void resize(size_t n);
+	void clear();
+
+	size_t size() const;
+	const std::vector<int16_t> &buffer() const;
+
+private:
+	size_t m_offset;
+	std::vector<int16_t> m_buffer;
 };
 
-struct ArtistInfo : public Service
-{
-	ArtistInfo(std::string artist, std::string lang)
-	: Service({{"artist", artist}, {"lang", lang}}) { }
-
-	virtual ~ArtistInfo() { }
-	
-	virtual const char *name() { return "Artist info"; }
-	
-	virtual void beautifyOutput(NC::Scrollpad &w);
-	
-	bool operator==(const ArtistInfo &ai) const { return m_arguments == ai.m_arguments; }
-	
-protected:
-	virtual bool argumentsOk();
-	virtual Result processData(const std::string &data);
-	
-	virtual const char *methodName() { return "artist.getinfo"; }
-};
-
-}
-
-#endif // NCMPCPP_LASTFM_SERVICE_H
+#endif // NCMPCPP_SAMPLE_BUFFER_H
