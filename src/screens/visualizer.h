@@ -80,6 +80,7 @@ private:
 	double Interpolate(size_t, size_t);
 #	endif // HAVE_FFTW3_H
 
+	void InitDataSource();
 	void InitVisualization();
 
 	void (Visualizer::*draw)(const int16_t *, ssize_t, size_t, size_t);
@@ -89,6 +90,8 @@ private:
 	boost::posix_time::ptime m_timer;
 
 	int m_source_fd;
+	std::string m_source_location;
+	std::string m_source_port;
 
 	std::vector<int16_t> m_rendered_samples;
 	std::vector<int16_t> m_incoming_samples;

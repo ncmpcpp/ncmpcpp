@@ -84,6 +84,7 @@ Visualizer::Visualizer()
   SMOOTH_CHARS(ToWString("▁▂▃▄▅▆▇█"))
 #endif
 {
+	InitDataSource();
 	InitVisualization();
 #	ifdef HAVE_FFTW3_H
 	m_fftw_results = DFT_TOTAL_SIZE/2+1;
@@ -184,8 +185,8 @@ void Visualizer::update()
 	if (Config.visualizer_in_stereo)
 		requested_samples *= 2;
 
-	Statusbar::printf("Samples: %1%, %2%, %3%", m_buffered_samples.size(),
-	                  requested_samples, m_sample_consumption_rate);
+	//Statusbar::printf("Samples: %1%, %2%, %3%", m_buffered_samples.size(),
+	//                  requested_samples, m_sample_consumption_rate);
 
 	size_t new_samples = m_buffered_samples.move(requested_samples, m_rendered_samples);
 	if (new_samples == 0)
@@ -621,6 +622,23 @@ void Visualizer::GenLogspace()
 }
 #endif // HAVE_FFTW3_H
 
+void Visualizer::InitDataSource()
+{
+	auto colon = Config.visualizer_fifo_path.rfind(':');
+	if (Config.visualizer_fifo_path[0] != '/' && colon != std::string::npos)
+	{
+		// UDP source
+		m_source_location = Config.visualizer_fifo_path.substr(0, colon);
+		m_source_port = Config.visualizer_fifo_path.substr(colon+1);
+	}
+	else
+	{
+		// FIFO source
+		m_source_location = Config.visualizer_fifo_path;
+		m_source_port.clear();
+	}
+}
+
 void Visualizer::InitVisualization()
 {
 	size_t rendered_samples = 0;
@@ -721,50 +739,51 @@ void Visualizer::OpenDataSource()
 	if (m_source_fd >= 0)
 		return;
 
-	/*
-	addrinfo hints, *res;
-	memset (&hints, 0, sizeof (hints));
-	hints.ai_family = PF_UNSPEC;
-	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_protocol = IPPROTO_UDP;
-
-	const char *host = "localhost", *port = "5555";
-
-	int errcode = getaddrinfo(host, port, &hints, &res);
-	if (errcode != 0)
+	if (!m_source_port.empty())
 	{
-		Statusbar::printf("Couldn't resolve \"%1%:%2%\": %3%",
-		                  host, port, gai_strerror(errcode));
-		return;
-	}
+		addrinfo hints, *res;
+		memset (&hints, 0, sizeof (hints));
+		hints.ai_family = PF_UNSPEC;
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_protocol = IPPROTO_UDP;
 
-	for (auto addr = res; addr != nullptr; addr = addr->ai_next)
-	{
-		m_source_fd = socket(res->ai_family, SOCK_NONBLOCK | res->ai_socktype,
-		                     res->ai_protocol);
-		if (m_source_fd >= 0)
+		int errcode = getaddrinfo(m_source_location.c_str(), m_source_port.c_str(),
+		                          &hints, &res);
+		if (errcode != 0)
 		{
-			errcode = bind(m_source_fd, res->ai_addr, res->ai_addrlen);
-			if (errcode < 0)
+			Statusbar::printf("Couldn't resolve \"%1%:%2%\": %3%",
+			                  m_source_location, m_source_port, gai_strerror(errcode));
+			return;
+		}
+
+		for (auto addr = res; addr != nullptr; addr = addr->ai_next)
+		{
+			m_source_fd = socket(res->ai_family, SOCK_NONBLOCK | res->ai_socktype,
+			                     res->ai_protocol);
+			if (m_source_fd >= 0)
 			{
-				std::cerr << "Binding a socket failed: " << strerror(errno) << std::endl;
-				CloseDataSource();
+				errcode = bind(m_source_fd, res->ai_addr, res->ai_addrlen);
+				if (errcode < 0)
+				{
+					std::cerr << "Binding a socket failed: " << strerror(errno) << std::endl;
+					CloseDataSource();
+				}
+				else
+					break;
 			}
 			else
-				break;
+				std::cerr << "Creation of socket failed: " << strerror(errno) << std::endl;
 		}
-		else
-			std::cerr << "Creation of socket failed: " << strerror(errno) << std::endl;
+
+		freeaddrinfo(res);
 	}
-
-	freeaddrinfo(res);
-	return;
-	*/
-
-	m_source_fd = open(Config.visualizer_fifo_path.c_str(), O_RDONLY | O_NONBLOCK);
-	if (m_source_fd < 0)
-		Statusbar::printf("Couldn't open \"%1%\" for reading PCM data: %2%",
-			Config.visualizer_fifo_path, strerror(errno));
+	else
+	{
+		m_source_fd = open(m_source_location.c_str(), O_RDONLY | O_NONBLOCK);
+		if (m_source_fd < 0)
+			Statusbar::printf("Couldn't open \"%1%\" for reading PCM data: %2%",
+			                  Config.visualizer_fifo_path, strerror(errno));
+	}
 }
 
 void Visualizer::CloseDataSource()
