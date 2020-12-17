@@ -88,7 +88,7 @@ RunExternalCommand::RunExternalCommand(std::string &&command)
 void RunExternalCommand::run()
 {
 	GNUC_UNUSED int res;
-	res = std::system((m_command + " &>/dev/null").c_str());
+	res = std::system((m_command + " >/dev/null 2>&1").c_str());
 }
 
 }
