@@ -192,6 +192,8 @@ void Visualizer::update()
 	if (new_samples == 0)
 		return;
 
+	// A crude way to adjust the amount of samples consumed from the buffer
+	// depending on how fast the rendering is.
 	if (m_buffered_samples.size() > 0)
 	{
 		if (++m_sample_consumption_rate_up_ctr > 8)
@@ -624,19 +626,21 @@ void Visualizer::GenLogspace()
 
 void Visualizer::InitDataSource()
 {
-	auto colon = Config.visualizer_fifo_path.rfind(':');
-	if (Config.visualizer_fifo_path[0] != '/' && colon != std::string::npos)
+	if (!Config.visualizer_fifo_path.empty())
+		m_source_location = Config.visualizer_fifo_path; // deprecated
+	else
+		m_source_location = Config.visualizer_data_source;
+
+	// If there's a colon and a location doesn't start with '/' we have a UDP
+	// sink. Otherwise assume it's a FIFO.
+	auto colon = m_source_location.rfind(':');
+	if (m_source_location[0] != '/' && colon != std::string::npos)
 	{
-		// UDP source
-		m_source_location = Config.visualizer_fifo_path.substr(0, colon);
-		m_source_port = Config.visualizer_fifo_path.substr(colon+1);
+		m_source_port = m_source_location.substr(colon+1);
+		m_source_location.resize(colon);
 	}
 	else
-	{
-		// FIFO source
-		m_source_location = Config.visualizer_fifo_path;
 		m_source_port.clear();
-	}
 }
 
 void Visualizer::InitVisualization()
@@ -782,7 +786,7 @@ void Visualizer::OpenDataSource()
 		m_source_fd = open(m_source_location.c_str(), O_RDONLY | O_NONBLOCK);
 		if (m_source_fd < 0)
 			Statusbar::printf("Couldn't open \"%1%\" for reading PCM data: %2%",
-			                  Config.visualizer_fifo_path, strerror(errno));
+			                  m_source_location, strerror(errno));
 	}
 }
 
@@ -796,7 +800,9 @@ void Visualizer::CloseDataSource()
 void Visualizer::FindOutputID()
 {
 	m_output_id = -1;
-	if (!Config.visualizer_output_name.empty())
+	// Look for the output only if its name is specified and we're fetching
+	// samples from a FIFO.
+	if (!Config.visualizer_output_name.empty() && m_source_port.empty())
 	{
 		for (MPD::OutputIterator out = Mpd.GetOutputs(), end; out != end; ++out)
 		{

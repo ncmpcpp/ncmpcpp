@@ -61,7 +61,8 @@ struct Configuration
 	std::string lyrics_directory;
 
 	std::string mpd_music_dir;
-	std::string visualizer_fifo_path;
+	std::string visualizer_fifo_path; // deprecated
+	std::string visualizer_data_source;
 	std::string visualizer_output_name;
 	std::string empty_tag;
 

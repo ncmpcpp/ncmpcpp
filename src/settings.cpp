@@ -196,7 +196,8 @@ NC::Buffer buffer_wlength(const NC::Buffer *target,
 		return *target;
 }
 
-void deprecated(const char *option, double version_removal, const std::string &advice)
+void deprecated(const char *option, const char *version_removal,
+                const std::string &advice)
 {
 	std::cerr << "WARNING: Variable '" << option
 	          << "' is deprecated and will be removed in "
@@ -217,14 +218,14 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			if (!v.empty())
 				deprecated(
 					"visualizer_sample_multiplier",
-					0.9,
+					"0.9",
 					"visualizer scales automatically");
 		});
 	p.add<void>("progressbar_boldness", nullptr, "", [](std::string v) {
 			if (!v.empty())
 				deprecated(
 					"progressbar_boldness",
-					0.9,
+					"0.9",
 					"use extended progressbar_color and progressbar_elapsed_color instead");
 		});
 
@@ -243,7 +244,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 					current_item_suffix_str);
 				deprecated(
 					"main_window_highlight_color",
-					0.9,
+					"0.9",
 					"set current_item_prefix = \""
 					+ current_item_prefix_str
 					+ "\" and current_item_suffix = \""
@@ -256,11 +257,21 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			{
 				deprecated(
 					"active_column_color",
-					0.9,
+					"0.9",
 					"replaced by current_item_inactive_column_prefix"
 					" and current_item_inactive_column_suffix");
 			};
 		});
+
+	p.add("visualizer_fifo_path", &visualizer_fifo_path, "", [](std::string v) {
+		if (!v.empty())
+		{
+			deprecated("visualizer_fifo_path",
+			           "0.10",
+			           "replaced by visualizer_data_source");
+		}
+		return adjust_path(v);
+	});
 
 	// keep the same order of variables as in configuration file
 	p.add("ncmpcpp_directory", &ncmpcpp_directory, "~/.ncmpcpp/", adjust_directory);
@@ -276,7 +287,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("mpd_connection_timeout", &mpd_connection_timeout, "5");
 	p.add("mpd_crossfade_time", &crossfade_time, "5");
 	p.add("random_exclude_pattern", &random_exclude_pattern, "");
-	p.add("visualizer_fifo_path", &visualizer_fifo_path, "/tmp/mpd.fifo", adjust_path);
+	p.add("visualizer_data_source", &visualizer_data_source, "/tmp/mpd.fifo", adjust_path);
 	p.add("visualizer_output_name", &visualizer_output_name, "Visualizer feed");
 	p.add("visualizer_in_stereo", &visualizer_in_stereo, "yes", yes_no);
 	p.add("visualizer_sync_interval", &visualizer_sync_interval, "0",

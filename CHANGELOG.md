@@ -24,6 +24,8 @@
 * Allow for editing multiple titles in the Tag Editor.
 * Allow setting `visualizer_sync_interval` to 0 (a new default) to disable
   synchronization attempts.
+* Support gstreamer's udpsink as a data source for visualization (Mopidy).
+* Deprecate `visualizer_fifo_path` in favor of `visualizer_data_source`.
 
 # ncmpcpp-0.8.2 (2018-04-11)
 * Help screen: fixed display of EoF keycode

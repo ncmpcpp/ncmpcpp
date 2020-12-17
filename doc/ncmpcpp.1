@@ -78,8 +78,9 @@ Set connection timeout to MPD to given value.
 .B mpd_crossfade_time = SECONDS
 Default number of seconds to crossfade, if enabled by ncmpcpp.
 .TP
-.B visualizer_fifo_path = PATH
-Path to mpd fifo output. This is needed to make music visualizer work (note that output sound format of this fifo has to be either 44100:16:1 or 44100:16:2, depending on whether you want mono or stereo visualization)
+.B visualizer_data_source = LOCATION
+Source of data for the visualizer. For MPD it's going to be a fifo output, for
+Mopidy a udpsink output (see the example configuration file for more details).
 .TP
 .B visualizer_output_name = NAME
 Name of output that provides data for visualizer. Needed to keep sound and visualization in sync.

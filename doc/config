@@ -40,10 +40,10 @@
 #
 ##### music visualizer #####
 ##
-## Note: In order to make music visualizer work you'll need to use mpd fifo
-## output, whose format parameter has to be set to 44100:16:1 for mono
-## visualization or 44100:16:2 for stereo visualization. Example configuration
-## (it has to be put into mpd.conf):
+## In order to make music visualizer work with MPD you need to use the fifo
+## output. Its format parameter has to be set to 44100:16:1 for mono
+## visualization or 44100:16:2 for stereo visualization. As an example here is
+## the relevant section for mpd.conf:
 ##
 ## audio_output {
 ##        type            "fifo"
@@ -52,8 +52,19 @@
 ##        format          "44100:16:2"
 ## }
 ##
+## Note: If you're using Mopidy, an address of a udpsink gstreamer's output is
+## also accepted. For example, the following section in mopidy.conf:
+##
+## [audio]
+## output = tee name=t ! queue ! autoaudiosink t.
+##        ! queue ! audio/x-raw,rate=44100,channels=2,format=S16LE
+##        ! udpsink host=localhost port=5555
+##
+## will make localhost:5555 available as a source of data for the stereo
+## visualizer.
+##
 #
-#visualizer_fifo_path = /tmp/mpd.fifo
+#visualizer_data_source = /tmp/mpd.fifo
 #
 ##
 ## Note: Below parameter is needed for ncmpcpp to determine which output
