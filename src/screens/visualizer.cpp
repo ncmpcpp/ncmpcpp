@@ -678,6 +678,17 @@ void Visualizer::Clear()
 {
 	w.clear();
 	std::fill(m_rendered_samples.begin(), m_rendered_samples.end(), 0);
+
+	// Discard any lingering data from the data source.
+	if (m_fifo >= 0)
+	{
+		ssize_t bytes_read;
+		do
+			bytes_read = read(m_fifo, m_incoming_samples.data(),
+			                  sizeof(int16_t) * m_incoming_samples.size());
+		while (bytes_read > 0);
+	}
+
 }
 
 void Visualizer::ToggleVisualizationType()
