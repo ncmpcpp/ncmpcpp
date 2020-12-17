@@ -31,10 +31,8 @@
 #include <fstream>
 #include <limits>
 #include <fcntl.h>
+#include <netdb.h>
 #include <cassert>
-
-#include <arpa/inet.h>
-#include <sys/socket.h>
 
 #include "global.h"
 #include "settings.h"
@@ -71,6 +69,7 @@ const NC::FormattedColor &toColor(size_t number, size_t max, bool wrap = true)
 
 Visualizer::Visualizer()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
+, m_source_fd(-1)
 , m_sample_consumption_rate(5)
 , m_sample_consumption_rate_up_ctr(0)
 , m_sample_consumption_rate_dn_ctr(0)
@@ -85,7 +84,6 @@ Visualizer::Visualizer()
   SMOOTH_CHARS(ToWString("▁▂▃▄▅▆▇█"))
 #endif
 {
-	ResetFD();
 	InitVisualization();
 #	ifdef HAVE_FFTW3_H
 	m_fftw_results = DFT_TOTAL_SIZE/2+1;
@@ -103,7 +101,7 @@ void Visualizer::switchTo()
 {
 	SwitchTo::execute(this);
 	Clear();
-	SetFD();
+	OpenDataSource();
 	// negative infinity to toggle output in update() at least once
 	m_timer = boost::posix_time::neg_infin;
 	drawHeader();
@@ -134,7 +132,7 @@ std::wstring Visualizer::title()
 
 void Visualizer::update()
 {
-	if (m_fifo < 0)
+	if (m_source_fd < 0)
 		return;
 
 	if (m_output_id != -1 && Global::Timer - m_timer > Config.visualizer_sync_interval)
@@ -147,7 +145,7 @@ void Visualizer::update()
 
 	// PCM in format 44100:16:1 (for mono visualization) and
 	// 44100:16:2 (for stereo visualization) is supported.
-	ssize_t bytes_read = read(m_fifo, m_incoming_samples.data(),
+	ssize_t bytes_read = read(m_source_fd, m_incoming_samples.data(),
 	                          sizeof(int16_t) * m_incoming_samples.size());
 	if (bytes_read > 0)
 	{
@@ -234,7 +232,7 @@ void Visualizer::update()
 
 int Visualizer::windowTimeout()
 {
-	if (m_fifo >= 0)// && Status::State::player() == MPD::psPlay)
+	if (m_source_fd >= 0 && Status::State::player() == MPD::psPlay)
 		return 1000/Config.visualizer_fps;
 	else
 		return Screen<WindowType>::windowTimeout();
@@ -680,11 +678,11 @@ void Visualizer::Clear()
 	std::fill(m_rendered_samples.begin(), m_rendered_samples.end(), 0);
 
 	// Discard any lingering data from the data source.
-	if (m_fifo >= 0)
+	if (m_source_fd >= 0)
 	{
 		ssize_t bytes_read;
 		do
-			bytes_read = read(m_fifo, m_incoming_samples.data(),
+			bytes_read = read(m_source_fd, m_incoming_samples.data(),
 			                  sizeof(int16_t) * m_incoming_samples.size());
 		while (bytes_read > 0);
 	}
@@ -718,51 +716,62 @@ void Visualizer::ToggleVisualizationType()
 	Statusbar::printf("Visualization type: %1%", Config.visualizer_type);
 }
 
-void Visualizer::SetFD()
+void Visualizer::OpenDataSource()
 {
-/*
-	if (m_fifo >= 0)
+	if (m_source_fd >= 0)
 		return;
 
-	sockaddr_in si_me;
+	/*
+	addrinfo hints, *res;
+	memset (&hints, 0, sizeof (hints));
+	hints.ai_family = PF_UNSPEC;
+	hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_protocol = IPPROTO_UDP;
 
-	if ((m_fifo = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+	const char *host = "localhost", *port = "5555";
+
+	int errcode = getaddrinfo(host, port, &hints, &res);
+	if (errcode != 0)
 	{
-		Statusbar::printf("socket failed: %s", strerror(errno));
+		Statusbar::printf("Couldn't resolve \"%1%:%2%\": %3%",
+		                  host, port, gai_strerror(errcode));
 		return;
 	}
 
-	int flags = fcntl(m_fifo, F_GETFL, 0);
-	fcntl(m_fifo, F_SETFL, flags | O_NONBLOCK);
-
-	memset(&si_me, 0, sizeof(si_me));
-
-	si_me.sin_family = AF_INET;
-	si_me.sin_port = htons(5555);
-	si_me.sin_addr.s_addr = INADDR_ANY;
-
-	// bind socket to port
-	if (bind(m_fifo, (sockaddr *)&si_me, sizeof(si_me)) < 0)
+	for (auto addr = res; addr != nullptr; addr = addr->ai_next)
 	{
-		Statusbar::printf("bind failed: %s", strerror(errno));
-		return;
-
+		m_source_fd = socket(res->ai_family, SOCK_NONBLOCK | res->ai_socktype,
+		                     res->ai_protocol);
+		if (m_source_fd >= 0)
+		{
+			errcode = bind(m_source_fd, res->ai_addr, res->ai_addrlen);
+			if (errcode < 0)
+			{
+				std::cerr << "Binding a socket failed: " << strerror(errno) << std::endl;
+				CloseDataSource();
+			}
+			else
+				break;
+		}
+		else
+			std::cerr << "Creation of socket failed: " << strerror(errno) << std::endl;
 	}
 
+	freeaddrinfo(res);
 	return;
-*/
+	*/
 
-	if (m_fifo < 0 && (m_fifo = open(Config.visualizer_fifo_path.c_str(), O_RDONLY | O_NONBLOCK)) < 0)
+	m_source_fd = open(Config.visualizer_fifo_path.c_str(), O_RDONLY | O_NONBLOCK);
+	if (m_source_fd < 0)
 		Statusbar::printf("Couldn't open \"%1%\" for reading PCM data: %2%",
-			Config.visualizer_fifo_path, strerror(errno)
-		);
+			Config.visualizer_fifo_path, strerror(errno));
 }
 
-void Visualizer::ResetFD()
+void Visualizer::CloseDataSource()
 {
-	if (m_fifo > 0)
-		close(m_fifo);
-	m_fifo = -1;
+	if (m_source_fd >= 0)
+		close(m_source_fd);
+	m_source_fd = -1;
 }
 
 void Visualizer::FindOutputID()

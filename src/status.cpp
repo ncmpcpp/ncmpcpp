@@ -162,8 +162,8 @@ void initialize_status()
 	myOutputs->fetchList();
 #	endif // ENABLE_OUTPUTS
 #	ifdef ENABLE_VISUALIZER
-	myVisualizer->ResetFD();
-	myVisualizer->SetFD();
+	myVisualizer->CloseDataSource();
+	myVisualizer->OpenDataSource();
 	myVisualizer->FindOutputID();
 #	endif // ENABLE_VISUALIZER
 

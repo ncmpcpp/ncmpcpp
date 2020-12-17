@@ -57,9 +57,10 @@ struct Visualizer: Screen<NC::Window>, Tabbable
 	virtual bool isMergable() override { return true; }
 
 	void Clear();
+	void OpenDataSource();
+	void CloseDataSource();
+
 	void ToggleVisualizationType();
-	void SetFD();
-	void ResetFD();
 	void FindOutputID();
 	void ResetAutoScaleMultiplier();
 
@@ -87,7 +88,7 @@ private:
 	int m_output_id;
 	boost::posix_time::ptime m_timer;
 
-	int m_fifo;
+	int m_source_fd;
 
 	std::vector<int16_t> m_rendered_samples;
 	std::vector<int16_t> m_incoming_samples;
