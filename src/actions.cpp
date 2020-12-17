@@ -621,9 +621,19 @@ void SlaveScreen::run()
 	drawHeader();
 }
 
+bool VolumeUp::canBeRun()
+{
+	return Status::State::volume() >= 0;
+}
+
 void VolumeUp::run()
 {
 	Mpd.ChangeVolume(static_cast<int>(Config.volume_change_step));
+}
+
+bool VolumeDown::canBeRun()
+{
+	return Status::State::volume() >= 0;
 }
 
 void VolumeDown::run()
@@ -1354,6 +1364,11 @@ void SetCrossfade::run()
 	lowerBoundCheck(crossfade, 0u);
 	Config.crossfade_time = crossfade;
 	Mpd.SetCrossfade(crossfade);
+}
+
+bool SetVolume::canBeRun()
+{
+	return Status::State::volume() >= 0;
 }
 
 void SetVolume::run()

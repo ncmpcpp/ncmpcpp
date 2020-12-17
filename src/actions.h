@@ -428,6 +428,7 @@ struct VolumeUp: BaseAction
 	VolumeUp(): BaseAction(Type::VolumeUp, "volume_up") { }
 	
 private:
+	virtual bool canBeRun() override;
 	virtual void run() override;
 };
 
@@ -436,6 +437,7 @@ struct VolumeDown: BaseAction
 	VolumeDown(): BaseAction(Type::VolumeDown, "volume_down") { }
 	
 private:
+	virtual bool canBeRun() override;
 	virtual void run() override;
 };
 
@@ -791,6 +793,7 @@ struct SetVolume: BaseAction
 	SetVolume(): BaseAction(Type::SetVolume, "set_volume") { }
 	
 private:
+	virtual bool canBeRun() override;
 	virtual void run() override;
 };
 
