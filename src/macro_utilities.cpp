@@ -88,10 +88,7 @@ RunExternalCommand::RunExternalCommand(std::string &&command)
 void RunExternalCommand::run()
 {
 	GNUC_UNUSED int res;
-
-	NC::pauseScreen();
-	res = std::system(m_command.c_str());
-	NC::unpauseScreen();
+	res = std::system((m_command + " &>/dev/null").c_str());
 }
 
 }
