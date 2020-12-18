@@ -760,10 +760,13 @@ void Visualizer::OpenDataSource()
 
 		for (auto addr = res; addr != nullptr; addr = addr->ai_next)
 		{
-			m_source_fd = socket(res->ai_family, SOCK_NONBLOCK | res->ai_socktype,
-			                     res->ai_protocol);
+			m_source_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 			if (m_source_fd >= 0)
 			{
+				// No SOCK_NONBLOCK on MacOS
+				int socket_flags = fcntl(m_source_fd, F_GETFL, 0);
+				fcntl(m_source_fd, F_SETFL, socket_flags | O_NONBLOCK);
+
 				errcode = bind(m_source_fd, res->ai_addr, res->ai_addrlen);
 				if (errcode < 0)
 				{
