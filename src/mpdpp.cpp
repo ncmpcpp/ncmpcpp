@@ -214,7 +214,11 @@ Status Connection::getStatus()
 void Connection::UpdateDirectory(const std::string &path)
 {
 	prechecksNoCommandsList();
-	mpd_run_update(m_connection.get(), path.c_str());
+	// Use update as mpd_run_update doesn't call mpd_response_finish if the id
+	// returned from mpd_recv_update_id is 0 which breaks mopidy.
+	mpd_send_update(m_connection.get(), path.c_str());
+	mpd_recv_update_id(m_connection.get());
+	mpd_response_finish(m_connection.get());
 	checkErrors();
 }
 
