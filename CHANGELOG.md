@@ -28,6 +28,7 @@
 * Deprecate `visualizer_fifo_path` in favor of `visualizer_data_source`.
 * Don't run volume changing actions if there is no mixer.
 * Do not loop after sending a database update command to Mopidy.
+* Deprecate `visualizer_sync_interval` configuration option.
 
 # ncmpcpp-0.8.2 (2018-04-11)
 * Help screen: fixed display of EoF keycode

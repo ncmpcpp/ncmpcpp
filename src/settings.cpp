@@ -272,6 +272,16 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 		}
 		return adjust_path(v);
 	});
+	p.add<void>("visualizer_sync_interval", nullptr, "", [](std::string v) {
+		if (!v.empty())
+		{
+			deprecated("visualizer_sync_interval",
+			           "0.10",
+			           "set 'buffer_time' parameter of your MPD audio output to '100000' "
+			           "(100ms) or lower if you experience synchronization issues "
+			           "between audio and visualization");
+		}
+	});
 
 	// keep the same order of variables as in configuration file
 	p.add("ncmpcpp_directory", &ncmpcpp_directory, "~/.ncmpcpp/", adjust_directory);
@@ -290,14 +300,6 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("visualizer_data_source", &visualizer_data_source, "/tmp/mpd.fifo", adjust_path);
 	p.add("visualizer_output_name", &visualizer_output_name, "Visualizer feed");
 	p.add("visualizer_in_stereo", &visualizer_in_stereo, "yes", yes_no);
-	p.add("visualizer_sync_interval", &visualizer_sync_interval, "0",
-	      [](std::string v) {
-		      unsigned sync_interval = verbose_lexical_cast<unsigned>(v);
-		      if (sync_interval == 0)
-			      sync_interval = std::numeric_limits<unsigned>::max();
-		      lowerBoundCheck<unsigned>(sync_interval, 10);
-		      return boost::posix_time::seconds(sync_interval);
-	});
 	p.add("visualizer_type", &visualizer_type,
 #ifdef HAVE_FFTW3_H
 	      "spectrum"

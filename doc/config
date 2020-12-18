@@ -52,6 +52,10 @@
 ##        format          "44100:16:2"
 ## }
 ##
+## If the visualization on occasion diverges from the audio output, please set
+## 'buffer_time' parameter of your audio output in mpd.conf to '100000' (100ms)
+## or less to prevent that from happening.
+##
 ## Note: If you're using Mopidy, an address of a udpsink gstreamer's output is
 ## also accepted. For example, the following section in mopidy.conf:
 ##
@@ -68,8 +72,8 @@
 #
 ##
 ## Note: Below parameter is needed for ncmpcpp to determine which output
-## provides data for visualizer and thus allow syncing between visualization and
-## sound as currently there are some problems with it.
+## provides data for visualizer and reset it at the beginning of visualization
+## to synchronize with audio.
 ##
 #
 #visualizer_output_name = Visualizer feed

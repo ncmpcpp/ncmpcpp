@@ -87,7 +87,6 @@ private:
 	void (Visualizer::*drawStereo)(const int16_t *, const int16_t *, ssize_t, size_t);
 
 	int m_output_id;
-	boost::posix_time::ptime m_timer;
 
 	int m_source_fd;
 	std::string m_source_location;

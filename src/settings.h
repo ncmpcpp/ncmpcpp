@@ -52,7 +52,7 @@ struct Column
 struct Configuration
 {
 	Configuration()
-	: playlist_disable_highlight_delay(0), visualizer_sync_interval(0)
+	: playlist_disable_highlight_delay(0)
 	{ }
 
 	bool read(const std::vector<std::string> &config_paths, bool ignore_errors);
@@ -198,7 +198,6 @@ struct Configuration
 	boost::regex::flag_type regex_type;
 
 	boost::posix_time::seconds playlist_disable_highlight_delay;
-	boost::posix_time::seconds visualizer_sync_interval;
 
 	double locked_screen_width_part;
 

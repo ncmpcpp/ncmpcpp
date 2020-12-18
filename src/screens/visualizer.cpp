@@ -103,8 +103,14 @@ void Visualizer::switchTo()
 	SwitchTo::execute(this);
 	Clear();
 	OpenDataSource();
-	// negative infinity to toggle output in update() at least once
-	m_timer = boost::posix_time::neg_infin;
+	// Disable and enable FIFO to get rid of the difference between audio and
+	// visualization.
+	if (m_output_id != -1)
+	{
+		Mpd.DisableOutput(m_output_id);
+		usleep(50000);
+		Mpd.EnableOutput(m_output_id);
+	}
 	drawHeader();
 #	ifdef HAVE_FFTW3_H
 	GenLogspace();
@@ -135,14 +141,6 @@ void Visualizer::update()
 {
 	if (m_source_fd < 0)
 		return;
-
-	if (m_output_id != -1 && Global::Timer - m_timer > Config.visualizer_sync_interval)
-	{
-		Mpd.DisableOutput(m_output_id);
-		usleep(50000);
-		Mpd.EnableOutput(m_output_id);
-		m_timer = Global::Timer;
-	}
 
 	// PCM in format 44100:16:1 (for mono visualization) and
 	// 44100:16:2 (for stereo visualization) is supported.
