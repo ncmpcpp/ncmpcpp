@@ -214,55 +214,6 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	option_parser p;
 
 	// Deprecated options.
-	p.add<void>("visualizer_sample_multiplier", nullptr, "", [](std::string v) {
-			if (!v.empty())
-				deprecated(
-					"visualizer_sample_multiplier",
-					"0.9",
-					"visualizer scales automatically");
-		});
-	p.add<void>("progressbar_boldness", nullptr, "", [](std::string v) {
-			if (!v.empty())
-				deprecated(
-					"progressbar_boldness",
-					"0.9",
-					"use extended progressbar_color and progressbar_elapsed_color instead");
-		});
-
-	p.add<void>("main_window_highlight_color", nullptr, "", [this](std::string v) {
-			if (!v.empty())
-			{
-				const std::string current_item_prefix_str = "$(" + v + ")$r";
-				const std::string current_item_suffix_str = "$/r$(end)";
-				current_item_prefix = buffer_wlength(
-					nullptr,
-					current_item_prefix_length,
-					current_item_prefix_str);
-				current_item_suffix = buffer_wlength(
-					nullptr,
-					current_item_suffix_length,
-					current_item_suffix_str);
-				deprecated(
-					"main_window_highlight_color",
-					"0.9",
-					"set current_item_prefix = \""
-					+ current_item_prefix_str
-					+ "\" and current_item_suffix = \""
-					+ current_item_suffix_str
-					+ "\" to preserve current behavior");
-			};
-		});
-	p.add<void>("active_column_color", nullptr, "", [](std::string v) {
-			if (!v.empty())
-			{
-				deprecated(
-					"active_column_color",
-					"0.9",
-					"replaced by current_item_inactive_column_prefix"
-					" and current_item_inactive_column_suffix");
-			};
-		});
-
 	p.add("visualizer_fifo_path", &visualizer_fifo_path, "", [](std::string v) {
 		if (!v.empty())
 		{
