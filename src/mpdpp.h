@@ -550,6 +550,7 @@ struct Connection
 	bool AddRandomSongs(size_t number, const std::string &random_exclude_pattern, std::mt19937 &rng);
 	bool Add(const std::string &path);
 	void Delete(unsigned int pos);
+	void DeleteRange(unsigned begin, unsigned end);
 	void PlaylistDelete(const std::string &playlist, unsigned int pos);
 	void StartCommandsList();
 	void CommitCommandsList();

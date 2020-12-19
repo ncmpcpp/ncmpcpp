@@ -655,6 +655,17 @@ void Connection::Delete(unsigned pos)
 	}
 }
 
+void Connection::DeleteRange(unsigned begin, unsigned end)
+{
+	prechecks();
+	mpd_send_delete_range(m_connection.get(), begin, end);
+	if (!m_command_list_active)
+	{
+		mpd_response_finish(m_connection.get());
+		checkErrors();
+	}
+}
+
 void Connection::PlaylistDelete(const std::string &playlist, unsigned pos)
 {
 	prechecks();

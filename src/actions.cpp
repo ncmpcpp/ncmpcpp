@@ -681,8 +681,7 @@ void DeletePlaylistItems::run()
 	if (myScreen == myPlaylist)
 	{
 		Statusbar::print("Deleting items...");
-		auto delete_fun = std::bind(&MPD::Connection::Delete, ph::_1, ph::_2);
-		deleteSelectedSongs(myPlaylist->main(), delete_fun);
+		deleteSelectedSongsFromPlaylist(myPlaylist->main());
 		Statusbar::print("Item(s) deleted");
 	}
 	else if (myScreen->isActiveWindow(myPlaylistEditor->Content))
@@ -1926,7 +1925,8 @@ void CropMainPlaylist::run()
 		confirmAction("Do you really want to crop main playlist?");
 	Statusbar::print("Cropping playlist...");
 	selectCurrentIfNoneSelected(w);
-	cropPlaylist(w, std::bind(&MPD::Connection::Delete, ph::_1, ph::_2));
+	reverseSelectionHelper(w.begin(), w.end());
+	deleteSelectedSongsFromPlaylist(w);
 	Statusbar::print("Playlist cropped");
 }
 

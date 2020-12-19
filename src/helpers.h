@@ -528,6 +528,8 @@ inline const char *withErrors(bool success)
 	return success ? "" : " " "(with errors)";
 }
 
+void deleteSelectedSongsFromPlaylist(NC::Menu<MPD::Song> &playlist);
+
 bool addSongToPlaylist(const MPD::Song &s, bool play, int position = -1);
 
 const MPD::Song *currentSong(const BaseScreen *screen);

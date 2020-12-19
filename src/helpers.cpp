@@ -76,6 +76,30 @@ MPD::SongIterator getDatabaseIterator(MPD::Connection &mpd)
 	return result;
 }
 
+void deleteSelectedSongsFromPlaylist(NC::Menu<MPD::Song> &playlist)
+{
+	selectCurrentIfNoneSelected(playlist);
+	boost::optional<int> range_end;
+	Mpd.StartCommandsList();
+	for (auto &s : boost::adaptors::reverse(playlist))
+	{
+		if (s.isSelected())
+		{
+			s.setSelected(false);
+			if (range_end == boost::none)
+				range_end = s.value().getPosition() + 1;
+		}
+		else if (range_end != boost::none)
+		{
+			Mpd.DeleteRange(s.value().getPosition() + 1, *range_end);
+			range_end.reset();
+		}
+	}
+	if (range_end != boost::none)
+		Mpd.DeleteRange(0, *range_end);
+	Mpd.CommitCommandsList();
+}
+
 void removeSongFromPlaylist(const SongMenu &playlist, const MPD::Song &s)
 {
 	Mpd.StartCommandsList();
