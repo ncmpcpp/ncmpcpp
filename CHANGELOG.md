@@ -29,6 +29,7 @@
 * Don't run volume changing actions if there is no mixer.
 * Do not loop after sending a database update command to Mopidy.
 * Deprecate `visualizer_sync_interval` configuration option.
+* Deprecate `noop` value of `browser_sort_mode` in favor of `none`.
 
 # ncmpcpp-0.8.2 (2018-04-11)
 * Help screen: fixed display of EoF keycode

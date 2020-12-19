@@ -387,7 +387,16 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	      "{%a - }{%t}|{%f}", [](std::string v) {
 		      return Format::parse(v, Format::Flags::Tag);
 	      });
-	p.add("browser_sort_mode", &browser_sort_mode, "name");
+	p.add("browser_sort_mode", &browser_sort_mode, "name", [](std::string v) {
+		if (v == "noop")
+		{
+			deprecated("browser_sort_mode = 'noop'",
+			           "0.10",
+			           "use 'none' instead");
+			v = "none";
+		}
+		return verbose_lexical_cast<SortMode>(v);
+	});
 	p.add("browser_sort_format", &browser_sort_format,
 	      "{%a - }{%t}|{%f} {(%l)}", [](std::string v) {
 		      return Format::parse(v, Format::Flags::Tag);

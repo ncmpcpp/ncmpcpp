@@ -32,7 +32,7 @@ enum class SpaceAddMode { AddRemove, AlwaysAdd };
 std::ostream &operator<<(std::ostream &os, SpaceAddMode sam);
 std::istream &operator>>(std::istream &is, SpaceAddMode &sam);
 
-enum class SortMode { Name, ModificationTime, CustomFormat, NoOp };
+enum class SortMode { Name, ModificationTime, CustomFormat, None };
 std::ostream &operator<<(std::ostream &os, SortMode sm);
 std::istream &operator>>(std::istream &is, SortMode &sm);
 

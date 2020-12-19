@@ -101,8 +101,8 @@ bool LocaleBasedItemSorting::operator()(const MPD::Item &a, const MPD::Item &b) 
 						break;
 				}
 				break;
-			case SortMode::NoOp:
-				throw std::logic_error("can't sort with NoOp sorting mode");
+			case SortMode::None:
+				throw std::logic_error("can't sort with None sorting mode");
 		}
 	}
 	else

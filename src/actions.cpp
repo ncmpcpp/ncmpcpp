@@ -2270,14 +2270,14 @@ void ToggleBrowserSortMode::run()
 			Statusbar::print("Sort songs by: custom format");
 			break;
 		case SortMode::CustomFormat:
-			Config.browser_sort_mode = SortMode::NoOp;
+			Config.browser_sort_mode = SortMode::None;
 			Statusbar::print("Do not sort songs");
 			break;
-		case SortMode::NoOp:
+		case SortMode::None:
 			Config.browser_sort_mode = SortMode::Name;
 			Statusbar::print("Sort songs by: name");
 	}
-	if (Config.browser_sort_mode != SortMode::NoOp)
+	if (Config.browser_sort_mode != SortMode::None)
 	{
 		size_t sort_offset = myBrowser->inRootDirectory() ? 0 : 1;
 		std::sort(myBrowser->main().begin()+sort_offset, myBrowser->main().end(),
