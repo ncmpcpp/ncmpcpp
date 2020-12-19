@@ -548,14 +548,14 @@ struct Connection
 	int AddSong(const Song &, int = -1); // returns id of added song
 	bool AddRandomTag(mpd_tag_type, size_t, std::mt19937 &rng);
 	bool AddRandomSongs(size_t number, const std::string &random_exclude_pattern, std::mt19937 &rng);
-	void Add(const std::string &path);
+	bool Add(const std::string &path);
 	void Delete(unsigned int pos);
 	void PlaylistDelete(const std::string &playlist, unsigned int pos);
 	void StartCommandsList();
 	void CommitCommandsList();
 	
 	void DeletePlaylist(const std::string &name);
-	void LoadPlaylist(const std::string &name);
+	bool LoadPlaylist(const std::string &name);
 	void SavePlaylist(const std::string &);
 	void ClearPlaylist(const std::string &playlist);
 	void AddToPlaylist(const std::string &, const Song &);

@@ -374,17 +374,34 @@ bool PlaylistEditor::itemAvailable()
 
 bool PlaylistEditor::addItemToPlaylist(bool play)
 {
-	bool result = false;
+	bool success = false;
 	if (isActiveWindow(Playlists))
 	{
-		ScopedUnfilteredMenu<MPD::Song> sunfilter_content(ReapplyFilter::No, Content);
-		result = addSongsToPlaylist(Content.beginV(), Content.endV(), play, -1);
-		Statusbar::printf("Playlist \"%1%\" loaded%2%",
-		                  Playlists.current()->value().path(), withErrors(result));
+		const auto &playlist = Playlists.current()->value();
+		success = Mpd.LoadPlaylist(playlist.path());
+		if (play)
+		{
+			// Cheap trick that might fail in presence of multiple clients modifying the
+			// playlist at the same time, but oh well, this approach correctly loads cue
+			// playlists and is much faster in general as it doesn't require fetching
+			// song data.
+			try
+			{
+				Mpd.Play(Status::State::playlistLength());
+			}
+			catch (MPD::ServerError &e)
+			{
+				// If not bad index, rethrow.
+				if (e.code() != MPD_SERVER_ERROR_ARG)
+					throw;
+			}
+		}
+		if (success)
+			Statusbar::printf("Playlist \"%1%\" loaded", playlist.path());
 	}
 	else if (isActiveWindow(Content))
-		result = addSongToPlaylist(Content.current()->value(), play);
-	return result;
+		success = addSongToPlaylist(Content.current()->value(), play);
+	return success;
 }
 
 std::vector<MPD::Song> PlaylistEditor::getSelectedSongs()

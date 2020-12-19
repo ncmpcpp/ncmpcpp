@@ -305,14 +305,13 @@ bool Browser::itemAvailable()
 
 bool Browser::addItemToPlaylist(bool play)
 {
-	bool result = false;
+	bool success = false;
 
 	auto tryToPlay = [] {
-		// Cheap trick that might fail in presence of multiple
-		// clients modifying the playlist at the same time, but
-		// oh well, this approach correctly loads cue playlists
-		// and is much faster in general as it doesn't require
-		// fetching song data.
+		// Cheap trick that might fail in presence of multiple clients modifying the
+		// playlist at the same time, but oh well, this approach correctly loads cue
+		// playlists and is much faster in general as it doesn't require fetching
+		// song data.
 		try
 		{
 			Mpd.Play(Status::State::playlistLength());
@@ -334,31 +333,30 @@ bool Browser::addItemToPlaylist(bool play)
 			{
 				std::vector<MPD::Song> songs;
 				getLocalDirectoryRecursively(songs, item.directory().path());
-				result = addSongsToPlaylist(songs.begin(), songs.end(), play, -1);
+				success = addSongsToPlaylist(songs.begin(), songs.end(), play, -1);
 			}
 			else
 			{
-				Mpd.Add(item.directory().path());
+				success = Mpd.Add(item.directory().path());
 				if (play)
 					tryToPlay();
-				result = true;
 			}
 			Statusbar::printf("Directory \"%1%\" added%2%",
-				item.directory().path(), withErrors(result));
+				item.directory().path(), withErrors(success));
 			break;
 		}
 		case MPD::Item::Type::Song:
-			result = addSongToPlaylist(item.song(), play);
+			success = addSongToPlaylist(item.song(), play);
 			break;
 		case MPD::Item::Type::Playlist:
-			Mpd.LoadPlaylist(item.playlist().path());
+			success = Mpd.LoadPlaylist(item.playlist().path());
 			if (play)
 				tryToPlay();
-			Statusbar::printf("Playlist \"%1%\" loaded", item.playlist().path());
-			result = true;
+			if (success)
+				Statusbar::printf("Playlist \"%1%\" loaded", item.playlist().path());
 			break;
 	}
-	return result;
+	return success;
 }
 
 std::vector<MPD::Song> Browser::getSelectedSongs()

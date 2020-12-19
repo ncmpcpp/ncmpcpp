@@ -567,16 +567,18 @@ int Connection::AddSong(const Song &s, int pos)
 	return AddSong((!s.isFromDatabase() ? "file://" : "") + s.getURI(), pos);
 }
 
-void Connection::Add(const std::string &path)
+bool Connection::Add(const std::string &path)
 {
+	bool result;
 	prechecks();
 	if (m_command_list_active)
-		mpd_send_add(m_connection.get(), path.c_str());
+		result = mpd_send_add(m_connection.get(), path.c_str());
 	else
 	{
-		mpd_run_add(m_connection.get(), path.c_str());
+		result = mpd_run_add(m_connection.get(), path.c_str());
 		checkErrors();
 	}
+	return result;
 }
 
 bool Connection::AddRandomTag(mpd_tag_type tag, size_t number, std::mt19937 &rng)
@@ -689,11 +691,12 @@ void Connection::DeletePlaylist(const std::string &name)
 	checkErrors();
 }
 
-void Connection::LoadPlaylist(const std::string &name)
+bool Connection::LoadPlaylist(const std::string &name)
 {
 	prechecksNoCommandsList();
-	mpd_run_load(m_connection.get(), name.c_str());
+	bool result = mpd_run_load(m_connection.get(), name.c_str());
 	checkErrors();
+	return result;
 }
 
 void Connection::SavePlaylist(const std::string &name)
