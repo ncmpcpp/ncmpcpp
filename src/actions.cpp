@@ -2261,6 +2261,9 @@ void ToggleBrowserSortMode::run()
 {
 	switch (Config.browser_sort_mode)
 	{
+		case SortMode::Type:
+			Config.browser_sort_mode = SortMode::Name;
+			Statusbar::print("Sort songs by: name");
 		case SortMode::Name:
 			Config.browser_sort_mode = SortMode::ModificationTime;
 			Statusbar::print("Sort songs by: modification time");
@@ -2274,15 +2277,16 @@ void ToggleBrowserSortMode::run()
 			Statusbar::print("Do not sort songs");
 			break;
 		case SortMode::None:
-			Config.browser_sort_mode = SortMode::Name;
-			Statusbar::print("Sort songs by: name");
+			Config.browser_sort_mode = SortMode::Type;
+			Statusbar::print("Sort songs by: type");
 	}
 	if (Config.browser_sort_mode != SortMode::None)
 	{
 		size_t sort_offset = myBrowser->inRootDirectory() ? 0 : 1;
-		std::sort(myBrowser->main().begin()+sort_offset, myBrowser->main().end(),
-			LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode)
-		);
+		std::stable_sort(
+			myBrowser->main().begin()+sort_offset, myBrowser->main().end(),
+			LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the,
+			                       Config.browser_sort_mode));
 	}
 }
 

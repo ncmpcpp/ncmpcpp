@@ -387,7 +387,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	      "{%a - }{%t}|{%f}", [](std::string v) {
 		      return Format::parse(v, Format::Flags::Tag);
 	      });
-	p.add("browser_sort_mode", &browser_sort_mode, "name", [](std::string v) {
+	p.add("browser_sort_mode", &browser_sort_mode, "type", [](std::string v) {
 		if (v == "noop")
 		{
 			deprecated("browser_sort_mode = 'noop'",

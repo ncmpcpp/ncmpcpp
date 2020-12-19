@@ -58,6 +58,9 @@ bool LocaleBasedItemSorting::operator()(const MPD::Item &a, const MPD::Item &b) 
 	{
 		switch (m_sort_mode)
 		{
+			case SortMode::Type:
+				result = a.type() > b.type();
+				break;
 			case SortMode::Name:
 				switch (a.type())
 				{

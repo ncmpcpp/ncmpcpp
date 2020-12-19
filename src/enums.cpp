@@ -78,6 +78,9 @@ std::ostream &operator<<(std::ostream &os, SortMode sm)
 {
 	switch (sm)
 	{
+		case SortMode::Type:
+			os << "type";
+			break;
 		case SortMode::Name:
 			os << "name";
 			break;
@@ -98,7 +101,9 @@ std::istream &operator>>(std::istream &is, SortMode &sm)
 {
 	std::string ssm;
 	is >> ssm;
-	if (ssm == "name")
+	if (ssm == "type")
+		sm = SortMode::Type;
+	else if (ssm == "name")
 		sm = SortMode::Name;
 	else if (ssm == "mtime")
 		sm = SortMode::ModificationTime;
