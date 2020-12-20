@@ -302,7 +302,18 @@ void MediaLibrary::update()
 			m_albums_update_request = false;
 			sunfilter_albums.set(ReapplyFilter::Yes, true);
 			std::map<std::tuple<std::string, std::string, std::string>, time_t> albums;
-			for (MPD::SongIterator s = getDatabaseIterator(Mpd), end; s != end; ++s)
+			MPD::SongIterator s, end;
+			try
+			{
+				s = Mpd.GetDirectoryRecursive("/");
+			}
+			catch (MPD::Error &e)
+			{
+				// If there was a problem, fall back to a different column mode.
+				toggleColumnsMode();
+				throw;
+			}
+			for (; s != end; ++s)
 			{
 				std::string tag;
 				unsigned idx = 0;
@@ -349,7 +360,18 @@ void MediaLibrary::update()
 				std::map<std::string, time_t> tags;
 				if (Config.media_library_sort_by_mtime)
 				{
-					for (MPD::SongIterator s = getDatabaseIterator(Mpd), end; s != end; ++s)
+					MPD::SongIterator s, end;
+					try
+					{
+						s = Mpd.GetDirectoryRecursive("/");
+					}
+					catch (MPD::Error &e)
+					{
+						// If there was a problem, fall back to a different sorting mode.
+						toggleSortMode();
+						throw;
+					}
+					for (; s != end; ++s)
 					{
 						std::string tag;
 						unsigned idx = 0;

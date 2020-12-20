@@ -42,40 +42,6 @@ const MPD::Song *currentSong(const BaseScreen *screen)
 	return ptr;
 }
 
-MPD::SongIterator getDatabaseIterator(MPD::Connection &mpd)
-{
-	MPD::SongIterator result;
-	try
-	{
-		result = mpd.GetDirectoryRecursive("/");
-	}
-	catch (MPD::ClientError &e)
-	{
-		if (e.code() == MPD_ERROR_CLOSED)
-		{
-			// If we can't get the database, display appropriate
-			// error message and reconnect with the MPD server.
-			Statusbar::print("Unable to fetch the data, increase max_output_buffer_size in your MPD configuration file");
-			mpd.Disconnect();
-			mpd.Connect();
-		}
-		else
-			throw;
-	}
-	catch (MPD::ServerError &e)
-	{
-		// mopidy blacklists 'listallinfo' command by default and throws server
-		// error when it receives it. Work around that to prevent ncmpcpp from
-		// continuously retrying to send the command and looping.
-		if (strstr(e.what(), "listallinfo") != nullptr
-		    && strstr(e.what(), "disabled") != nullptr)
-			Statusbar::print("Unable to fetch the data, server refused to process 'listallinfo' command");
-		else
-			throw;
-	}
-	return result;
-}
-
 void deleteSelectedSongsFromPlaylist(NC::Menu<MPD::Song> &playlist)
 {
 	selectCurrentIfNoneSelected(playlist);

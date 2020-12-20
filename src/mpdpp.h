@@ -38,36 +38,42 @@ void checkConnectionErrors(mpd_connection *conn);
 enum PlayerState { psUnknown, psStop, psPlay, psPause };
 enum ReplayGainMode { rgmOff, rgmTrack, rgmAlbum };
 
-struct ClientError: public std::exception
+struct Error: public std::exception
 {
-	ClientError(mpd_error code_, std::string msg, bool clearable_)
-	: m_code(code_), m_msg(msg), m_clearable(clearable_) { }
-	virtual ~ClientError() noexcept { }
-	
+	Error(std::string msg, bool clearable_)
+		: m_msg(msg), m_clearable(clearable_) { }
+	virtual ~Error() noexcept { }
+
 	virtual const char *what() const noexcept { return m_msg.c_str(); }
-	mpd_error code() const { return m_code; }
 	bool clearable() const { return m_clearable; }
-	
+
 private:
-	mpd_error m_code;
 	std::string m_msg;
 	bool m_clearable;
 };
 
-struct ServerError: public std::exception
+struct ClientError: public Error
+{
+	ClientError(mpd_error code_, std::string msg, bool clearable_)
+		: Error(msg, clearable_), m_code(code_) { }
+	virtual ~ClientError() noexcept { }
+	
+	mpd_error code() const { return m_code; }
+
+private:
+	mpd_error m_code;
+};
+
+struct ServerError: public Error
 {
 	ServerError(mpd_server_error code_, std::string msg, bool clearable_)
-	: m_code(code_), m_msg(msg), m_clearable(clearable_) { }
+		: Error(msg, clearable_), m_code(code_) { }
 	virtual ~ServerError() noexcept { }
 	
-	virtual const char *what() const noexcept { return m_msg.c_str(); }
 	mpd_server_error code() const { return m_code; }
-	bool clearable() const { return m_clearable; }
-	
+
 private:
 	mpd_server_error m_code;
-	std::string m_msg;
-	bool m_clearable;
 };
 
 struct Statistics

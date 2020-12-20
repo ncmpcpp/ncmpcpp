@@ -500,7 +500,7 @@ void SearchEngine::Search()
 	input_song_iterator s, end;
 	if (Config.search_in_db)
 	{
-		s = input_song_iterator(getDatabaseIterator(Mpd));
+		s = input_song_iterator(Mpd.GetDirectoryRecursive("/"));
 		end = input_song_iterator(MPD::SongIterator());
 	}
 	else

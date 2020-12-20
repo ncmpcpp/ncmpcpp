@@ -534,8 +534,6 @@ bool addSongToPlaylist(const MPD::Song &s, bool play, int position = -1);
 
 const MPD::Song *currentSong(const BaseScreen *screen);
 
-MPD::SongIterator getDatabaseIterator(MPD::Connection &mpd);
-
 std::string timeFormat(const char *format, time_t t);
 
 std::string Timestamp(time_t t);
