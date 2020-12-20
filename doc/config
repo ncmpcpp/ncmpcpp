@@ -231,7 +231,7 @@
 ## Note: colors can be nested.
 ##
 #
-#song_list_format = {%a - }{%t}|{$8%f$9}$R{$3(%l)$9}
+#song_list_format = {%a - }{%t}|{$8%f$9}$R{$3%l$9}
 #
 #song_status_format = {{%a{ "%b"{ (%y)}} - }{%t}}|{%f}
 #
@@ -274,7 +274,7 @@
 #
 #browser_sort_mode = type
 #
-#browser_sort_format = {%a - }{%t}|{%f} {(%l)}
+#browser_sort_format = {%a - }{%t}|{%f} {%l}
 #
 ##### columns settings #####
 ##

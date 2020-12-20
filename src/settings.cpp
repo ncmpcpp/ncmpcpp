@@ -315,7 +315,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	      });
 	p.add("message_delay_time", &message_delay_time, "5");
 	p.add("song_list_format", &song_list_format,
-	      "{%a - }{%t}|{$8%f$9}$R{$3(%l)$9}", [](std::string v) {
+	      "{%a - }{%t}|{$8%f$9}$R{$3%l$9}", [](std::string v) {
 		      return Format::parse(v);
 	      });
 	p.add("song_status_format", &song_status_format,
@@ -398,7 +398,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 		return verbose_lexical_cast<SortMode>(v);
 	});
 	p.add("browser_sort_format", &browser_sort_format,
-	      "{%a - }{%t}|{%f} {(%l)}", [](std::string v) {
+	      "{%a - }{%t}|{%f} {%l}", [](std::string v) {
 		      return Format::parse(v, Format::Flags::Tag);
 	      });
 	p.add("song_columns_list_format", &song_columns_mode_format,
