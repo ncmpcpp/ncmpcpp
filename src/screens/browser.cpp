@@ -427,18 +427,29 @@ void Browser::locateSong(const MPD::Song &s)
 
 	w.clearFilter();
 
-	// change to relevant directory
-	if (m_current_directory != s.getDirectory())
+	try
 	{
-		getDirectory(s.getDirectory());
-		drawHeader();
-	}
+		// Try to change to relevant directory.
+		if (m_current_directory != s.getDirectory())
+		{
+			getDirectory(s.getDirectory());
+			drawHeader();
+		}
 
-	// highlight the item
-	auto begin = w.beginV(), end = w.endV();
-	auto it = std::find(begin, end, MPD::Item(s));
-	if (it != end)
-		w.highlight(it-begin);
+		// Highlight the item.
+		auto begin = w.beginV(), end = w.endV();
+		auto it = std::find(begin, end, MPD::Item(s));
+		if (it != end)
+			w.highlight(it-begin);
+	}
+	catch (MPD::ServerError &err)
+	{
+		// If the directory is invalid, recover by invoking the update.
+		if (err.code() == MPD_SERVER_ERROR_NO_EXIST)
+			requestUpdate();
+		else
+			throw;
+	}
 }
 
 bool Browser::enterDirectory()
