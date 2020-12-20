@@ -178,7 +178,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::Pause, "Pause");
 	key(w, Type::Next, "Next track");
 	key(w, Type::Previous, "Previous track");
-	key(w, Type::ReplaySong, "Replay playing song");
+	key(w, Type::ReplaySong, "Replay the current song");
 	key(w, Type::SeekForward, "Seek forward in playing song");
 	key(w, Type::SeekBackward, "Seek backward in playing song");
 	key(w, Type::VolumeDown,
