@@ -1,4 +1,4 @@
-# ncmpcpp-0.9 (2020-12-??)
+# ncmpcpp-0.9 (2020-12-20)
 * Fix various Mopidy specific bugs.
 * Add `run_external_console_command` action for running terminal applications.
 * Pass lyrics filename in single quotes to shell.
