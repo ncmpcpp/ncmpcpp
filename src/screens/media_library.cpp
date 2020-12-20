@@ -93,7 +93,7 @@ bool AlbumEntryMatcher(const Regex::Regex &rx, const NC::Menu<AlbumEntry>::Item 
 bool SongEntryMatcher(const Regex::Regex &rx, const MPD::Song &s);
 
 bool MoveToTag(NC::Menu<PrimaryTag> &tags, const std::string &primary_tag);
-bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, const MPD::Song &s);
+bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, const MPD::Song &s, bool consider_date);
 
 struct SortSongs {
 	typedef NC::Menu<MPD::Song>::Item SongItem;
@@ -1049,7 +1049,7 @@ void MediaLibrary::locateSong(const MPD::Song &s)
 	// they are not found.
 	if (hasTwoColumns || !Albums.empty())
 	{
-		if (!MoveToAlbum(Albums, primary_tag, s))
+		if (!MoveToAlbum(Albums, primary_tag, s, true))
 		{
 			// The album could not be found, insert it if in two column mode.
 			// See comment about tags not found above. This is the equivalent
@@ -1060,7 +1060,7 @@ void MediaLibrary::locateSong(const MPD::Song &s)
 			                                s.getMTime())));
 			std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
 			Albums.refresh();
-			MoveToAlbum(Albums, primary_tag, s);
+			MoveToAlbum(Albums, primary_tag, s, true);
 		}
 
 		Songs.clearFilter();
@@ -1159,7 +1159,8 @@ bool MoveToTag(NC::Menu<PrimaryTag> &tags, const std::string &primary_tag)
 	return false;
 }
 
-bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, const MPD::Song &s)
+bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag,
+                 const MPD::Song &s, bool consider_date)
 {
 	if (albums.empty())
 		return false;
@@ -1170,7 +1171,7 @@ bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, c
 	auto equals_fun_argument = [&](AlbumEntry &e) {
 		return (isAlbumOnly || !hasTwoColumns || e.entry().tag() == primary_tag)
 		&& e.entry().album() == album
-		&& (!Config.media_library_albums_split_by_date || e.entry().date() == date);
+		&& (!consider_date || !Config.media_library_albums_split_by_date || e.entry().date() == date);
 	};
 
 	if (equals_fun_argument(*albums.currentV()))
@@ -1183,8 +1184,15 @@ bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, c
 		albums.highlight(it-begin);
 		return true;
 	}
-
-	return false;
+	else if (consider_date)
+	{
+		// When trying to locate songs from Spotify the song usually has a date tag,
+		// but the entry in the library doesn't. So if that happens, try again and
+		// ignore the date.
+		return MoveToAlbum(albums, primary_tag, s, false);
+	}
+	else
+		return false;
 }
 
 }
