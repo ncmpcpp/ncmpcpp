@@ -42,6 +42,8 @@ std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher)
 		fetcher = std::make_unique<AzLyricsFetcher>();
 	else if (s == "genius")
 		fetcher = std::make_unique<GeniusFetcher>();
+	else if (s == "musixmatch")
+		fetcher = std::make_unique<MusixmatchFetcher>();
 	else if (s == "sing365")
 		fetcher = std::make_unique<Sing365Fetcher>();
 	else if (s == "metrolyrics")
@@ -83,7 +85,7 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist,
 		result.second = curl_easy_strerror(code);
 		return result;
 	}
-	
+
 	auto lyrics = getContent(regex(), data);
 
 	if (lyrics.empty() || notLyrics(data))
@@ -91,7 +93,7 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist,
 		result.second = msgNotFound;
 		return result;
 	}
-	
+
 	data.clear();
 	for (auto it = lyrics.begin(); it != lyrics.end(); ++it)
 	{
@@ -183,7 +185,7 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist,
 		result.second = msgNotFound;
 		return result;
 	}
-	
+
 	data = unescapeHtmlUtf8(urls[0]);
 	
 	URL = data.c_str();

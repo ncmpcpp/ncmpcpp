@@ -1,3 +1,6 @@
+# ncmpcpp-0.10 (????-??-??)
+* Add support for fetching lyrics from musixmatch.com.
+
 # ncmpcpp-0.9 (2020-12-20)
 * Fix various Mopidy specific bugs.
 * Add `run_external_console_command` action for running terminal applications.

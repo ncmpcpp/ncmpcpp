@@ -69,6 +69,16 @@ private:
 	const char *URL;
 };
 
+struct MusixmatchFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() const override { return "musixmatch.com"; }
+
+protected:
+	virtual const char *regex() const override { return "<span class=\"lyrics__content__.*?>(.*?)</span>"; }
+
+	virtual void postProcess(std::string &) const override { }
+};
+
 struct MetrolyricsFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const override { return "metrolyrics.com"; }
