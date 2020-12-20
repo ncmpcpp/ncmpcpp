@@ -22,8 +22,6 @@
 * Add `visualizer_autoscale` option to a configuration file.
 * Add `visualizer_fps` option to a configuration file (60 by default).
 * Allow for editing multiple titles in the Tag Editor.
-* Allow setting `visualizer_sync_interval` to 0 (a new default) to disable
-  synchronization attempts.
 * Support gstreamer's udpsink as a data source for visualization (Mopidy).
 * Deprecate `visualizer_fifo_path` in favor of `visualizer_data_source`.
 * Don't run volume changing actions if there is no mixer.
