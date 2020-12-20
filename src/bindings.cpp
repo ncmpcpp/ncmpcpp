@@ -201,6 +201,15 @@ std::shared_ptr<Actions::BaseAction> parseActionLine(const std::string &line, F 
 			else
 				error() << "empty command passed to run_external_command\n";
 		}
+		else if (action_name == "run_external_console_command")
+		{
+			std::string command = getEnclosedString(line, '"', '"', 0);
+			if (!command.empty())
+				result = std::static_pointer_cast<Actions::BaseAction>(
+					std::make_shared<Actions::RunExternalConsoleCommand>(std::move(command)));
+			else
+				error() << "empty command passed to run_external_console_command\n";
+		}
 	}
 	return result;
 }

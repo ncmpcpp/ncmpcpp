@@ -97,6 +97,10 @@
 ##    - run_external_command "command" - runs given command using
 ##      system() function.
 ##
+##    - run_external_console_command "command" - runs given console
+##      command using system() function.
+##
+##
 ## 5) In addition to binding to a key, you can also bind actions
 ##    or chains of actions to a command. If it comes to commands,
 ##    syntax is very similar to defining keys. Here goes example

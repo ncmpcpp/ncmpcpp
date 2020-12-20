@@ -70,6 +70,16 @@ private:
 	std::string m_command;
 };
 
+struct RunExternalConsoleCommand: BaseAction
+{
+	RunExternalConsoleCommand(std::string &&command);
+
+private:
+	virtual void run() override;
+
+	std::string m_command;
+};
+
 }
 
 #endif // NCMPCPP_MACRO_UTILITIES_H

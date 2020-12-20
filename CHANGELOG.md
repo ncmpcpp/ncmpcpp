@@ -1,5 +1,5 @@
 # ncmpcpp-0.9 (2020-12-??)
-* Restore curses window after running external command.
+* Add `run_external_console_command` action for running terminal applications.
 * Pass lyrics filename in single quotes to shell.
 * Add support for fetching lyrics from zeneszoveg.hu.
 * Add `Play` action for starting playback in stopped state.
