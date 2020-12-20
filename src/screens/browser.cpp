@@ -165,6 +165,7 @@ void Browser::resize()
 void Browser::switchTo()
 {
 	SwitchTo::execute(this);
+	update();
 	drawHeader();
 }
 
