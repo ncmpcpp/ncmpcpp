@@ -1,7 +1,7 @@
 ##############################################################
 ## This is the example bindings file. Copy it to            ##
-## ~/.ncmpcpp/bindings or $XDG_CONFIG_HOME/ncmpcpp/bindings ##
-## and set up your preferences                              ##
+## $XDG_CONFIG_HOME/ncmpcpp/bindings or ~/.ncmpcpp/bindings ##
+## and set up your preferences.                             ##
 ##############################################################
 ##
 ##### General rules #####

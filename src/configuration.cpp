@@ -74,13 +74,13 @@ void expand_home(std::string &path)
 bool configure(int argc, char **argv)
 {
 	const std::vector<std::string> default_config_paths = {
-		"~/.ncmpcpp/config",
-		xdg_config_home() + "ncmpcpp/config"
+		xdg_config_home() + "ncmpcpp/config",
+		"~/.ncmpcpp/config"
 	};
 
 	const std::vector<std::string> default_bindings_paths = {
-		"~/.ncmpcpp/bindings",
-		xdg_config_home() + "ncmpcpp/bindings"
+		xdg_config_home() + "ncmpcpp/bindings",
+		"~/.ncmpcpp/bindings"
 	};
 
 	std::vector<std::string> bindings_paths;
