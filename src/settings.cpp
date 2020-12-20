@@ -476,7 +476,6 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("titles_visibility", &titles_visibility, "yes", yes_no);
 	p.add("header_text_scrolling", &header_text_scrolling, "yes", yes_no);
 	p.add("cyclic_scrolling", &use_cyclic_scrolling, "no", yes_no);
-	p.add("lines_scrolled", &lines_scrolled, "2");
 	p.add("lyrics_fetchers", &lyrics_fetchers,
 	      "azlyrics, genius, sing365, metrolyrics, justsomelyrics, jahlyrics, plyrics, tekstowo, zeneszoveg, internet",
 	      list_of<LyricsFetcher_>);
@@ -558,7 +557,8 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("block_search_constraints_change_if_items_found",
 	      &block_search_constraints_change, "yes", yes_no);
 	p.add("mouse_support", &mouse_support, "yes", yes_no);
-	p.add("mouse_list_scroll_whole_page", &mouse_list_scroll_whole_page, "yes", yes_no);
+	p.add("mouse_list_scroll_whole_page", &mouse_list_scroll_whole_page, "no", yes_no);
+	p.add("lines_scrolled", &lines_scrolled, "5");
 	p.add("empty_tag_marker", &empty_tag, "<empty>");
 	p.add("tags_separator", &MPD::Song::TagsSeparator, " | ");
 	p.add("tag_editor_extended_numeration", &tag_editor_extended_numeration, "no", yes_no);

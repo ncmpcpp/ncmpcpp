@@ -405,8 +405,6 @@
 #
 #cyclic_scrolling = no
 #
-#lines_scrolled = 2
-#
 #lyrics_fetchers = azlyrics, genius, sing365, metrolyrics, justsomelyrics, jahlyrics, plyrics, tekstowo, zeneszoveg, internet
 #
 #follow_now_playing_lyrics = no
@@ -498,7 +496,9 @@
 #
 #mouse_support = yes
 #
-#mouse_list_scroll_whole_page = yes
+#mouse_list_scroll_whole_page = no
+#
+#lines_scrolled = 5
 #
 #empty_tag_marker = <empty>
 #
