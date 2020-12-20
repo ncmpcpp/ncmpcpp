@@ -800,7 +800,7 @@ void DeleteStoredPlaylist::run()
 void ReplaySong::run()
 {
 	if (Status::State::player() != MPD::psStop)
-		Mpd.Seek(Status::State::currentSongPosition(), 0);
+		Mpd.Play(Status::State::currentSongPosition());
 }
 
 void PreviousSong::run()
