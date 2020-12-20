@@ -99,11 +99,7 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist,
 	{
 		postProcess(*it);
 		if (!it->empty())
-		{
 			data += *it;
-			if (it != lyrics.end()-1)
-				data += "\n\n----------\n\n";
-		}
 	}
 	
 	result.second = data;
