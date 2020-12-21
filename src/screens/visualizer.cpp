@@ -104,7 +104,6 @@ void Visualizer::switchTo()
 {
 	SwitchTo::execute(this);
 	Clear();
-	OpenDataSource();
 	m_reset_output = true;
 	drawHeader();
 #	ifdef HAVE_FFTW3_H

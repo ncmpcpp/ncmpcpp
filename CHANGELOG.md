@@ -3,6 +3,7 @@
 * Fix intermittent failures of the Genius fetcher.
 * Fix crash on startup with Visualizer as the initial screen.
 * Fix crash on startup with Browser as the initial screen.
+* Show the Visualizer immediately if it's the initial screen.
 
 # ncmpcpp-0.9 (2020-12-20)
 * Fix various Mopidy specific bugs.
