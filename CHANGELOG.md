@@ -1,5 +1,6 @@
 # ncmpcpp-0.10 (????-??-??)
 * Add support for fetching lyrics from musixmatch.com.
+* Fix intermittent failures of the Genius fetcher.
 
 # ncmpcpp-0.9 (2020-12-20)
 * Fix various Mopidy specific bugs.

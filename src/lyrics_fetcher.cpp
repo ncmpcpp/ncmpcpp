@@ -90,6 +90,9 @@ LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist,
 
 	if (lyrics.empty() || notLyrics(data))
 	{
+		//std::cerr << "Data: " << data << "\n";
+		//std::cerr << "Empty: " << lyrics.empty() << "\n";
+		//std::cerr << "Not Lyrics: " << notLyrics(data) << "\n";
 		result.second = msgNotFound;
 		return result;
 	}
@@ -183,7 +186,7 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist,
 	}
 
 	data = unescapeHtmlUtf8(urls[0]);
-	
+
 	URL = data.c_str();
 	return LyricsFetcher::fetch("", "");
 }
