@@ -28,6 +28,7 @@
 #include "format_impl.h"
 #include "global.h"
 #include "helpers.h"
+#include "macro_utilities.h"
 #include "screens/lyrics.h"
 #include "screens/media_library.h"
 #include "screens/outputs.h"
@@ -489,9 +490,9 @@ void Status::Changes::playerState()
 			}
 			throw std::logic_error("unreachable");
 		};
-		GNUC_UNUSED int res;
 		setenv("MPD_PLAYER_STATE", stateToEnv(m_player_state), 1);
-		res = system(Config.execute_on_player_state_change.c_str());
+		// Since we're setting a MPD_PLAYER_STATE, we need to block.
+		runExternalCommandNoOutput(Config.execute_on_player_state_change, true);
 		unsetenv("MPD_PLAYER_STATE");
 	}
 
@@ -568,9 +569,8 @@ void Status::Changes::songID(int song_id)
 		const auto &s = it != pl.endV() ? *it : Mpd.GetCurrentSong();
 		if (!s.empty())
 		{
-			GNUC_UNUSED int res;
 			if (!Config.execute_on_song_change.empty())
-				res = system(Config.execute_on_song_change.c_str());
+				runExternalCommandNoOutput(Config.execute_on_song_change, false);
 
 			if (Config.fetch_lyrics_in_background)
 				myLyrics->fetchInBackground(s, false);

@@ -82,4 +82,9 @@ private:
 
 }
 
+// Helpers
+
+void runExternalConsoleCommand(const std::string &cmd);
+void runExternalCommandNoOutput(const std::string &cmd, bool block);
+
 #endif // NCMPCPP_MACRO_UTILITIES_H
