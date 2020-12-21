@@ -2,6 +2,7 @@
 * Add support for fetching lyrics from musixmatch.com.
 * Fix intermittent failures of the Genius fetcher.
 * Fix crash on startup with Visualizer as the initial screen.
+* Fix crash on startup with Browser as the initial screen.
 
 # ncmpcpp-0.9 (2020-12-20)
 * Fix various Mopidy specific bugs.

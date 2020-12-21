@@ -95,6 +95,7 @@ struct Browser: Screen<BrowserWindow>, Filterable, HasSongs, Searchable, Tabbabl
 	static void fetchSupportedExtensions();
 
 private:
+	bool m_redraw_header;
 	bool m_update_request;
 	bool m_local_browser;
 	size_t m_scroll_beginning;

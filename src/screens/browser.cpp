@@ -129,7 +129,8 @@ std::vector<MPD::Song> BrowserWindow::getSelectedSongs()
 /**********************************************************************/
 
 Browser::Browser()
-: m_update_request(true)
+: m_redraw_header(false)
+, m_update_request(true)
 , m_local_browser(false)
 , m_scroll_beginning(0)
 , m_current_directory("/")
@@ -165,8 +166,7 @@ void Browser::resize()
 void Browser::switchTo()
 {
 	SwitchTo::execute(this);
-	update();
-	drawHeader();
+	m_redraw_header = true;
 }
 
 std::wstring Browser::title()
@@ -181,7 +181,6 @@ void Browser::update()
 	if (m_update_request)
 	{
 		m_update_request = false;
-		bool directory_changed = false;
 		do
 		{
 			try
@@ -194,17 +193,17 @@ void Browser::update()
 				// If current directory doesn't exist, try getting its
 				// parent until we either succeed or reach the root.
 				if (err.code() == MPD_SERVER_ERROR_NO_EXIST)
-				{
 					m_current_directory = getParentDirectory(m_current_directory);
-					directory_changed = true;
-				}
 				else
 					throw;
 			}
 		}
 		while (w.empty() && !inRootDirectory());
-		if (directory_changed)
-			drawHeader();
+	}
+	if (m_redraw_header)
+	{
+		drawHeader();
+		m_redraw_header = false;
 	}
 }
 
@@ -432,10 +431,7 @@ void Browser::locateSong(const MPD::Song &s)
 	{
 		// Try to change to relevant directory.
 		if (m_current_directory != s.getDirectory())
-		{
 			getDirectory(s.getDirectory());
-			drawHeader();
-		}
 
 		// Highlight the item.
 		auto begin = w.beginV(), end = w.endV();
@@ -462,7 +458,6 @@ bool Browser::enterDirectory()
 		if (item.type() == MPD::Item::Type::Directory)
 		{
 			getDirectory(item.directory().path());
-			drawHeader();
 			result = true;
 		}
 	}
@@ -479,7 +474,10 @@ void Browser::getDirectory(std::string directory)
 
 		// Reset the position if we change directories.
 		if (m_current_directory != directory)
+		{
 			w.reset();
+			m_redraw_header = true;
+		}
 
 		// Check if it's a parent directory.
 		if (isStringParentDirectory(directory))
@@ -550,7 +548,6 @@ void Browser::changeBrowseMode()
 		m_current_directory = "/";
 	w.reset();
 	getDirectory(m_current_directory);
-	drawHeader();
 }
 
 void Browser::remove(const MPD::Item &item)
