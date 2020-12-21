@@ -189,9 +189,6 @@ int main(int argc, char **argv)
 							Mpd.Disconnect();
 							throw MPD::ClientError(MPD_ERROR_STATE, "MPD < 0.16.0 is not supported", false);
 					}
-					// Once the connection is established, run full Status::trace to set a
-					// proper window timeout, initialize status etc.
-					Status::trace(true, true);
 				}
 				catch (MPD::ClientError &e)
 				{
