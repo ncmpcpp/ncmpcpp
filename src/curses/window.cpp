@@ -459,12 +459,16 @@ void initScreen(bool enable_colors, bool enable_mouse)
 
 void pauseScreen()
 {
+	if (Mouse::supportEnabled)
+		Mouse::disable();
 	def_prog_mode();
 	endwin();
 }
 
 void unpauseScreen()
 {
+	if (Mouse::supportEnabled)
+		Mouse::enable();
 	refresh();
 }
 

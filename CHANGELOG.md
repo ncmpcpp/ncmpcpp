@@ -6,6 +6,7 @@
 * Show the Visualizer immediately if it's the initial screen.
 * Draw a separator between albums with the same name, but a different artist.
 * Suppress output of all external commands.
+* Consider mouse support when pausing and unpausing curses interface.
 
 # ncmpcpp-0.9 (2020-12-20)
 * Fix various Mopidy specific bugs.
