@@ -87,6 +87,7 @@ private:
 	void (Visualizer::*drawStereo)(const int16_t *, const int16_t *, ssize_t, size_t);
 
 	int m_output_id;
+	bool m_reset_output;
 
 	int m_source_fd;
 	std::string m_source_location;

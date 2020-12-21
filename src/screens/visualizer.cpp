@@ -69,6 +69,8 @@ const NC::FormattedColor &toColor(size_t number, size_t max, bool wrap = true)
 
 Visualizer::Visualizer()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
+, m_output_id(-1)
+, m_reset_output(false)
 , m_source_fd(-1)
 , m_sample_consumption_rate(5)
 , m_sample_consumption_rate_up_ctr(0)
@@ -103,14 +105,7 @@ void Visualizer::switchTo()
 	SwitchTo::execute(this);
 	Clear();
 	OpenDataSource();
-	// Disable and enable FIFO to get rid of the difference between audio and
-	// visualization.
-	if (m_output_id != -1)
-	{
-		Mpd.DisableOutput(m_output_id);
-		usleep(50000);
-		Mpd.EnableOutput(m_output_id);
-	}
+	m_reset_output = true;
 	drawHeader();
 #	ifdef HAVE_FFTW3_H
 	GenLogspace();
@@ -141,6 +136,16 @@ void Visualizer::update()
 {
 	if (m_source_fd < 0)
 		return;
+
+	// Disable and enable FIFO to get rid of the difference between audio and
+	// visualization.
+	if (m_reset_output && m_output_id != -1)
+	{
+		Mpd.DisableOutput(m_output_id);
+		usleep(50000);
+		Mpd.EnableOutput(m_output_id);
+		m_reset_output = false;
+	}
 
 	// PCM in format 44100:16:1 (for mono visualization) and
 	// 44100:16:2 (for stereo visualization) is supported.
