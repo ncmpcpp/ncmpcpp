@@ -2263,6 +2263,7 @@ void ToggleBrowserSortMode::run()
 		case SortMode::Type:
 			Config.browser_sort_mode = SortMode::Name;
 			Statusbar::print("Sort songs by: name");
+			break;
 		case SortMode::Name:
 			Config.browser_sort_mode = SortMode::ModificationTime;
 			Statusbar::print("Sort songs by: modification time");
