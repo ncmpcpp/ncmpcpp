@@ -8,6 +8,7 @@
 * Suppress output of all external commands.
 * Consider mouse support when pausing and unpausing curses interface.
 * Reduce CPU usage of the frequency spectrum visualizer.
+* Enable Link Time Optimization by default.
 
 # ncmpcpp-0.9 (2020-12-20)
 * Fix various Mopidy specific bugs.

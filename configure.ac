@@ -17,6 +17,7 @@ AC_ARG_ENABLE(clock, AS_HELP_STRING([--enable-clock], [Enable clock screen @<:@d
 
 AC_ARG_WITH(fftw, AS_HELP_STRING([--with-fftw], [Enable fftw support (required for frequency spectrum vizualization) @<:@default=auto@:>@]), [fftw=$withval], [fftw=auto])
 AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor @<:@default=auto@:>@]), [taglib=$withval], [taglib=auto])
+AC_ARG_WITH(lto, AS_HELP_STRING([--with-lto], [Enable LTO (link time optimization) @<:@default=yes@:>@]), [lto=$withval], [lto=yes])
 
 if test "$outputs" = "yes"; then
 	AC_DEFINE([ENABLE_OUTPUTS], [1], [enables outputs screen])
@@ -24,6 +25,25 @@ fi
 
 if test "$clock" = "yes"; then
 	AC_DEFINE([ENABLE_CLOCK], [1], [enables clock screen])
+fi
+
+# -flto
+if test "$lto" != "no"; then
+  AC_MSG_CHECKING([whether compiler supports -flto])
+  old_CXXFLAGS="$CXXFLAGS"
+  # support specifying the number of threads
+  if test "$lto" != "yes"; then
+    flto="-flto=$lto"
+  else
+    flto="-flto"
+  fi
+  CXXFLAGS="$flto"
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([[ ]])],
+    AC_MSG_RESULT([yes]),
+    AC_MSG_RESULT([no])
+      flto=""
+  )
+  CXXFLAGS="$old_CXXFLAGS $flto"
 fi
 
 # -ftree-vectorize
