@@ -127,7 +127,7 @@
 ## visualizer look at a larger slice of time, which results in less jumpy
 ## visualizer output.
 #
-#visualizer_spectrum_dft_size = 3
+#visualizer_spectrum_dft_size = 2
 #
 #visualizer_spectrum_gain = 10
 #

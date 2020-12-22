@@ -77,8 +77,8 @@ Visualizer::Visualizer()
 , m_sample_consumption_rate_dn_ctr(0)
 #	ifdef HAVE_FFTW3_H
 	,
-  DFT_NONZERO_SIZE(1 << Config.visualizer_spectrum_dft_size),
-  DFT_TOTAL_SIZE(1 << (Config.visualizer_spectrum_dft_size + 2)),
+  DFT_NONZERO_SIZE(2048 * (2*Config.visualizer_spectrum_dft_size + 4)),
+  DFT_TOTAL_SIZE(1 << 15),
   DYNAMIC_RANGE(100-Config.visualizer_spectrum_gain),
   HZ_MIN(Config.visualizer_spectrum_hz_min),
   HZ_MAX(Config.visualizer_spectrum_hz_max),
@@ -206,7 +206,7 @@ void Visualizer::update()
 	}
 	else if (m_sample_consumption_rate > 0)
 	{
-		if (++m_sample_consumption_rate_dn_ctr > 2)
+		if (++m_sample_consumption_rate_dn_ctr > 4)
 		{
 			m_sample_consumption_rate_dn_ctr = 0;
 			--m_sample_consumption_rate;
@@ -489,7 +489,7 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 	for (size_t x = 0; x < win_width; ++x)
 	{
 		const size_t &i = m_bar_heights[h_idx].first;
-		const double &bar_height = m_bar_heights[h_idx].second;
+		const double bar_height = m_bar_heights[h_idx].second;
 		double h = 0;
 
 		if (x == i) {
@@ -547,33 +547,33 @@ void Visualizer::DrawFrequencySpectrumStereo(const int16_t *buf_left, const int1
 
 double Visualizer::Interpolate(size_t x, size_t h_idx)
 {
-	const double &x_next = m_bar_heights[h_idx].first;
-	const double &h_next = m_bar_heights[h_idx].second;
+	const double x_next = m_bar_heights[h_idx].first;
+	const double h_next = m_bar_heights[h_idx].second;
 
 	double dh = 0;
 	if (h_idx == 0) {
 		// no data points on left, linear extrap
 		if (h_idx < m_bar_heights.size()-1) {
-			const double &x_next2 = m_bar_heights[h_idx+1].first;
-			const double &h_next2 = m_bar_heights[h_idx+1].second;
+			const double x_next2 = m_bar_heights[h_idx+1].first;
+			const double h_next2 = m_bar_heights[h_idx+1].second;
 			dh = (h_next2 - h_next) / (x_next2 - x_next);
 		}
 		return h_next - dh*(x_next-x);
 	} else if (h_idx == 1) {
 		// one data point on left, linear interp
-		const double &x_prev = m_bar_heights[h_idx-1].first;
-		const double &h_prev = m_bar_heights[h_idx-1].second;
+		const double x_prev = m_bar_heights[h_idx-1].first;
+		const double h_prev = m_bar_heights[h_idx-1].second;
 		dh = (h_next - h_prev) / (x_next - x_prev);
 		return h_next - dh*(x_next-x);
 	} else if (h_idx < m_bar_heights.size()-1) {
 		// two data points on both sides, cubic interp
 		// see https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Interpolation_on_an_arbitrary_interval
-		const double &x_prev2 = m_bar_heights[h_idx-2].first;
-		const double &h_prev2 = m_bar_heights[h_idx-2].second;
-		const double &x_prev = m_bar_heights[h_idx-1].first;
-		const double &h_prev = m_bar_heights[h_idx-1].second;
-		const double &x_next2 = m_bar_heights[h_idx+1].first;
-		const double &h_next2 = m_bar_heights[h_idx+1].second;
+		const double x_prev2 = m_bar_heights[h_idx-2].first;
+		const double h_prev2 = m_bar_heights[h_idx-2].second;
+		const double x_prev = m_bar_heights[h_idx-1].first;
+		const double h_prev = m_bar_heights[h_idx-1].second;
+		const double x_next2 = m_bar_heights[h_idx+1].first;
+		const double h_next2 = m_bar_heights[h_idx+1].second;
 
 		const double m0 = (h_prev - h_prev2) / (x_prev - x_prev2);
 		const double m1 = (h_next2 - h_next) / (x_next2 - x_next);

@@ -26,6 +26,30 @@ if test "$clock" = "yes"; then
 	AC_DEFINE([ENABLE_CLOCK], [1], [enables clock screen])
 fi
 
+# -ftree-vectorize
+AC_MSG_CHECKING([whether compiler supports -ftree-vectorize])
+old_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="-ftree-vectorize"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])],
+  AC_MSG_RESULT([yes])
+    tree_vectorize="-ftree-vectorize",
+  AC_MSG_RESULT([no])
+    tree_vectorize=""
+)
+CXXFLAGS="$old_CXXFLAGS $tree_vectorize"
+
+# -ffast-math
+AC_MSG_CHECKING([whether compiler supports -ffast-math])
+old_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="-ffast-math"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])],
+  AC_MSG_RESULT([yes])
+    fast_math="-ffast-math",
+  AC_MSG_RESULT([no])
+    fast_math=""
+)
+CXXFLAGS="$old_CXXFLAGS $fast_math"
+
 # -std=c++14
 AC_MSG_CHECKING([whether compiler supports -std=c++14])
 old_CXXFLAGS="$CXXFLAGS"
