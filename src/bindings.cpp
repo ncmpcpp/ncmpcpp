@@ -610,6 +610,7 @@ void BindingsConfiguration::generateDefaults()
 	{
 		bind(k, Actions::Type::JumpToParentDirectory);
 		bind(k, Actions::Type::ReplaySong);
+		bind(k, Actions::Type::Play);
 	}
 	if (notBound(k = stringToKey("f")))
 		bind(k, Actions::Type::SeekForward);

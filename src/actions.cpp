@@ -797,6 +797,11 @@ void DeleteStoredPlaylist::run()
 	myPlaylistEditor->requestPlaylistsUpdate();
 }
 
+bool ReplaySong::canBeRun()
+{
+	return Status::State::currentSongPosition() >= 0;
+}
+
 void ReplaySong::run()
 {
 	Mpd.Play(Status::State::currentSongPosition());

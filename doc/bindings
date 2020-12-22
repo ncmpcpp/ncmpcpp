@@ -152,7 +152,6 @@
 ##
 ##  - set_volume
 ##  - load
-##  - play
 ##
 #
 #def_key "mouse"
@@ -327,6 +326,9 @@
 #
 #def_key "backspace"
 #  replay_song
+#
+#def_key "backspace"
+#  play
 #
 #def_key "f"
 #  seek_forward

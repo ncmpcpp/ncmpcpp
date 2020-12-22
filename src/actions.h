@@ -495,6 +495,7 @@ struct ReplaySong: BaseAction
 	ReplaySong(): BaseAction(Type::ReplaySong, "replay_song") { }
 	
 private:
+	virtual bool canBeRun() override;
 	virtual void run() override;
 };
 
