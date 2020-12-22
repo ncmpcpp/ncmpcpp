@@ -9,6 +9,7 @@
 * Consider mouse support when pausing and unpausing curses interface.
 * Reduce CPU usage of the frequency spectrum visualizer.
 * Enable Link Time Optimization by default.
+* Enable full sorting of items in the local browser if it's not.
 
 # ncmpcpp-0.9 (2020-12-20)
 * Fix various Mopidy specific bugs.

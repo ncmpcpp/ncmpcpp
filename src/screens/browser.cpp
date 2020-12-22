@@ -498,7 +498,15 @@ void Browser::getDirectory(std::string directory)
 		}
 
 		if (m_local_browser)
+		{
 			getLocalDirectory(w, directory);
+			if (Config.browser_sort_mode == SortMode::None
+			    || Config.browser_sort_mode == SortMode::Type)
+			{
+				Statusbar::print("Switching to sorting songs by name for the local browser");
+				Config.browser_sort_mode = SortMode::Name;
+			}
+		}
 		else
 		{
 			MPD::ItemIterator end;
