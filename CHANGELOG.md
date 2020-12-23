@@ -1,4 +1,4 @@
-# ncmpcpp-0.10 (????-??-??)
+# ncmpcpp-0.9.1 (2020-12-23)
 * Add support for fetching lyrics from musixmatch.com.
 * Fix intermittent failures of the Genius fetcher.
 * Fix crash on startup with Visualizer as the initial screen.
