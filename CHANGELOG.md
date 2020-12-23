@@ -11,6 +11,7 @@
 * Enable Link Time Optimization by default.
 * Enable full sorting of items in the local browser if it's not.
 * Bind `Play` to `Backspace` by default.
+* Fix fetching information about artists from last.fm.
 
 # ncmpcpp-0.9 (2020-12-20)
 * Fix various Mopidy specific bugs.

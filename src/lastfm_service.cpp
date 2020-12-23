@@ -120,11 +120,11 @@ Service::Result ArtistInfo::processData(const std::string &data)
 				unescapeHtmlEntities(url);
 				// fill in language info since url points to english version.
 				const auto &lang = m_arguments["lang"];
-				if (!lang.empty())
+				if (!lang.empty() && lang != "en")
 					boost::replace_first(url, "last.fm/music/", "last.fm/" + lang + "/music/");
 				// ...try to get the content of it...
 				CURLcode code = Curl::perform(wiki, url, "", true);
-				
+
 				if (code != CURLE_OK)
 				{
 					result.second = curl_easy_strerror(code);
@@ -138,13 +138,9 @@ Service::Result ArtistInfo::processData(const std::string &data)
 						desc = unescapeHtmlUtf8(what[1]);
 				}
 			}
-			else
-			{
-				// otherwise, get rid of CDATA wrapper.
-				rx.assign("<!\\[CDATA\\[(.*)\\]\\]>");
-				desc = boost::regex_replace(desc, rx, "\\1");
-			}
 			stripHtmlTags(desc);
+			// Needs to be done after stripHtmlTags in case there are &#10;s there.
+			desc = unescapeHtmlUtf8(desc);
 			boost::trim(desc);
 			result.second += desc;
 		}
