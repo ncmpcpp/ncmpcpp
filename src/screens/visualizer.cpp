@@ -56,7 +56,7 @@ namespace {
 // toColor: a scaling function for coloring. For numbers 0 to max this function
 // returns a coloring from the lowest color to the highest, and colors will not
 // loop from 0 to max.
-const NC::FormattedColor &toColor(size_t number, size_t max, bool wrap = true)
+const NC::FormattedColor &toColor(size_t number, size_t max, bool wrap)
 {
 	const auto colors_size = Config.visualizer_colors.size();
 	const auto index = (number * colors_size) / max;
@@ -417,7 +417,7 @@ void Visualizer::DrawSoundEllipseStereo(const int16_t *buf_left, const int16_t *
 		// (y-h)+2 = r^2 centers the circle around the point (w,h). Because fonts
 		// are not all the same size, this will not always generate a perfect
 		// circle.
-		auto c = toColor(sqrt(x*x + 4*y*y), radius);
+		auto c = toColor(sqrt(x*x + 4*y*y), radius, true);
 		w << NC::XY(left_half_width + x, top_half_height + y)
 		  << c
 		  << Config.visualizer_chars[1]
@@ -444,15 +444,10 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 		+	m_fftw_output[i][1]*m_fftw_output[i][1]
 		) / (DFT_NONZERO_SIZE);
 
-	const size_t win_width = w.getWidth();
-
-	size_t cur_bin = 0;
-	while (cur_bin < m_fftw_results && Bin2Hz(cur_bin) < m_dft_logspace[0])
-	{
-		++cur_bin;
-	}
 	m_bar_heights.clear();
-	for (size_t x = 0; x < win_width; ++x)
+
+	const size_t win_width = w.getWidth();
+	for (size_t x = 0, cur_bin = 0; x < win_width; ++x)
 	{
 		double bar_height = 0;
 
@@ -482,13 +477,13 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 		bar_height = bar_height > 0 ? bar_height * height : 0;
 		bar_height = bar_height > height ? height : bar_height;
 
-		m_bar_heights.emplace_back(std::make_pair(x, bar_height));
+		m_bar_heights.emplace_back(x, bar_height);
 	}
 
 	size_t h_idx = 0;
 	for (size_t x = 0; x < win_width; ++x)
 	{
-		const size_t &i = m_bar_heights[h_idx].first;
+		const size_t i = m_bar_heights[h_idx].first;
 		const double bar_height = m_bar_heights[h_idx].second;
 		double h = 0;
 
@@ -511,7 +506,7 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 			// select character to draw
 			if (Config.visualizer_spectrum_smooth_look) {
 				// smooth
-				const size_t &size = SMOOTH_CHARS.size();
+				const size_t size = SMOOTH_CHARS.size();
 				const size_t idx = static_cast<size_t>(size*h) % size;
 				if (j < h-1 || idx == size-1) {
 					// full height
