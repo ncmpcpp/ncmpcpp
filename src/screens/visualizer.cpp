@@ -447,7 +447,11 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 	m_bar_heights.clear();
 
 	const size_t win_width = w.getWidth();
-	for (size_t x = 0, cur_bin = 0; x < win_width; ++x)
+
+	size_t cur_bin = 0;
+	while (cur_bin < m_fftw_results && Bin2Hz(cur_bin) < m_dft_logspace[0])
+		++cur_bin;
+	for (size_t x = 0; x < win_width; ++x)
 	{
 		double bar_height = 0;
 
