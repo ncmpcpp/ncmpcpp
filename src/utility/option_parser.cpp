@@ -68,6 +68,12 @@ std::vector<size_t> parse_ratio(const std::string &v, const std::vector<size_t>:
 
 	if (ret.size() != length)
 		invalid_value(v);
+	
+	size_t total = 0;
+	for (auto i : ret)
+		total += i;
+	if (total == 0)
+		invalid_value(v);
 
 	return ret;
 }
