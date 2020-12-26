@@ -2780,16 +2780,11 @@ void AddYoutubeDLItem::run()
 	// search the youtube-dl executable in the PATH
 	auto ydl_path = bp::search_path("youtube-dl");
 	if (ydl_path.empty()) {
-		Statusbar::ScopedLock slock;
-		Statusbar::put() << "youtube-dl was not found in PATH";
+		Statusbar::print("youtube-dl was not found in PATH");
 		return;
 	}
 
-	{
-		Statusbar::ScopedLock slock;
-		Statusbar::put() << "Calling youtube-dl with '" << url << "' ...";
-		wFooter->refresh();
-	}
+	Statusbar::printf("Calling youtube-dl with '%1%' ...", url);
 
 	// start youtube-dl in a child process
 	// -j: output as JSON, each playlist item on a separate line
@@ -2810,7 +2805,7 @@ void AddYoutubeDLItem::run()
 		auto album = ptree.get_optional<std::string>("album");
 		auto id = Mpd.AddSong(download_url);
 		if (id == -1) {
-			return;
+			return 0;
 		}
 		if (title.has_value()) {
 			Mpd.AddTag(id, MPD_TAG_TITLE, *title);
@@ -2821,25 +2816,35 @@ void AddYoutubeDLItem::run()
 		if (album.has_value()) {
 			Mpd.AddTag(id, MPD_TAG_ALBUM, *album);
 		}
+		return 1;
 	};
 
 	std::string line;
 	pt::ptree ptree;
+	unsigned num_songs_added = 0;
 
 	while (std::getline(output, line)) {
 		try {
 			std::istringstream line_stream(line);
 			pt::read_json(line_stream, ptree);
-			add_song(ptree);
+			num_songs_added += add_song(ptree);
 		} catch (pt::ptree_error &e) {
-			Statusbar::ScopedLock slock;
-			Statusbar::put() << "An error occurred while calling youtube-dl or parsing its output";
-			wFooter->refresh();
+			Statusbar::print("An error occurred while parsing the output of youtube-dl");
+			continue;
 		}
+		Statusbar::printf("Added %1% item(s) to playlist", num_songs_added);
 	}
 
 	if (child_process.running()) {
 		child_process.terminate();
+	}
+	child_process.wait();
+
+	auto ec = child_process.exit_code();
+	if (ec == 0) {
+		Statusbar::printf("Added %1% item(s) to playlist", num_songs_added);
+	} else {
+		Statusbar::printf("Added %1% item(s) to playlist (youtube-dl exited with exit code %2%)", num_songs_added, ec);
 	}
 }
 
