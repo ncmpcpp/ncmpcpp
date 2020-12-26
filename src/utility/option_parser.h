@@ -39,7 +39,6 @@
 #include <cassert>
 #include <stdexcept>
 #include <unordered_map>
-#include <vector>
 
 [[noreturn]] inline void invalid_value(const std::string &v)
 {
@@ -57,15 +56,24 @@ DestT verbose_lexical_cast(const std::string &v)
 }
 
 template <typename ValueT, typename ConvertT>
-std::vector<ValueT> list_of(const std::string &v, ConvertT convert)
+std::vector<ValueT> list_of(const std::string &v, ConvertT convert, const typename std::vector<ValueT>::size_type length, const std::string &e, const std::string &c, const std::string &q)
 {
 	std::vector<ValueT> result;
-	boost::tokenizer<boost::escaped_list_separator<char>> elems(v);
+	boost::escaped_list_separator<char> ecq(e, c, q);
+	boost::tokenizer<boost::escaped_list_separator<char>> elems(v, ecq);
 	for (auto &value : elems)
 		result.push_back(convert(boost::trim_copy(value)));
 	if (result.empty())
 		throw std::runtime_error("empty list");
+	if (length > 0 && result.size() != length)
+		throw std::runtime_error("invalid list length");
 	return result;
+}
+
+template <typename ValueT, typename ConvertT>
+std::vector<ValueT> list_of(const std::string &v, ConvertT convert)
+{
+	return list_of<ValueT>(v, convert, 0, "\\", ",", "\"");
 }
 
 template <typename ValueT>

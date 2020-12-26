@@ -30,8 +30,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 #include <iostream>
 
@@ -49,26 +47,11 @@ bool yes_no(const std::string &v)
 
 std::vector<size_t> parse_ratio(const std::string &v, const std::vector<size_t>::size_type length)
 {
-	std::vector<size_t> ret;
-	std::vector<std::string> temp;
+	std::string e("");
+	std::string c(":");
+	std::string q("");
+	std::vector<size_t> ret = list_of<size_t>(v, verbose_lexical_cast<size_t>, length, e, c, q);
 
-	boost::split(temp, v, boost::is_any_of(":"));
-
-	for (auto i : temp)
-	{
-		try
-		{
-			ret.push_back(boost::lexical_cast<size_t>(i));
-		}
-		catch(const boost::bad_lexical_cast &e)
-		{
-			invalid_value(v);
-		}
-	}
-
-	if (ret.size() != length)
-		invalid_value(v);
-	
 	size_t total = 0;
 	for (auto i : ret)
 		total += i;
