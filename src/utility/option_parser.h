@@ -76,10 +76,7 @@ std::vector<ValueT> list_of(const std::string &v)
 
 bool yes_no(const std::string &v);
 
-std::vector<int> parse_ratio(const std::string &s);
-bool integers_in_range(const std::string &v);
-std::vector<int> check_ratio_two(const std::string &v);
-std::vector<int> check_ratio_three(const std::string &v);
+std::vector<size_t> parse_ratio(const std::string &v, const std::vector<size_t>::size_type length);
 
 ////////////////////////////////////////////////////////////////////////////////
 

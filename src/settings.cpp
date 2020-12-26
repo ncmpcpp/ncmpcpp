@@ -518,11 +518,11 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("ask_for_locked_screen_width_part", &ask_for_locked_screen_width_part,
 	      "yes", yes_no);
 	p.add("media_library_column_width_ratio_two", &media_library_column_width_ratio_two,
-			"1:1", check_ratio_two);
+			"1:1", std::bind(parse_ratio, ph::_1, 2));
 	p.add("media_library_column_width_ratio_three", &media_library_column_width_ratio_three,
-			"1:1:1", check_ratio_three);
+			"1:1:1", std::bind(parse_ratio, ph::_1, 3));
 	p.add("playlist_editor_column_width_ratio", &playlist_editor_column_width_ratio,
-			"1:2", check_ratio_two);
+			"1:2", std::bind(parse_ratio, ph::_1, 2));
 	p.add("jump_to_now_playing_song_at_start", &jump_to_now_playing_song_at_start,
 	      "yes", yes_no);
 	p.add("ask_before_clearing_playlists", &ask_before_clearing_playlists,
@@ -538,6 +538,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 				return boost::regex::icase | boost::regex::literal;
 			else if (v == "basic")
 				return boost::regex::icase | boost::regex::basic;
+
 			else if (v == "extended")
 				return boost::regex::icase |  boost::regex::extended;
 			else if (v == "perl")

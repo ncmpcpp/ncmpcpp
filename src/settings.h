@@ -85,9 +85,9 @@ struct Configuration
 
 	std::string pattern;
 
-	std::vector<int> playlist_editor_column_width_ratio;
-	std::vector<int> media_library_column_width_ratio_two;
-	std::vector<int> media_library_column_width_ratio_three;
+	std::vector<size_t> playlist_editor_column_width_ratio;
+	std::vector<size_t> media_library_column_width_ratio_two;
+	std::vector<size_t> media_library_column_width_ratio_three;
 
 	std::vector<Column> columns;
 

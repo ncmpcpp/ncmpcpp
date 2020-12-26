@@ -31,6 +31,7 @@
  */
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 #include <iostream>
 
@@ -46,62 +47,31 @@ bool yes_no(const std::string &v)
 		invalid_value(v);
 }
 
-std::vector<int> parse_ratio(const std::string &s)
+std::vector<size_t> parse_ratio(const std::string &v, const std::vector<size_t>::size_type length)
 {
-	std::vector<int> ret;
+	std::vector<size_t> ret;
 	std::vector<std::string> temp;
 
-	boost::split(temp, s, boost::is_any_of(":"));
-
-	for (auto i : temp)
-		ret.push_back(std::stoi(i));
-
-	return ret;
-}
-
-bool integers_in_range(const std::string &v)
-{
-	std::vector<std::string> temp;
 	boost::split(temp, v, boost::is_any_of(":"));
 
 	for (auto i : temp)
 	{
 		try
 		{
-			int x = std::stoi(i);
+			ret.push_back(boost::lexical_cast<size_t>(i));
 		}
-		catch(const std::out_of_range &e)
+		catch(const boost::bad_lexical_cast &e)
 		{
-			return false;
+			invalid_value(v);
 		}
 	}
 
-	return true;
+	if (ret.size() != length)
+		invalid_value(v);
+
+	return ret;
 }
 
-std::vector<int> check_ratio_two(const std::string &v)
-{
-	boost::regex expr{"^[1-9][0-9]*:[1-9][0-9]*$"};
-	if (!boost::regex_match(v, expr))
-		invalid_value(v);
-
-	if (integers_in_range(v))
-		return parse_ratio(v);
-	else
-		invalid_value(v);
-}
-
-std::vector<int> check_ratio_three(const std::string &v)
-{
-	boost::regex expr{"^[1-9][0-9]*:[1-9][0-9]*:[1-9][0-9]*$"};
-	if (!boost::regex_match(v, expr))
-		invalid_value(v);
-
-	if (integers_in_range(v))
-		return parse_ratio(v);
-	else
-		invalid_value(v);
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 

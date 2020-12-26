@@ -66,9 +66,8 @@ PlaylistEditor::PlaylistEditor()
 , m_window_timeout(Config.data_fetching_delay ? 250 : BaseScreen::defaultWindowTimeout)
 , m_fetching_delay(boost::posix_time::milliseconds(Config.data_fetching_delay ? 250 : -1))
 {
-	std::vector<int> ratio_vector = Config.playlist_editor_column_width_ratio;
-	int ra = ratio_vector[0];
-	int rb = ratio_vector[1];
+	size_t ra = Config.playlist_editor_column_width_ratio[0];
+	size_t rb = Config.playlist_editor_column_width_ratio[1];
 
 	LeftColumnWidth = COLS*ra/(ra+rb)-1;
 	RightColumnStartX = LeftColumnWidth+1;
@@ -113,9 +112,8 @@ void PlaylistEditor::resize()
 	size_t x_offset, width;
 	getWindowResizeParams(x_offset, width);
 	
-	std::vector<int> ratio_vector = Config.playlist_editor_column_width_ratio;
-	int ra = ratio_vector[0];
-	int rb = ratio_vector[1];
+	size_t ra = Config.playlist_editor_column_width_ratio[0];
+	size_t rb = Config.playlist_editor_column_width_ratio[1];
 
 	LeftColumnStartX = x_offset;
 	LeftColumnWidth = width*ra/(ra+rb)-1;
