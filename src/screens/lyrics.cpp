@@ -332,7 +332,7 @@ void Lyrics::edit()
 		fetch(m_song);
 	}
 	else
-		runExternalCommandNoOutput(Config.external_editor + " '" + filename + "'", false);
+		runExternalCommand(Config.external_editor + " '" + filename + "'", false);
 }
 
 void Lyrics::toggleFetcher()

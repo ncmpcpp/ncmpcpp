@@ -492,7 +492,7 @@ void Status::Changes::playerState()
 		};
 		setenv("MPD_PLAYER_STATE", stateToEnv(m_player_state), 1);
 		// Since we're setting a MPD_PLAYER_STATE, we need to block.
-		runExternalCommandNoOutput(Config.execute_on_player_state_change, true);
+		runExternalCommand(Config.execute_on_player_state_change, true);
 		unsetenv("MPD_PLAYER_STATE");
 	}
 
@@ -570,7 +570,7 @@ void Status::Changes::songID(int song_id)
 		if (!s.empty())
 		{
 			if (!Config.execute_on_song_change.empty())
-				runExternalCommandNoOutput(Config.execute_on_song_change, false);
+				runExternalCommand(Config.execute_on_song_change, false);
 
 			if (Config.fetch_lyrics_in_background)
 				myLyrics->fetchInBackground(s, false);
