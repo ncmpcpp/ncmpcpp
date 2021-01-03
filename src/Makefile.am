@@ -22,6 +22,7 @@ ncmpcpp_SOURCES = \
 	screens/tag_editor.cpp \
 	screens/tiny_tag_editor.cpp \
 	screens/visualizer.cpp \
+	screens/artwork.cpp \
 	utility/comparators.cpp \
 	utility/html.cpp \
 	utility/option_parser.cpp \
