@@ -33,6 +33,7 @@
 
 #include "actions.h"
 #include "bindings.h"
+#include "screens/artwork.h"
 #include "screens/browser.h"
 #include "charset.h"
 #include "configuration.h"
@@ -47,6 +48,7 @@
 #include "screens/visualizer.h"
 #include "title.h"
 #include "utility/conversion.h"
+#include "screens/screen.h"
 
 namespace ph = std::placeholders;
 
@@ -57,7 +59,7 @@ std::streambuf *cerr_buffer;
 std::streambuf *clog_buffer;
 
 volatile bool run_resize_screen = false;
-	
+
 void sighandler(int sig)
 {
 	if (sig == SIGWINCH)
@@ -235,6 +237,11 @@ int main(int argc, char **argv)
 			catch (NC::PromptAborted &)
 			{
 				Statusbar::printf("Action aborted");
+			}
+
+			if (!isVisible(myArtwork))
+			{
+				myArtwork->removeArtwork();
 			}
 
 			if (myScreen == myPlaylist)

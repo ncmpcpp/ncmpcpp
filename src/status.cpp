@@ -23,6 +23,7 @@
 #include <netinet/in.h>
 
 #include "curses/menu_impl.h"
+#include "screens/artwork.h"
 #include "screens/browser.h"
 #include "charset.h"
 #include "format_impl.h"
@@ -603,6 +604,10 @@ void Status::Changes::songID(int song_id)
 			    && isVisible(myLyrics)
 			    && myLyrics->previousScreen() == myPlaylist)
 				myLyrics->fetch(s);
+
+#	ifdef ENABLE_ARTWORK
+			myArtwork->updateArtwork(s.getDirectory());
+#	endif // ENABLE_ARTWORK
 		}
 	}
 	elapsedTime(false);

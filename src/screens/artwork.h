@@ -18,52 +18,45 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef NCMPCPP_SCREEN_TYPE_H
-#define NCMPCPP_SCREEN_TYPE_H
+#ifndef NCMPCPP_ARTWORK_H
+#define NCMPCPP_ARTWORK_H
 
-#include <string>
 #include "config.h"
 
-// forward declaration
-struct BaseScreen;
+#ifdef ENABLE_ARTWORK
 
-enum class ScreenType {
-	Browser,
-#	ifdef ENABLE_CLOCK
-	Clock,
-#	endif // ENABLE_CLOCK
-	Help,
-	Lastfm,
-	Lyrics,
-	MediaLibrary,
-#	ifdef ENABLE_OUTPUTS
-	Outputs,
-#	endif // ENABLE_OUTPUTS
-	Playlist,
-	PlaylistEditor,
-	SearchEngine,
-	SelectedItemsAdder,
-	ServerInfo,
-	SongInfo,
-	SortPlaylistDialog,
-#	ifdef HAVE_TAGLIB_H
-	TagEditor,
-	TinyTagEditor,
-#	endif // HAVE_TAGLIB_H
-	Unknown,
-#	ifdef ENABLE_VISUALIZER
-	Visualizer,
-#	endif // ENABLE_VISUALIZER
-#	ifdef ENABLE_ARTWORK
-	Artwork,
-#	endif // ENABLE_ARTWORK
+#include "curses/window.h"
+#include "interfaces.h"
+#include "screens/screen.h"
+
+struct Artwork: Screen<NC::Window>, Tabbable
+{
+	Artwork();
+	
+	virtual void resize() override;
+	virtual void switchTo() override;
+	
+	virtual std::wstring title() override;
+	virtual ScreenType type() override { return ScreenType::Artwork; }
+	
+	virtual void update() override { }
+	virtual void scroll(NC::Scroll) override { }
+	
+	virtual void mouseButtonPressed(MEVENT) override { }
+	
+	virtual bool isLockable() override { return true; }
+	virtual bool isMergable() override { return true; }
+
+	static void removeArtwork();
+	static void showArtwork(std::string path, int x_offset, int y_offset, int width, int height);
+	static void updateArtwork(std::string path);
+
+private:
+	static void stopUeberzug();
 };
 
-std::string screenTypeToString(ScreenType st);
+extern Artwork *myArtwork;
 
-ScreenType stringtoStartupScreenType(const std::string &s);
-ScreenType stringToScreenType(const std::string &s);
+#endif // ENABLE_ARTWORK
 
-BaseScreen *toScreen(ScreenType st);
-
-#endif // NCMPCPP_SCREEN_TYPE_H
+#endif // NCMPCPP_ARTWORK_H
