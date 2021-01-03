@@ -87,7 +87,7 @@ RunExternalCommand::RunExternalCommand(std::string &&command)
 
 void RunExternalCommand::run()
 {
-	runExternalCommand(m_command, false);
+	runExternalCommand(m_command, true);
 }
 
 RunExternalConsoleCommand::RunExternalConsoleCommand(std::string &&command)
@@ -118,5 +118,6 @@ void runExternalCommand(const std::string &cmd, bool block)
 	if (block)
 		std::system(cmd.c_str());
 	else
-		std::system(("nohup " + cmd + " &").c_str());
+		// If we don't block, disregard any output.
+		std::system(("nohup " + cmd + " >/dev/null 2>&1 &").c_str());
 }

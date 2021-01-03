@@ -570,7 +570,11 @@ void Status::Changes::songID(int song_id)
 		if (!s.empty())
 		{
 			if (!Config.execute_on_song_change.empty())
-				runExternalCommand(Config.execute_on_song_change, false);
+			{
+				// We need to block to allow sending output to the terminal so a script
+				// can e.g. set the album art.
+				runExternalCommand(Config.execute_on_song_change, true);
+			}
 
 			if (Config.fetch_lyrics_in_background)
 				myLyrics->fetchInBackground(s, false);
