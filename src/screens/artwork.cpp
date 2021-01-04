@@ -38,7 +38,7 @@ using Global::MainStartY;
 
 Artwork* myArtwork;
 std::string ueberzug_fifo;
-pid_t child_pid;
+pid_t child_pid = 0;
 std::string current_artwork_path;
 
 extern char** environ;
@@ -55,17 +55,29 @@ Artwork::Artwork()
 	mkfifo(ueberzug_fifo.c_str(), 0666);
 	assert(ret == 0);
 
-	// start ueberzug process
-  char argv0[] = "setsid";
-	char argv1[] = "bash";
-	char argv2[] = "-c";
-	std::string cmd = boost::str(boost::format("tail --follow %1% | ueberzug layer --silent --parser simple") % ueberzug_fifo);
-	char* argv3 = strdup(cmd.c_str());
-	char* argv[] = {argv0, argv1, argv2, argv3, (char*)0};
-	posix_spawnp(&child_pid, "setsid", nullptr, nullptr, argv, environ);
-	free(argv3);
-
 	std::atexit(stopUeberzug);
+
+	// start ueberzug process
+	{
+		// argv
+		char argv1[] = "bash";
+		char argv2[] = "-c";
+		std::string cmd = boost::str(boost::format("tail --follow %1% | ueberzug layer --silent --parser simple") % ueberzug_fifo);
+		char* argv3 = strdup(cmd.c_str());
+		char* argv[] = {argv1, argv2, argv3, nullptr};
+
+		// attrp
+		posix_spawnattr_t attr;
+		ret = posix_spawnattr_setflags(&attr, POSIX_SPAWN_SETPGROUP);
+		assert(ret == 0);
+		ret = posix_spawnattr_setpgroup(&attr, 0);
+		assert(ret == 0);
+
+		// spawn process
+		ret = posix_spawnp(&child_pid, "bash", nullptr, &attr, argv, environ);
+		assert(ret == 0);
+		free(argv3);
+	}
 }
 
 void Artwork::stopUeberzug()
