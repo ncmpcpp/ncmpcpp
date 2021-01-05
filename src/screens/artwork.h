@@ -48,10 +48,10 @@ struct Artwork: Screen<NC::Window>, Tabbable
 	virtual bool isMergable() override { return true; }
 
 	static void removeArtwork();
-	static void showArtwork(std::string path, int x_offset, int y_offset, int width, int height);
 	static void updateArtwork(std::string path);
 
 private:
+	static void showArtwork(std::string path, int x_offset, int y_offset, int width, int height);
 	static void stopUeberzug();
 };
 
