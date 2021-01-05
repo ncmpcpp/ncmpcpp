@@ -225,6 +225,9 @@ struct Configuration
 	SortMode browser_sort_mode;
 
 	LyricsFetchers lyrics_fetchers;
+
+	std::string albumart_default_path;
+	std::string albumart_scaler;
 };
 
 extern Configuration Config;

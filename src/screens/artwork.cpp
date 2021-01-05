@@ -24,6 +24,7 @@
 #include <spawn.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include <sstream>
@@ -37,8 +38,9 @@ using Global::MainHeight;
 using Global::MainStartY;
 
 Artwork* myArtwork;
-int ueberzug_fd;
-std::string current_artwork_path;
+static pid_t child_pid;
+static int ueberzug_fd;
+static std::string current_artwork_path;
 
 int writen(const int fd, const char *buf, const size_t count)
 {
@@ -61,18 +63,15 @@ int writen(const int fd, const char *buf, const size_t count)
 Artwork::Artwork()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
 {
-	int ret;
-
 	// create pipe from ncmpcpp to ueberzug
 	int pipefd[2];
-	ret = pipe(pipefd);
-	if (ret == -1)
+	if (pipe(pipefd))
 	{
 		throw std::runtime_error("Unable to create pipe");
 	}
 
 	// fork and exec ueberzug
-	pid_t child_pid = fork();
+	child_pid = fork();
 	if (child_pid == -1)
 	{
 		throw std::runtime_error("Unable to fork ueberzug process");
@@ -87,6 +86,9 @@ Artwork::Artwork()
 		const char* const argv[] = {"ueberzug", "layer", "--silent", "--parser", "simple", nullptr};
 		// const_cast ok, exec doesn't modify argv
 		execvp(argv[0], const_cast<char *const *>(argv));
+
+		// exit forked process immediately if exec fails
+		std::abort();
 	}
 
 	ueberzug_fd = pipefd[1];
@@ -99,6 +101,8 @@ void Artwork::stopUeberzug()
 {
 	removeArtwork();
 	close(ueberzug_fd);
+	int status;
+	waitpid(child_pid, &status, 0);
 }
 
 void Artwork::resize()
@@ -110,7 +114,8 @@ void Artwork::resize()
 	updateArtwork(current_artwork_path);
 }
 
-void Artwork::switchTo(){
+void Artwork::switchTo()
+{
 	SwitchTo::execute(this);
 	drawHeader();
 }
@@ -125,9 +130,9 @@ void Artwork::showArtwork(std::string path, int x_offset, int y_offset, int widt
 	stream << "action\tadd\t";
 	stream << "identifier\talbumart\t";
 	stream << "synchronously_draw\tTrue\t";
-	stream << "scaler\tcontain\t";
 	stream << "scaling_position_x\t0.5\t";
 	stream << "scaling_position_y\t0.5\t";
+	stream << "scaler\t" << Config.albumart_scaler << "\t";
 	stream << "path\t" << path << "\t";
 	stream << "x\t" << x_offset << "\t";
 	stream << "y\t" << y_offset << "\t";
@@ -150,10 +155,23 @@ void Artwork::updateArtwork(std::string path)
 {
 	if (isVisible(myArtwork))
 	{
-		size_t x_offset, width;
-		myArtwork->getWindowResizeParams(x_offset, width);
-		std::string fullpath = Config.mpd_music_dir + path + "/cover.jpg";
-		showArtwork(fullpath, x_offset, MainStartY, width, MainHeight);
-		current_artwork_path = path;
+		std::vector<std::string> candidate_paths = {
+			Config.mpd_music_dir + path + "/cover.png",
+			Config.mpd_music_dir + path + "/cover.jpg",
+			Config.mpd_music_dir + path + "/cover.tiff",
+			Config.mpd_music_dir + path + "/cover.bmp",
+			Config.albumart_default_path,
+		};
+
+		auto it = std::find_if(
+				candidate_paths.begin(), candidate_paths.end(),
+				[](const std::string &s) { return 0 == access(s.c_str(), R_OK); });
+		if (it != candidate_paths.end())
+		{
+			size_t x_offset, width;
+			myArtwork->getWindowResizeParams(x_offset, width);
+			showArtwork(it->c_str(), x_offset, MainStartY, width, MainHeight);
+			current_artwork_path = path;
+		}
 	}
 }
