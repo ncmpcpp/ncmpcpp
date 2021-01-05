@@ -26,7 +26,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <fstream>
+#include <sstream>
 
 #include "macro_utilities.h"
 #include "screens/screen_switcher.h"
@@ -37,54 +37,68 @@ using Global::MainHeight;
 using Global::MainStartY;
 
 Artwork* myArtwork;
-std::string ueberzug_fifo;
-pid_t child_pid = 0;
+int ueberzug_fd;
 std::string current_artwork_path;
 
-extern char** environ;
+int writen(const int fd, const char *buf, const size_t count)
+{
+	size_t n = count;
+	while (n > 0)
+	{
+		ssize_t bytes = write(fd, buf, n);
+		if (-1 == bytes)
+		{
+			break;
+		}
+
+		n -= bytes;
+		buf += bytes;
+	}
+
+	return n == 0 ? 0 : -1;
+}
 
 Artwork::Artwork()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
 {
-	pid_t parent_pid = getpid();
 	int ret;
 
-	// generate ueberzug fifo name
-	char fifo_fmt[] = "/tmp/ncmpcpp_ueberzug.%1%.fifo";
-	ueberzug_fifo = boost::str(boost::format(fifo_fmt) % parent_pid);
-	mkfifo(ueberzug_fifo.c_str(), 0666);
-	assert(ret == 0);
+	// create pipe from ncmpcpp to ueberzug
+	int pipefd[2];
+	ret = pipe(pipefd);
+	if (ret == -1)
+	{
+		throw std::runtime_error("Unable to create pipe");
+	}
+
+	// fork and exec ueberzug
+	pid_t child_pid = fork();
+	if (child_pid == -1)
+	{
+		throw std::runtime_error("Unable to fork ueberzug process");
+	}
+	else if (child_pid == 0)
+	{
+		// redirect pipe output to ueberzug stdin
+		dup2(pipefd[0], STDIN_FILENO);
+		close(pipefd[0]);
+		close(pipefd[1]);
+
+		const char* const argv[] = {"ueberzug", "layer", "--silent", "--parser", "simple", nullptr};
+		// const_cast ok, exec doesn't modify argv
+		execvp(argv[0], const_cast<char *const *>(argv));
+	}
+
+	ueberzug_fd = pipefd[1];
+	close(pipefd[0]);
 
 	std::atexit(stopUeberzug);
-
-	// start ueberzug process
-	{
-		// argv
-		char argv1[] = "bash";
-		char argv2[] = "-c";
-		std::string cmd = boost::str(boost::format("tail --follow %1% | ueberzug layer --silent --parser simple") % ueberzug_fifo);
-		char* argv3 = strdup(cmd.c_str());
-		char* argv[] = {argv1, argv2, argv3, nullptr};
-
-		// attrp
-		posix_spawnattr_t attr;
-		ret = posix_spawnattr_setflags(&attr, POSIX_SPAWN_SETPGROUP);
-		assert(ret == 0);
-		ret = posix_spawnattr_setpgroup(&attr, 0);
-		assert(ret == 0);
-
-		// spawn process
-		ret = posix_spawnp(&child_pid, "bash", nullptr, &attr, argv, environ);
-		assert(ret == 0);
-		free(argv3);
-	}
 }
 
 void Artwork::stopUeberzug()
 {
 	removeArtwork();
-	std::remove(ueberzug_fifo.c_str());
-	kill(-1*child_pid, SIGTERM);
+	close(ueberzug_fd);
 }
 
 void Artwork::resize()
@@ -96,7 +110,7 @@ void Artwork::resize()
 	updateArtwork(current_artwork_path);
 }
 
-void Artwork::switchTo() {
+void Artwork::switchTo(){
 	SwitchTo::execute(this);
 	drawHeader();
 }
@@ -107,8 +121,7 @@ void Artwork::showArtwork(std::string path, int x_offset, int y_offset, int widt
 {
 	std::string dir = Config.mpd_music_dir;
 
-	std::ofstream stream;
-	stream.open(ueberzug_fifo, std::ios_base::app);
+	std::stringstream stream;
 	stream << "action\tadd\t";
 	stream << "identifier\talbumart\t";
 	stream << "synchronously_draw\tTrue\t";
@@ -120,17 +133,21 @@ void Artwork::showArtwork(std::string path, int x_offset, int y_offset, int widt
 	stream << "y\t" << y_offset << "\t";
 	stream << "width\t" << width << "\t";
 	stream << "height\t" << height << "\n";
+
+	writen(ueberzug_fd, stream.str().c_str(), stream.str().length());
 }
 
 void Artwork::removeArtwork()
 {
-	std::ofstream stream;
-	stream.open(ueberzug_fifo, std::ios_base::app);
-	stream << "action\tremove\t"
-		"identifier\talbumart\n";
+	std::stringstream stream;
+	stream << "action\tremove\t";
+	stream << "identifier\talbumart\n";
+
+	writen(ueberzug_fd, stream.str().c_str(), stream.str().length());
 }
 
-void Artwork::updateArtwork(std::string path) {
+void Artwork::updateArtwork(std::string path)
+{
 	if (isVisible(myArtwork))
 	{
 		size_t x_offset, width;
