@@ -41,11 +41,11 @@
 using Global::MainHeight;
 using Global::MainStartY;
 
+namespace bp = boost::process;
+
 Artwork* myArtwork;
 ArtworkBackend* backend;
 bool Artwork::drawn = false;
-static pid_t child_pid;
-static int ueberzug_fd;
 static std::string current_artwork_dir = "";
 
 Artwork::Artwork()
@@ -127,114 +127,25 @@ void Artwork::updateArtwork(std::string dir)
 
 // UeberzugBackend
 
-bool UeberzugBackend::process_ok = false;
-
-int writen(const int fd, const char *buf, const size_t count)
-{
-	size_t n = count;
-	while (n > 0)
-	{
-		ssize_t ret = write(fd, buf, n);
-		if ((ret == -1 && errno == EINTR) || (errno == EWOULDBLOCK) || (errno == EAGAIN))
-		{
-			continue;
-		}
-		else
-		{
-			break;
-		}
-
-		n -= ret;
-		buf += ret;
-	}
-
-	return n == 0 ? 0 : -1;
-}
+bp::child UeberzugBackend::process = bp::child();
+bp::opstream UeberzugBackend::stream = bp::opstream();
 
 void UeberzugBackend::init()
 {
-	int ret;
-
-	// create pipe from ncmpcpp to ueberzug
-	int pipefd[2];
-	if (pipe(pipefd))
+	std::vector<std::string> args = {"layer", "--silent", "--parser", "simple"};
+	try
 	{
-		throw std::runtime_error("Unable to create pipe");
+		process = bp::child(bp::search_path("ueberzug"), bp::args(args), bp::std_in < stream);
+		std::atexit(stop);
 	}
-
-	// self-pipe trick to check if fork-exec succeeded
-	// https://stackoverflow.com/a/1586277
-	// https://cr.yp.to/docs/selfpipe.html
-	// https://lkml.org/lkml/2006/7/10/300
-	int exec_check_pipefd[2];
-	if (pipe(exec_check_pipefd))
-	{
-		throw std::runtime_error("Unable to create pipe");
-	}
-	if (fcntl(exec_check_pipefd[1], F_SETFD, fcntl(exec_check_pipefd[1], F_GETFD) | FD_CLOEXEC))
-	{
-		throw std::runtime_error("Unable to set FD_CLOEXEC on pipe");
-	}
-
-	// fork and exec ueberzug
-	child_pid = fork();
-	if (child_pid == -1)
-	{
-		throw std::runtime_error("Unable to fork ueberzug process");
-	}
-	else if (child_pid == 0)
-	{
-		// redirect pipe output to ueberzug stdin
-		while (-1 == dup2(pipefd[0], STDIN_FILENO) && errno == EINTR);
-		//close pipes
-		close(pipefd[0]);
-		close(pipefd[1]);
-
-		// close self-pipe
-		close(exec_check_pipefd[0]);
-
-		// exec ueberzug
-		const char* const argv[] = {"ueberzug", "layer", "--silent", "--parser", "simple", nullptr};
-		// const_cast ok, exec doesn't modify argv
-		execvp(argv[0], const_cast<char *const *>(argv));
-
-		// if exec() fails, write to self-pipe and abort
-		write(exec_check_pipefd[1], &errno, sizeof(errno));
-		close(exec_check_pipefd[1]);
-		std::abort();
-	}
-
-	// ueberzug pipes
-	ueberzug_fd = pipefd[1];
-	close(pipefd[0]);
-
-	// check self-pipe to see if ueberzug was successfully started
-	int err;
-	close(exec_check_pipefd[1]);
-	while ((ret = read(exec_check_pipefd[0], &err, sizeof(errno))) == -1)
-	{
-		if (errno != EAGAIN && errno != EINTR) break;
-	}
-	if (ret)
-	{
-		// reap the failed ueberzug process
-		waitpid(child_pid, nullptr, 0);
-	}
-	else
-	{
-		process_ok = true;
-		// set ueberzug cleanup routine
-		std::atexit(UeberzugBackend::stop);
-	}
-	close(exec_check_pipefd[0]);
+	catch (const bp::process_error &e) {}
 }
 
 void UeberzugBackend::updateArtwork(std::string path, int x_offset, int y_offset, int width, int height)
 {
-	if (!process_ok)
+	if (!process.running())
 		return;
 
-	std::stringstream stream;
 	stream << "action\tadd\t";
 	stream << "identifier\talbumart\t";
 	stream << "synchronously_draw\tTrue\t";
@@ -246,25 +157,24 @@ void UeberzugBackend::updateArtwork(std::string path, int x_offset, int y_offset
 	stream << "y\t" << y_offset << "\t";
 	stream << "width\t" << width << "\t";
 	stream << "height\t" << height << "\n";
-	writen(ueberzug_fd, stream.str().c_str(), stream.str().length());
+	stream.flush();
 }
 
 void UeberzugBackend::removeArtwork()
 {
-	if (!process_ok)
+	if (!process.running())
 		return;
 
-	std::stringstream stream;
 	stream << "action\tremove\t";
 	stream << "identifier\talbumart\n";
-	writen(ueberzug_fd, stream.str().c_str(), stream.str().length());
+	stream.flush();
 }
 
 void UeberzugBackend::stop()
 {
-	// close the ueberzug pipe, which causes ueberzug to exit
-	close(ueberzug_fd);
-	waitpid(child_pid, nullptr, 0);
+	// close the underlying pipe, which causes ueberzug to exit
+	stream.pipe().close();
+	process.wait();
 }
 
 #endif // ENABLE_ARTWORK
