@@ -240,11 +240,11 @@ int main(int argc, char **argv)
 			}
 
 #	ifdef ENABLE_ARTWORK
-			if (!isVisible(myArtwork))
+			if (!isVisible(myArtwork) && myArtwork->drawn)
 			{
 				myArtwork->removeArtwork();
 			}
-			else if (!myArtwork->drawn)
+			else if (isVisible(myArtwork) && !myArtwork->drawn)
 			{
 				myArtwork->updateArtwork();
 			}

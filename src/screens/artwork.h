@@ -55,7 +55,6 @@ struct Artwork: Screen<NC::Window>, Tabbable
 
 private:
 	static void drawArtwork(std::string path, int x_offset, int y_offset, int width, int height);
-	static void stopUeberzug();
 };
 
 class ArtworkBackend
@@ -76,7 +75,10 @@ public:
 	virtual void init() override;
 	virtual void updateArtwork(std::string path, int x_offset, int y_offset, int width, int height) override;
 	virtual void removeArtwork() override;
+
+private:
 	static void stop();
+	static bool process_ok;
 };
 
 extern Artwork *myArtwork;

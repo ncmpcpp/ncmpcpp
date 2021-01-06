@@ -23,6 +23,7 @@
 #ifdef ENABLE_ARTWORK
 
 #include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <spawn.h>
 #include <stdio.h>
@@ -97,6 +98,8 @@ void Artwork::updateArtwork(std::string dir)
 	if (dir == "")
 		return;
 
+	current_artwork_dir = dir;
+
 	// only draw artwork if artwork screen is visible
 	if (!isVisible(myArtwork))
 		return;
@@ -119,11 +122,12 @@ void Artwork::updateArtwork(std::string dir)
 	size_t x_offset, width;
 	myArtwork->getWindowResizeParams(x_offset, width);
 	drawArtwork(it->c_str(), x_offset, MainStartY, width, MainHeight);
-	current_artwork_dir = dir;
 }
 
 
 // UeberzugBackend
+
+bool UeberzugBackend::process_ok = false;
 
 int writen(const int fd, const char *buf, const size_t count)
 {
@@ -150,11 +154,26 @@ int writen(const int fd, const char *buf, const size_t count)
 void UeberzugBackend::init()
 {
 	int ret;
+
 	// create pipe from ncmpcpp to ueberzug
 	int pipefd[2];
 	if (pipe(pipefd))
 	{
 		throw std::runtime_error("Unable to create pipe");
+	}
+
+	// self-pipe trick to check if fork-exec succeeded
+	// https://stackoverflow.com/a/1586277
+	// https://cr.yp.to/docs/selfpipe.html
+	// https://lkml.org/lkml/2006/7/10/300
+	int exec_check_pipefd[2];
+	if (pipe(exec_check_pipefd))
+	{
+		throw std::runtime_error("Unable to create pipe");
+	}
+	if (fcntl(exec_check_pipefd[1], F_SETFD, fcntl(exec_check_pipefd[1], F_GETFD) | FD_CLOEXEC))
+	{
+		throw std::runtime_error("Unable to set FD_CLOEXEC on pipe");
 	}
 
 	// fork and exec ueberzug
@@ -167,26 +186,54 @@ void UeberzugBackend::init()
 	{
 		// redirect pipe output to ueberzug stdin
 		while (-1 == dup2(pipefd[0], STDIN_FILENO) && errno == EINTR);
-
+		//close pipes
 		close(pipefd[0]);
 		close(pipefd[1]);
 
+		// close self-pipe
+		close(exec_check_pipefd[0]);
+
+		// exec ueberzug
 		const char* const argv[] = {"ueberzug", "layer", "--silent", "--parser", "simple", nullptr};
 		// const_cast ok, exec doesn't modify argv
 		execvp(argv[0], const_cast<char *const *>(argv));
 
-		// exit forked process immediately if exec fails
+		// if exec() fails, write to self-pipe and abort
+		write(exec_check_pipefd[1], &errno, sizeof(errno));
+		close(exec_check_pipefd[1]);
 		std::abort();
 	}
 
+	// ueberzug pipes
 	ueberzug_fd = pipefd[1];
 	close(pipefd[0]);
 
-	std::atexit(UeberzugBackend::stop);
+	// check self-pipe to see if ueberzug was successfully started
+	int err;
+	close(exec_check_pipefd[1]);
+	while ((ret = read(exec_check_pipefd[0], &err, sizeof(errno))) == -1)
+	{
+		if (errno != EAGAIN && errno != EINTR) break;
+	}
+	if (ret)
+	{
+		// reap the failed ueberzug process
+		waitpid(child_pid, nullptr, 0);
+	}
+	else
+	{
+		process_ok = true;
+		// set ueberzug cleanup routine
+		std::atexit(UeberzugBackend::stop);
+	}
+	close(exec_check_pipefd[0]);
 }
 
 void UeberzugBackend::updateArtwork(std::string path, int x_offset, int y_offset, int width, int height)
 {
+	if (!process_ok)
+		return;
+
 	std::stringstream stream;
 	stream << "action\tadd\t";
 	stream << "identifier\talbumart\t";
@@ -204,6 +251,9 @@ void UeberzugBackend::updateArtwork(std::string path, int x_offset, int y_offset
 
 void UeberzugBackend::removeArtwork()
 {
+	if (!process_ok)
+		return;
+
 	std::stringstream stream;
 	stream << "action\tremove\t";
 	stream << "identifier\talbumart\n";
