@@ -25,6 +25,8 @@
 
 #ifdef ENABLE_ARTWORK
 
+#include <boost/process.hpp>
+
 #include "curses/window.h"
 #include "interfaces.h"
 #include "screens/screen.h"
@@ -78,7 +80,8 @@ public:
 
 private:
 	static void stop();
-	static bool process_ok;
+	static boost::process::child process;
+	static boost::process::opstream stream;
 };
 
 extern Artwork *myArtwork;
