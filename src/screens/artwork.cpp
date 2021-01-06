@@ -20,6 +20,9 @@
 
 #include "screens/artwork.h"
 
+#ifdef ENABLE_ARTWORK
+
+#include <errno.h>
 #include <signal.h>
 #include <spawn.h>
 #include <stdio.h>
@@ -38,31 +41,115 @@ using Global::MainHeight;
 using Global::MainStartY;
 
 Artwork* myArtwork;
+ArtworkBackend* backend;
+bool Artwork::drawn = false;
 static pid_t child_pid;
 static int ueberzug_fd;
-static std::string current_artwork_path;
+static std::string current_artwork_dir = "";
+
+Artwork::Artwork()
+: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
+{
+	backend = new UeberzugBackend;
+	backend->init();
+}
+
+void Artwork::resize()
+{
+	size_t x_offset, width;
+	getWindowResizeParams(x_offset, width);
+	w.resize(width, MainHeight);
+	w.moveTo(x_offset, MainStartY);
+	updateArtwork(current_artwork_dir);
+}
+
+void Artwork::switchTo()
+{
+	SwitchTo::execute(this);
+	drawHeader();
+}
+
+std::wstring Artwork::title() { return L"Artwork"; }
+
+void Artwork::drawArtwork(std::string path, int x_offset, int y_offset, int width, int height)
+{
+	backend->updateArtwork(path, x_offset, y_offset, width, height);
+	drawn = true;
+}
+
+void Artwork::removeArtwork(bool reset_artwork)
+{
+	backend->removeArtwork();
+	drawn = false;
+	if (reset_artwork)
+	{
+		current_artwork_dir = "";
+	}
+}
+
+void Artwork::updateArtwork()
+{
+	updateArtwork(current_artwork_dir);
+}
+
+void Artwork::updateArtwork(std::string dir)
+{
+	if (dir == "")
+		return;
+
+	// only draw artwork if artwork screen is visible
+	if (!isVisible(myArtwork))
+		return;
+
+	// find the first suitable image to draw
+	std::vector<std::string> candidate_paths = {
+		Config.mpd_music_dir + dir + "/cover.png",
+		Config.mpd_music_dir + dir + "/cover.jpg",
+		Config.mpd_music_dir + dir + "/cover.tiff",
+		Config.mpd_music_dir + dir + "/cover.bmp",
+		Config.albumart_default_path,
+	};
+	auto it = std::find_if(
+			candidate_paths.begin(), candidate_paths.end(),
+			[](const std::string &s) { return 0 == access(s.c_str(), R_OK); });
+	if (it == candidate_paths.end())
+		return;
+
+	// draw the image
+	size_t x_offset, width;
+	myArtwork->getWindowResizeParams(x_offset, width);
+	drawArtwork(it->c_str(), x_offset, MainStartY, width, MainHeight);
+	current_artwork_dir = dir;
+}
+
+
+// UeberzugBackend
 
 int writen(const int fd, const char *buf, const size_t count)
 {
 	size_t n = count;
 	while (n > 0)
 	{
-		ssize_t bytes = write(fd, buf, n);
-		if (-1 == bytes)
+		ssize_t ret = write(fd, buf, n);
+		if ((ret == -1 && errno == EINTR) || (errno == EWOULDBLOCK) || (errno == EAGAIN))
+		{
+			continue;
+		}
+		else
 		{
 			break;
 		}
 
-		n -= bytes;
-		buf += bytes;
+		n -= ret;
+		buf += ret;
 	}
 
 	return n == 0 ? 0 : -1;
 }
 
-Artwork::Artwork()
-: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
+void UeberzugBackend::init()
 {
+	int ret;
 	// create pipe from ncmpcpp to ueberzug
 	int pipefd[2];
 	if (pipe(pipefd))
@@ -79,7 +166,8 @@ Artwork::Artwork()
 	else if (child_pid == 0)
 	{
 		// redirect pipe output to ueberzug stdin
-		dup2(pipefd[0], STDIN_FILENO);
+		while (-1 == dup2(pipefd[0], STDIN_FILENO) && errno == EINTR);
+
 		close(pipefd[0]);
 		close(pipefd[1]);
 
@@ -94,38 +182,11 @@ Artwork::Artwork()
 	ueberzug_fd = pipefd[1];
 	close(pipefd[0]);
 
-	std::atexit(stopUeberzug);
+	std::atexit(UeberzugBackend::stop);
 }
 
-void Artwork::stopUeberzug()
+void UeberzugBackend::updateArtwork(std::string path, int x_offset, int y_offset, int width, int height)
 {
-	removeArtwork();
-	close(ueberzug_fd);
-	int status;
-	waitpid(child_pid, &status, 0);
-}
-
-void Artwork::resize()
-{
-	size_t x_offset, width;
-	getWindowResizeParams(x_offset, width);
-	w.resize(width, MainHeight);
-	w.moveTo(x_offset, MainStartY);
-	updateArtwork(current_artwork_path);
-}
-
-void Artwork::switchTo()
-{
-	SwitchTo::execute(this);
-	drawHeader();
-}
-
-std::wstring Artwork::title() { return L"Artwork"; }
-
-void Artwork::showArtwork(std::string path, int x_offset, int y_offset, int width, int height)
-{
-	std::string dir = Config.mpd_music_dir;
-
 	std::stringstream stream;
 	stream << "action\tadd\t";
 	stream << "identifier\talbumart\t";
@@ -138,40 +199,22 @@ void Artwork::showArtwork(std::string path, int x_offset, int y_offset, int widt
 	stream << "y\t" << y_offset << "\t";
 	stream << "width\t" << width << "\t";
 	stream << "height\t" << height << "\n";
-
 	writen(ueberzug_fd, stream.str().c_str(), stream.str().length());
 }
 
-void Artwork::removeArtwork()
+void UeberzugBackend::removeArtwork()
 {
 	std::stringstream stream;
 	stream << "action\tremove\t";
 	stream << "identifier\talbumart\n";
-
 	writen(ueberzug_fd, stream.str().c_str(), stream.str().length());
 }
 
-void Artwork::updateArtwork(std::string path)
+void UeberzugBackend::stop()
 {
-	if (isVisible(myArtwork))
-	{
-		std::vector<std::string> candidate_paths = {
-			Config.mpd_music_dir + path + "/cover.png",
-			Config.mpd_music_dir + path + "/cover.jpg",
-			Config.mpd_music_dir + path + "/cover.tiff",
-			Config.mpd_music_dir + path + "/cover.bmp",
-			Config.albumart_default_path,
-		};
-
-		auto it = std::find_if(
-				candidate_paths.begin(), candidate_paths.end(),
-				[](const std::string &s) { return 0 == access(s.c_str(), R_OK); });
-		if (it != candidate_paths.end())
-		{
-			size_t x_offset, width;
-			myArtwork->getWindowResizeParams(x_offset, width);
-			showArtwork(it->c_str(), x_offset, MainStartY, width, MainHeight);
-			current_artwork_path = path;
-		}
-	}
+	// close the ueberzug pipe, which causes ueberzug to exit
+	close(ueberzug_fd);
+	waitpid(child_pid, nullptr, 0);
 }
+
+#endif // ENABLE_ARTWORK

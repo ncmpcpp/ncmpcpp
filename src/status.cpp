@@ -518,7 +518,12 @@ void Status::Changes::playerState()
 		{
 			auto np = myPlaylist->nowPlayingSong();
 			if (!np.empty())
+			{
 				drawTitle(np);
+#	ifdef ENABLE_ARTWORK
+				myArtwork->updateArtwork(np.getDirectory());
+#	endif // ENABLE_ARTWORK
+      }
 			myPlaylist->reloadRemaining();
 			break;
 		}
@@ -538,6 +543,9 @@ void Status::Changes::playerState()
 			if (isVisible(myVisualizer))
 				myVisualizer->Clear();
 #			endif // ENABLE_VISUALIZER
+#	ifdef ENABLE_ARTWORK
+			myArtwork->removeArtwork(/* reset_artwork */ true);
+#	endif // ENABLE_ARTWORK
 			break;
 		default:
 			break;

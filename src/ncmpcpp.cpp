@@ -239,10 +239,16 @@ int main(int argc, char **argv)
 				Statusbar::printf("Action aborted");
 			}
 
+#	ifdef ENABLE_ARTWORK
 			if (!isVisible(myArtwork))
 			{
 				myArtwork->removeArtwork();
 			}
+			else if (!myArtwork->drawn)
+			{
+				myArtwork->updateArtwork();
+			}
+#	endif
 
 			if (myScreen == myPlaylist)
 				myPlaylist->enableHighlighting();

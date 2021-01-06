@@ -47,12 +47,36 @@ struct Artwork: Screen<NC::Window>, Tabbable
 	virtual bool isLockable() override { return true; }
 	virtual bool isMergable() override { return true; }
 
-	static void removeArtwork();
-	static void updateArtwork(std::string path);
+	static void removeArtwork(bool reset_artwork = false);
+	static void updateArtwork();
+	static void updateArtwork(std::string dir);
+
+	static bool drawn;
 
 private:
-	static void showArtwork(std::string path, int x_offset, int y_offset, int width, int height);
+	static void drawArtwork(std::string path, int x_offset, int y_offset, int width, int height);
 	static void stopUeberzug();
+};
+
+class ArtworkBackend
+{
+public:
+	virtual void init() { }
+
+	// draw artwork, path relative to mpd_music_dir, units in terminal characters
+	virtual void updateArtwork(std::string path, int x_offset, int y_offset, int width, int height) = 0;
+
+	// clear artwork from screen
+	virtual void removeArtwork() = 0;
+};
+
+class UeberzugBackend : public ArtworkBackend
+{
+public:
+	virtual void init() override;
+	virtual void updateArtwork(std::string path, int x_offset, int y_offset, int width, int height) override;
+	virtual void removeArtwork() override;
+	static void stop();
 };
 
 extern Artwork *myArtwork;
