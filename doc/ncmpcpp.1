@@ -133,6 +133,12 @@ For spectrum visualizer, left-most frequency of visualizer, must be less than HZ
 .B visualizer_spectrum_hz_max = Hz
 For spectrum visualizer, right-most frequency of visualizer, must be greater than HZ MIN.
 .TP
+.B albumart_default_path = PATH
+Fallback to this image if no album cover art is found in the music library.
+.TP
+.B albumart_scaler = STRING
+Passed directly to Ueberzug to configure how artwork fills the screen. One of "crop", "distort", "fit_contain", "contain", "forced_cover", "cover". See the Ueberzug documentation for full descriptions or updated scalers.
+.TP
 .B system_encoding = ENCODING
 If you use encoding other than utf8, set it in order to handle utf8 encoded strings properly.
 .TP

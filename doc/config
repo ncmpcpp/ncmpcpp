@@ -154,6 +154,30 @@
 #visualizer_spectrum_log_scale_x = yes
 #visualizer_spectrum_log_scale_y = yes
 #
+##### in-terminal artwork #####
+##
+## ncmpcpp can display artwork in the terminal. The artwork is shown in the
+## "artwork" screen, which can be optionally be displayed side-by-side with
+## another screen via ncmpcpp's slave screen functionality.
+##
+## The "mpd_music_dir" config option should be set accordingly. ncmpcpp will
+## attempt to find and display an image named "cover.png", "cover.jpg",
+## "cover.tiff", or "cover.bmp" in the same directory as the current playing
+## song.
+##
+## Ueberzug must be installed and visible in PATH for artwork to be displayed.
+##
+#
+## Fallback to this image if no album cover art is found in the music library.
+#
+#albumart_default_path = ""
+#
+## Passed directly to Ueberzug to configure how artwork fills the screen. One of
+## "crop", "distort", "fit_contain", "contain", "forced_cover", "cover". See the
+## Ueberzug documentation for full descriptions or updated scalers.
+#
+#albumart_scaler = "fit_contain"
+#
 ##### system encoding #####
 ##
 ## ncmpcpp should detect your charset encoding but if it failed to do so, you
