@@ -22,13 +22,6 @@
 
 #ifdef ENABLE_ARTWORK
 
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <spawn.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 #include <sstream>
@@ -121,7 +114,7 @@ void Artwork::updateArtwork(std::string dir)
 	// draw the image
 	size_t x_offset, width;
 	myArtwork->getWindowResizeParams(x_offset, width);
-	drawArtwork(it->c_str(), x_offset, MainStartY, width, MainHeight);
+	drawArtwork(*it, x_offset, MainStartY, width, MainHeight);
 }
 
 

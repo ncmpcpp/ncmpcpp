@@ -34,18 +34,18 @@
 struct Artwork: Screen<NC::Window>, Tabbable
 {
 	Artwork();
-	
+
 	virtual void resize() override;
 	virtual void switchTo() override;
-	
+
 	virtual std::wstring title() override;
 	virtual ScreenType type() override { return ScreenType::Artwork; }
-	
+
 	virtual void update() override { }
 	virtual void scroll(NC::Scroll) override { }
-	
+
 	virtual void mouseButtonPressed(MEVENT) override { }
-	
+
 	virtual bool isLockable() override { return true; }
 	virtual bool isMergable() override { return true; }
 
