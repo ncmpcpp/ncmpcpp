@@ -284,7 +284,7 @@ void SelectedItemsAdder::addToExistingPlaylist(const std::string &playlist) cons
 {
 	for (auto s = m_selected_items.begin(); s != m_selected_items.end(); ++s){
 		for (MPD::SongIterator s2 = Mpd.GetPlaylistContent(playlist), end; s2 != end; ++s2)
-			if(s2->getID() == s->getID()){
+			if(s2->getURI() == s->getURI()){
 				goto next_song;
 			}
 		Mpd.StartCommandsList();
