@@ -24,6 +24,7 @@
 
 #include <unistd.h>
 
+#include <boost/json.hpp>
 #include <sstream>
 
 #include "macro_utilities.h"
@@ -33,8 +34,6 @@
 
 using Global::MainHeight;
 using Global::MainStartY;
-
-namespace bp = boost::process;
 
 Artwork* myArtwork;
 ArtworkBackend* backend;
@@ -120,12 +119,14 @@ void Artwork::updateArtwork(std::string dir)
 
 // UeberzugBackend
 
-bp::child UeberzugBackend::process = bp::child();
-bp::opstream UeberzugBackend::stream = bp::opstream();
+boost::process::child UeberzugBackend::process;
+boost::process::opstream UeberzugBackend::stream;
 
 void UeberzugBackend::init()
 {
-	std::vector<std::string> args = {"layer", "--silent", "--parser", "simple"};
+	namespace bp = boost::process;
+
+	std::vector<std::string> args = {"layer", "--silent", "--parser", "json"};
 	try
 	{
 		process = bp::child(bp::search_path("ueberzug"), bp::args(args), bp::std_in < stream);
@@ -139,18 +140,21 @@ void UeberzugBackend::updateArtwork(std::string path, int x_offset, int y_offset
 	if (!process.running())
 		return;
 
-	stream << "action\tadd\t";
-	stream << "identifier\talbumart\t";
-	stream << "synchronously_draw\tTrue\t";
-	stream << "scaling_position_x\t0.5\t";
-	stream << "scaling_position_y\t0.5\t";
-	stream << "scaler\t" << Config.albumart_scaler << "\t";
-	stream << "path\t" << path << "\t";
-	stream << "x\t" << x_offset << "\t";
-	stream << "y\t" << y_offset << "\t";
-	stream << "width\t" << width << "\t";
-	stream << "height\t" << height << "\n";
-	stream.flush();
+	boost::json::value v = {
+		{"action", "add"},
+		{"identifier", "albumart"},
+		{"synchronously_draw", true},
+		{"scaling_position_x", 0.5},
+		{"scaling_position_y", 0.5},
+		{"scaler", Config.albumart_scaler},
+		{"path", path},
+		{"x", x_offset},
+		{"y", y_offset},
+		{"width", width},
+		{"height", height},
+	};
+
+	stream << v << std::endl;
 }
 
 void UeberzugBackend::removeArtwork()
@@ -158,9 +162,12 @@ void UeberzugBackend::removeArtwork()
 	if (!process.running())
 		return;
 
-	stream << "action\tremove\t";
-	stream << "identifier\talbumart\n";
-	stream.flush();
+	boost::json::value v = {
+		{"action", "remove"},
+		{"identifier", "albumart"},
+	};
+
+	stream << v << std::endl;
 }
 
 void UeberzugBackend::stop()
