@@ -856,6 +856,17 @@ BOOST_DEFUN([Hash],
 [BOOST_FIND_HEADER([boost/functional/hash.hpp])])
 
 
+# BOOST_JSON([PREFERRED-RT-OPT])
+# -----------------------------------
+# Look for Boost.JSON.  For the documentation of PREFERRED-RT-OPT, see the
+# documentation of BOOST_FIND_LIB above.
+BOOST_DEFUN([JSON],
+[BOOST_FIND_LIB([json], [$1],
+                [boost/json.hpp],
+                [boost::json::value v;])
+])# BOOST_JSON
+
+
 # BOOST_LAMBDA()
 # --------------
 # Look for Boost.Lambda
