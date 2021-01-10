@@ -996,6 +996,13 @@ BOOST_DEFUN([Preprocessor],
 [BOOST_FIND_HEADER([boost/preprocessor/repeat.hpp])])
 
 
+# BOOST_PROCESS()
+# ------------
+# Look for Boost.Process
+BOOST_DEFUN([Process],
+[BOOST_FIND_HEADER([boost/process.hpp])])
+
+
 # BOOST_RANGE()
 # --------------------
 # Look for Boost.Range
