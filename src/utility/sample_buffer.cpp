@@ -40,7 +40,7 @@ void SampleBuffer::put(SampleBuffer::Iterator begin, SampleBuffer::Iterator end)
 	m_offset += elems;
 }
 
-size_t SampleBuffer::move(size_t elems, std::vector<int16_t> &dest)
+size_t SampleBuffer::get(size_t elems, std::vector<int16_t> &dest)
 {
 	if (m_offset == 0)
 		return 0;

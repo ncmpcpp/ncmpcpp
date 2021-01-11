@@ -190,7 +190,7 @@ void Visualizer::update()
 	//Statusbar::printf("Samples: %1%, %2%, %3%", m_buffered_samples.size(),
 	//                  requested_samples, m_sample_consumption_rate);
 
-	size_t new_samples = m_buffered_samples.move(requested_samples, m_rendered_samples);
+	size_t new_samples = m_buffered_samples.get(requested_samples, m_rendered_samples);
 	if (new_samples == 0)
 		return;
 

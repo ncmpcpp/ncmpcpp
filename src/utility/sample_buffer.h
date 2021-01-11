@@ -31,7 +31,7 @@ struct SampleBuffer
 	SampleBuffer() : m_offset(0) { }
 
 	void put(Iterator begin, Iterator end);
-	size_t move(size_t elems, std::vector<int16_t> &dest);
+	size_t get(size_t elems, std::vector<int16_t> &dest);
 
 	void resize(size_t n);
 	void clear();
