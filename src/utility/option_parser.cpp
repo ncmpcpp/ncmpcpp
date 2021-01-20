@@ -47,10 +47,7 @@ bool yes_no(const std::string &v)
 
 std::vector<size_t> parse_ratio(const std::string &v, const std::vector<size_t>::size_type length)
 {
-	std::string e("");
-	std::string c(":");
-	std::string q("");
-	std::vector<size_t> ret = list_of<size_t>(v, verbose_lexical_cast<size_t>, length, e, c, q);
+	std::vector<size_t> ret = list_of<size_t>(v, verbose_lexical_cast<size_t>, length, "", ":", "");
 
 	size_t total = 0;
 	for (auto i : ret)

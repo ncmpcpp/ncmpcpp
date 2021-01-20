@@ -56,11 +56,11 @@ DestT verbose_lexical_cast(const std::string &v)
 }
 
 template <typename ValueT, typename ConvertT>
-std::vector<ValueT> list_of(const std::string &v, ConvertT convert, const typename std::vector<ValueT>::size_type length, const std::string &e, const std::string &c, const std::string &q)
+std::vector<ValueT> list_of(const std::string &v, ConvertT convert, const typename std::vector<ValueT>::size_type length, const std::string &escape, const std::string &sep, const std::string &quote)
 {
 	std::vector<ValueT> result;
-	boost::escaped_list_separator<char> ecq(e, c, q);
-	boost::tokenizer<boost::escaped_list_separator<char>> elems(v, ecq);
+	boost::escaped_list_separator<char> esq(escape, sep, quote);
+	boost::tokenizer<boost::escaped_list_separator<char>> elems(v, esq);
 	for (auto &value : elems)
 		result.push_back(convert(boost::trim_copy(value)));
 	if (result.empty())
