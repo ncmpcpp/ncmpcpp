@@ -615,7 +615,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	      verbose_lexical_cast<NC::Color>);
 
 	p.add("albumart_default_path", &albumart_default_path, "", adjust_path);
-	p.add("albumart_scaler", &albumart_scaler, "contain");
+	p.add("albumart_scaler", &albumart_scaler, "fit_contain");
 
 	return std::all_of(
 		config_paths.begin(),

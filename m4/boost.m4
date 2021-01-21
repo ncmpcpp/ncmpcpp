@@ -1014,6 +1014,13 @@ BOOST_DEFUN([Process],
 [BOOST_FIND_HEADER([boost/process.hpp])])
 
 
+# BOOST_PROPERTY_TREE()
+# ------------
+# Look for Boost.PropertyTree
+BOOST_DEFUN([Property_Tree],
+[BOOST_FIND_HEADER([boost/property_tree/ptree.hpp])])
+
+
 # BOOST_RANGE()
 # --------------------
 # Look for Boost.Range

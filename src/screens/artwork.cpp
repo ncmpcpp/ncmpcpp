@@ -24,7 +24,8 @@
 
 #include <unistd.h>
 
-#include <boost/json.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <sstream>
 
 #include "macro_utilities.h"
@@ -140,21 +141,21 @@ void UeberzugBackend::updateArtwork(std::string path, int x_offset, int y_offset
 	if (!process.running())
 		return;
 
-	boost::json::value v = {
-		{"action", "add"},
-		{"identifier", "albumart"},
-		{"synchronously_draw", true},
-		{"scaling_position_x", 0.5},
-		{"scaling_position_y", 0.5},
-		{"scaler", Config.albumart_scaler},
-		{"path", path},
-		{"x", x_offset},
-		{"y", y_offset},
-		{"width", width},
-		{"height", height},
-	};
+	boost::property_tree::ptree pt;
+	pt.put("action", "add");
+	pt.put("identifier", "albumart");
+	pt.put("synchronously_draw", true);
+	pt.put("scaling_position_x", 0.5);
+	pt.put("scaling_position_y", 0.5);
+	pt.put("scaler", Config.albumart_scaler);
+	pt.put("path", path);
+	pt.put("x", x_offset);
+	pt.put("y", y_offset);
+	pt.put("width", width);
+	pt.put("height", height);
 
-	stream << v << std::endl;
+	boost::property_tree::write_json(stream, pt, /* pretty */ false);
+	stream << std::endl;
 }
 
 void UeberzugBackend::removeArtwork()
@@ -162,12 +163,12 @@ void UeberzugBackend::removeArtwork()
 	if (!process.running())
 		return;
 
-	boost::json::value v = {
-		{"action", "remove"},
-		{"identifier", "albumart"},
-	};
+	boost::property_tree::ptree pt;
+	pt.put("action", "remove");
+	pt.put("identifier", "albumart");
 
-	stream << v << std::endl;
+	boost::property_tree::write_json(stream, pt, /* pretty */ false);
+	stream << std::endl;
 }
 
 void UeberzugBackend::stop()
