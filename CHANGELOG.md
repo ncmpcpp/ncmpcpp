@@ -1,6 +1,7 @@
 # ncmpcpp-0.9.2 (????-??-??)
 * Revert suppression of output of all external commands as that makes e.g album
   art addons no longer work.
+* Gracefully handle failures when asking for a password.
 
 # ncmpcpp-0.9.1 (2020-12-23)
 * Add support for fetching lyrics from musixmatch.com.

@@ -192,14 +192,29 @@ void Status::handleServerError(MPD::ServerError &e)
 	Statusbar::printf("MPD: %1%", e.what());
 	if (e.code() == MPD_SERVER_ERROR_PERMISSION)
 	{
-		NC::Window::ScopedPromptHook helper(*wFooter, nullptr);
-		Statusbar::put() << "Password: ";
-		Mpd.SetPassword(wFooter->prompt("", -1, true));
-		try {
+		try
+		{
+			NC::Window::ScopedPromptHook helper(*wFooter, nullptr);
+			Statusbar::put() << "Password: ";
+			Mpd.SetPassword(wFooter->prompt("", -1, true));
 			Mpd.SendPassword();
 			Statusbar::print("Password accepted");
-		} catch (MPD::ServerError &e_prim) {
-			handleServerError(e_prim);
+		}
+		// SendPassword might throw if connection is closed
+		catch (MPD::ClientError &e_prim)
+		{
+			handleClientError(e_prim);
+		}
+		// Wrong password, we'll ask again later
+		catch (MPD::ServerError &e_prim)
+		{
+			Statusbar::printf("MPD: %1%", e_prim.what());
+		}
+		// If prompt asking for a password is aborted, exit the application to
+		// prevent getting stuck in the prompt indefinitely.
+		catch (NC::PromptAborted &)
+		{
+			Actions::ExitMainLoop = true;
 		}
 	}
 }
