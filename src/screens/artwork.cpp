@@ -37,9 +37,13 @@ using Global::MainHeight;
 using Global::MainStartY;
 
 Artwork* myArtwork;
-ArtworkBackend* backend;
 bool Artwork::drawn = false;
-static std::string current_artwork_dir = "";
+
+namespace
+{
+	std::string current_artwork_dir = "";
+	ArtworkBackend* backend;
+}
 
 Artwork::Artwork()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
@@ -54,7 +58,7 @@ void Artwork::resize()
 	getWindowResizeParams(x_offset, width);
 	w.resize(width, MainHeight);
 	w.moveTo(x_offset, MainStartY);
-	updateArtwork(current_artwork_dir);
+	updateArtwork();
 }
 
 void Artwork::switchTo()
