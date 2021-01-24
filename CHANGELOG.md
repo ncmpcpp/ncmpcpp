@@ -1,3 +1,5 @@
+# ncmpcpp-0.10 (????-??-??)
+
 # ncmpcpp-0.9.2 (2021-01-24)
 * Revert suppression of output of all external commands as that makes e.g album
   art addons no longer work.
