@@ -1,4 +1,4 @@
-# ncmpcpp-0.9.2 (2020-01-24)
+# ncmpcpp-0.9.2 (2021-01-24)
 * Revert suppression of output of all external commands as that makes e.g album
   art addons no longer work.
 * Gracefully handle failures when asking for a password.
