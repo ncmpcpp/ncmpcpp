@@ -51,12 +51,21 @@ struct Artwork: Screen<NC::Window>, Tabbable
 
 	static void removeArtwork(bool reset_artwork = false);
 	static void updateArtwork();
-	static void updateArtwork(std::string dir);
+	static void updateArtwork(std::string uri);
 
 	static bool drawn;
 
 private:
-	static void drawArtwork(std::string path, int x_offset, int y_offset, int width, int height);
+	static void stop();
+
+	static void worker();
+	static void worker_drawArtwork(std::string path, int x_offset, int y_offset, int width, int height);
+	static void worker_removeArtwork(bool reset_artwork = false);
+	static void worker_updateArtwork();
+	static void worker_updateArtwork(std::string uri);
+
+	static std::string temp_file_name;
+	static std::ofstream temp_file;
 };
 
 class ArtworkBackend
