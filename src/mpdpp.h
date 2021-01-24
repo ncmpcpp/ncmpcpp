@@ -502,12 +502,13 @@ struct Connection
 	void Disconnect();
 	
 	const std::string &GetHostname() { return m_host; }
-	int GetPort() { return m_port; }
+	const int GetPort() { return m_port; }
+	const std::string &GetPassword() { return m_password; }
 	
 	unsigned Version() const;
 	
 	int GetFD() const { return m_fd; }
-	
+
 	void SetHostname(const std::string &);
 	void SetPort(int port) { m_port = port; }
 	void SetTimeout(int timeout) { m_timeout = timeout; }
@@ -600,7 +601,10 @@ struct Connection
 	void idle();
 	int noidle();
 	void setNoidleCallback(NoidleCallback callback);
-	
+
+	void setBinaryLimit(size_t limit);
+	std::vector<uint8_t> GetArtwork(const std::string &uri);
+
 private:
 	struct ConnectionDeleter {
 		void operator()(mpd_connection *connection) {
@@ -629,5 +633,6 @@ private:
 }
 
 extern MPD::Connection Mpd;
+extern MPD::Connection Mpd_artwork;
 
 #endif // NCMPCPP_MPDPP_H

@@ -521,7 +521,7 @@ void Status::Changes::playerState()
 			{
 				drawTitle(np);
 #	ifdef ENABLE_ARTWORK
-				myArtwork->updateArtwork(np.getDirectory());
+				myArtwork->updateArtwork(np.getURI());
 #	endif // ENABLE_ARTWORK
       }
 			myPlaylist->reloadRemaining();
