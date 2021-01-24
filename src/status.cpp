@@ -612,10 +612,6 @@ void Status::Changes::songID(int song_id)
 			    && isVisible(myLyrics)
 			    && myLyrics->previousScreen() == myPlaylist)
 				myLyrics->fetch(s);
-
-#	ifdef ENABLE_ARTWORK
-			myArtwork->updateArtwork(s.getDirectory());
-#	endif // ENABLE_ARTWORK
 		}
 	}
 	elapsedTime(false);
