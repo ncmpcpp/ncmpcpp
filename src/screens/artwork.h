@@ -62,10 +62,12 @@ private:
 	static void worker_drawArtwork(std::string path, int x_offset, int y_offset, int width, int height);
 	static void worker_removeArtwork(bool reset_artwork = false);
 	static void worker_updateArtwork();
-	static void worker_updateArtwork(std::string uri);
+	static void worker_updateArtwork(const std::string &uri);
+	static std::vector<uint8_t> worker_fetchArtwork(const std::string &uri);
 
 	static std::string temp_file_name;
 	static std::ofstream temp_file;
+	static std::thread t;
 };
 
 class ArtworkBackend
