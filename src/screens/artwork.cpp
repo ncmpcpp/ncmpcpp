@@ -43,6 +43,7 @@ Artwork* myArtwork;
 bool Artwork::drawn = false;
 std::string Artwork::temp_file_name;
 std::ofstream Artwork::temp_file;
+std::thread Artwork::t;
 
 namespace
 {
@@ -76,8 +77,7 @@ Artwork::Artwork()
 	backend->init();
 
 	// Spawn worker thread
-	std::thread t(worker);
-	t.detach();
+	t = std::thread(worker);
 	std::atexit(stop);
 }
 
@@ -107,6 +107,7 @@ void Artwork::stop()
 		cv.notify_all();
 	}
 	std::remove(temp_file_name.c_str());
+	t.join();
 }
 
 void Artwork::removeArtwork(bool reset_artwork)
@@ -164,7 +165,7 @@ void Artwork::worker_updateArtwork()
 	worker_drawArtwork(current_artwork_path, x_offset, MainStartY, width, MainHeight);
 }
 
-void Artwork::worker_updateArtwork(std::string uri)
+void Artwork::worker_updateArtwork(const std::string &uri)
 {
 	size_t x_offset, width;
 	myArtwork->getWindowResizeParams(x_offset, width);
@@ -176,28 +177,10 @@ void Artwork::worker_updateArtwork(std::string uri)
 		return;
 	}
 
-	// Try to read artwork from MPD
-	std::vector<uint8_t> buffer;
-	for (size_t i = 0; i < 2; ++i)
-	{
-		try{
-			buffer = Mpd_artwork.GetArtwork(uri);
-		}
-		catch (const MPD::ClientError &e)
-		{
-			// Reconnect to MPD if closed and try again
-			if (e.code() == MPD_ERROR_CLOSED)
-			{
-				Mpd_artwork.Disconnect();
-				Mpd_artwork.Connect();
-				continue;
-			}
-		}
-		break;
-	}
+	auto buffer = worker_fetchArtwork(uri);
 
 	// Draw default artwork if MPD doesn't return anything
-	if (buffer.size() == 0) {
+	if (buffer.empty()) {
 		current_artwork_path = Config.albumart_default_path;
 		worker_drawArtwork(Config.albumart_default_path, x_offset, MainStartY, width, MainHeight);
 		return;
@@ -210,6 +193,37 @@ void Artwork::worker_updateArtwork(std::string uri)
 	temp_file.close();
 	current_artwork_path = temp_file_name;
 	worker_drawArtwork(temp_file_name, x_offset, MainStartY, width, MainHeight);
+}
+
+std::vector<uint8_t> Artwork::worker_fetchArtwork(const std::string &uri)
+{
+	// Check if MPD connection is still alive
+	try
+	{
+		Mpd_artwork.getStatus();
+	}
+	catch (const MPD::ClientError &e)
+	{
+		// Reconnect to MPD if closed and try again
+		if (e.code() == MPD_ERROR_CLOSED)
+		{
+			Mpd_artwork.Disconnect();
+			Mpd_artwork.Connect();
+		}
+	}
+
+	// Get artwork
+	// TODO: make this order configurable
+	const std::vector<std::string> art_sources = { "albumart", "readpicture" };
+	std::vector<uint8_t> buffer;
+	for (const auto &source : art_sources)
+	{
+		buffer = Mpd_artwork.GetArtwork(uri, source);
+		if (!buffer.empty())
+			return buffer;
+	}
+
+	return buffer;
 }
 
 void Artwork::worker()

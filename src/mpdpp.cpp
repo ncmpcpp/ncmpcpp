@@ -884,11 +884,17 @@ void Connection::setBinaryLimit(size_t limit)
 	checkErrors();
 }
 
-std::vector<uint8_t> Connection::GetArtwork(const std::string &uri)
+std::vector<uint8_t> Connection::GetArtwork(const std::string &uri, const std::string &cmd)
 {
-	setBinaryLimit(1 * (1 << 20)); // set binarylimit to 1 MiB
+	// Raise binarylimit for faster transfer if supported
+	try
+	{
+		setBinaryLimit(1 * (1 << 20)); // set binarylimit to 1 MiB
+	}
+	catch (const std::exception &e) {}
 
 	prechecksNoCommandsList();
+	bool ret;
 	size_t offset = 0;
 	size_t size = std::numeric_limits<size_t>::max();
 	std::vector<uint8_t> buffer;
@@ -898,7 +904,13 @@ std::vector<uint8_t> Connection::GetArtwork(const std::string &uri)
 	while (offset < size)
 	{
 		size_t binary = 0;
-		mpd_send_command(m_connection.get(), "albumart", uri.c_str(), std::to_string(offset).c_str(), nullptr);
+		ret = mpd_send_command(m_connection.get(), cmd.c_str(), uri.c_str(), std::to_string(offset).c_str(), nullptr);
+		if (!ret)
+		{
+			return {};
+		}
+
+		checkErrors();
 		if (mpd_pair *pair = mpd_recv_pair_named(m_connection.get(), "size"))
 		{
 			size = std::stoi(pair->value);
@@ -910,18 +922,18 @@ std::vector<uint8_t> Connection::GetArtwork(const std::string &uri)
 			binary = std::stoi(pair->value);
 			mpd_enqueue_pair(m_connection.get(), pair);
 		}
-		if (!mpd_recv_binary(m_connection.get(), buffer.data() + offset, binary))
+		ret = mpd_recv_binary(m_connection.get(), buffer.data() + offset, binary);
+		mpd_response_finish(m_connection.get());
+		if (!ret)
 		{
 			return {};
 		}
 		offset += binary;
-		mpd_response_finish(m_connection.get());
-		checkErrors();
 		++count;
 	}
-	std::cerr << "albumart " << uri;
-	std::cerr << ", roundtrips: " << count;
-	std::cerr << ", size: " << buffer.size() << std::endl;
+	std::cerr << cmd.c_str() << ": " << uri
+		<< ", roundtrips: " << count
+		<< ", size: " << buffer.size() << std::endl;
 	return buffer;
 }
 

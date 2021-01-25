@@ -603,7 +603,7 @@ struct Connection
 	void setNoidleCallback(NoidleCallback callback);
 
 	void setBinaryLimit(size_t limit);
-	std::vector<uint8_t> GetArtwork(const std::string &uri);
+	std::vector<uint8_t> GetArtwork(const std::string &uri, const std::string &cmd);
 
 private:
 	struct ConnectionDeleter {
