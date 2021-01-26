@@ -1,5 +1,6 @@
 # ncmpcpp-0.10 (????-??-??)
 * Add the configuration option `mpd_password`.
+* Separate chunks of lyrics with a double newline.
 
 # ncmpcpp-0.9.2 (2021-01-24)
 * Revert suppression of output of all external commands as that makes e.g album
