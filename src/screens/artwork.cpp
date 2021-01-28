@@ -55,16 +55,10 @@ namespace
 // For signaling worker thread
 namespace
 {
-	std::condition_variable cv;
-	std::mutex cv_mtx;
-	bool cv_ready = false;
-	bool cv_exit_worker = false;
-
-	enum operation { UPDATE, UPDATE_URI, REMOVE };
-	operation cv_op;
-
-	std::string cv_uri;
-	bool cv_reset_artwork;
+	std::condition_variable worker_cv;
+	std::mutex worker_mtx;
+	bool worker_exit = false;
+	std::queue<std::function<void()>> worker_queue;
 }
 
 Artwork::Artwork()
@@ -101,39 +95,39 @@ std::wstring Artwork::title() { return L"Artwork"; }
 void Artwork::stop()
 {
 	{
-		std::lock_guard<std::mutex> lck(cv_mtx);
-		cv_exit_worker = true;
-		cv_ready = true;
-		cv.notify_all();
+		std::lock_guard<std::mutex> lck(worker_mtx);
+		worker_exit = true;
 	}
+	worker_cv.notify_all();
 	std::remove(temp_file_name.c_str());
 	t.join();
 }
 
 void Artwork::removeArtwork(bool reset_artwork)
 {
-	std::lock_guard<std::mutex> lck(cv_mtx);
-	cv_op = REMOVE;
-	cv_reset_artwork = reset_artwork;
-	cv_ready = true;
-	cv.notify_all();
+	{
+		std::lock_guard<std::mutex> lck(worker_mtx);
+		worker_queue.emplace([=] { worker_removeArtwork(reset_artwork); });
+	}
+	worker_cv.notify_all();
 }
 
 void Artwork::updateArtwork()
 {
-	std::lock_guard<std::mutex> lck(cv_mtx);
-	cv_op = UPDATE;
-	cv_ready = true;
-	cv.notify_all();
+	{
+		std::lock_guard<std::mutex> lck(worker_mtx);
+		worker_queue.emplace([] { worker_updateArtwork(); });
+	}
+	worker_cv.notify_all();
 }
 
 void Artwork::updateArtwork(std::string uri)
 {
-	std::lock_guard<std::mutex> lck(cv_mtx);
-	cv_op = UPDATE_URI;
-	cv_uri = uri;
-	cv_ready = true;
-	cv.notify_all();
+	{
+		std::lock_guard<std::mutex> lck(worker_mtx);
+		worker_queue.emplace([=] { worker_updateArtwork(uri); });
+	}
+	worker_cv.notify_all();
 }
 
 
@@ -143,6 +137,7 @@ void Artwork::worker_drawArtwork(std::string path, int x_offset, int y_offset, i
 {
 	backend->updateArtwork(path, x_offset, y_offset, width, height);
 	drawn = true;
+	current_artwork_path = path;
 }
 
 void Artwork::worker_removeArtwork(bool reset_artwork)
@@ -181,7 +176,6 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 
 	// Draw default artwork if MPD doesn't return anything
 	if (buffer.empty()) {
-		current_artwork_path = Config.albumart_default_path;
 		worker_drawArtwork(Config.albumart_default_path, x_offset, MainStartY, width, MainHeight);
 		return;
 	}
@@ -191,7 +185,6 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 	temp_file.open(temp_file_name, std::ios::trunc | std::ios::binary);
 	temp_file.write(reinterpret_cast<char *>(buffer.data()), buffer.size());
 	temp_file.close();
-	current_artwork_path = temp_file_name;
 	worker_drawArtwork(temp_file_name, x_offset, MainStartY, width, MainHeight);
 }
 
@@ -230,19 +223,21 @@ void Artwork::worker()
 {
 	while (true)
 	{
-		std::string uri;
-		bool reset_artwork;
-		operation op;
+		std::function<void()> op;
 		{
 			// Wait for signal
-			std::unique_lock<std::mutex> lck(cv_mtx);
-			cv.wait(lck, [] { return cv_ready; });
-			cv_ready = false;
-			if (cv_exit_worker)
+			std::unique_lock<std::mutex> lck(worker_mtx);
+			worker_cv.wait(lck, [] { return worker_exit || !worker_queue.empty(); });
+
+			if (worker_exit)
+			{
+				worker_exit = false;
 				return;
-			op = cv_op;
-			uri = cv_uri;
-			reset_artwork = cv_reset_artwork;
+			}
+
+			// Take the first operation in queue
+			op = worker_queue.front();
+			worker_queue.pop();
 		}
 
 		try
@@ -255,19 +250,8 @@ void Artwork::worker()
 				Mpd_artwork.Connect();
 			}
 
-			switch (op)
-			{
-				case UPDATE:
-					worker_updateArtwork();
-					break;
-				case UPDATE_URI:
-					worker_updateArtwork(uri);
-					break;
-				case REMOVE:
-					worker_removeArtwork(reset_artwork);
-					break;
-			}
-
+			// Do the requested operation
+			op();
 		}
 		catch (std::exception &e)
 		{
