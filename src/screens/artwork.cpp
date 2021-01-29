@@ -40,26 +40,22 @@ using Global::MainStartY;
 
 Artwork* myArtwork;
 
-bool Artwork::drawn = false;
 std::string Artwork::temp_file_name;
 std::ofstream Artwork::temp_file;
 std::thread Artwork::t;
-
-namespace
-{
-	ArtworkBackend* backend;
-	std::string current_artwork_path = "";
-	std::string prev_uri = "";
-}
+ArtworkBackend* Artwork::backend;
+std::string Artwork::current_artwork_path = "";
+std::string Artwork::prev_uri = "";
+bool Artwork::drawn = false;
+bool Artwork::before_inital_draw = true;
 
 // For signaling worker thread
-namespace
-{
-	std::condition_variable worker_cv;
-	std::mutex worker_mtx;
-	bool worker_exit = false;
-	std::queue<std::function<void()>> worker_queue;
-}
+std::condition_variable Artwork::worker_cv;
+std::mutex Artwork::worker_mtx;
+std::chrono::time_point<std::chrono::steady_clock> Artwork::query_time;
+bool Artwork::worker_exit = false;
+std::vector<std::pair<Artwork::WorkerOp, std::function<void()>>> Artwork::worker_queue;
+
 
 Artwork::Artwork()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
@@ -107,7 +103,11 @@ void Artwork::removeArtwork(bool reset_artwork)
 {
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace([=] { worker_removeArtwork(reset_artwork); });
+		// Need to specify distinct operations for reset_artwork true/false to
+		// guarantee that both are executed if they are called within one loop
+		// iteration of the worker thread
+		WorkerOp op = reset_artwork ? OP_REMOVE_RESET : OP_REMOVE;
+		worker_queue.emplace_back(std::make_pair(op, [=] { worker_removeArtwork(reset_artwork); }));
 	}
 	worker_cv.notify_all();
 }
@@ -116,7 +116,7 @@ void Artwork::updateArtwork()
 {
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace([] { worker_updateArtwork(); });
+		worker_queue.emplace_back(std::make_pair(OP_UPDATE, [] { worker_updateArtwork(); }));
 	}
 	worker_cv.notify_all();
 }
@@ -125,7 +125,16 @@ void Artwork::updateArtwork(std::string uri)
 {
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace([=] { worker_updateArtwork(uri); });
+		worker_queue.emplace_back(std::make_pair(OP_UPDATE_URI, [=] { worker_updateArtwork(uri); }));
+	}
+	worker_cv.notify_all();
+}
+
+void Artwork::updatedVisibility()
+{
+	{
+		std::lock_guard<std::mutex> lck(worker_mtx);
+		worker_queue.emplace_back(std::make_pair(OP_UPDATED_VIS, [=] { worker_updatedVisibility(); }));
 	}
 	worker_cv.notify_all();
 }
@@ -137,6 +146,7 @@ void Artwork::worker_drawArtwork(std::string path, int x_offset, int y_offset, i
 {
 	backend->updateArtwork(path, x_offset, y_offset, width, height);
 	drawn = true;
+	before_inital_draw = false;
 	current_artwork_path = path;
 }
 
@@ -188,8 +198,21 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 	worker_drawArtwork(temp_file_name, x_offset, MainStartY, width, MainHeight);
 }
 
+void Artwork::worker_updatedVisibility()
+{
+	if (!isVisible(myArtwork) && drawn)
+	{
+		worker_removeArtwork();
+	}
+	else if (isVisible(myArtwork) && !before_inital_draw && !drawn)
+	{
+		worker_updateArtwork();
+	}
+}
+
 std::vector<uint8_t> Artwork::worker_fetchArtwork(const std::string &uri)
 {
+
 	// Check if MPD connection is still alive
 	try
 	{
@@ -212,6 +235,7 @@ std::vector<uint8_t> Artwork::worker_fetchArtwork(const std::string &uri)
 	for (const auto &source : art_sources)
 	{
 		buffer = Mpd_artwork.GetArtwork(uri, source);
+		query_time = std::chrono::steady_clock::now();
 		if (!buffer.empty())
 			return buffer;
 	}
@@ -223,9 +247,9 @@ void Artwork::worker()
 {
 	while (true)
 	{
-		std::function<void()> op;
+		std::deque<std::function<void()>> ops;
 		{
-			// Wait for signal
+			// Wait for work
 			std::unique_lock<std::mutex> lck(worker_mtx);
 			worker_cv.wait(lck, [] { return worker_exit || !worker_queue.empty(); });
 
@@ -235,9 +259,27 @@ void Artwork::worker()
 				return;
 			}
 
-			// Take the first operation in queue
-			op = worker_queue.front();
-			worker_queue.pop();
+			// Only run the latest queued operation for each type so we won't fall behind
+			std::set<WorkerOp> found_set;
+			for (auto it = worker_queue.rbegin(); it != worker_queue.rend(); ++it)
+			{
+				if (found_set.end() != found_set.find(it->first))
+					continue;
+				found_set.insert(it->first);
+				ops.push_front(it->second);
+			}
+			worker_queue.clear();
+
+			// If next work iteration requires MPD and we have previously queried
+			// MPD, wait a bit to avoid overwhelming MPD
+			if (found_set.end() != found_set.find(OP_UPDATE_URI))
+			{
+				if (worker_cv.wait_until(lck, query_time + std::chrono::milliseconds(500), [] { return worker_exit; }))
+				{
+					worker_exit = false;
+					return;
+				}
+			}
 		}
 
 		try
@@ -250,8 +292,11 @@ void Artwork::worker()
 				Mpd_artwork.Connect();
 			}
 
-			// Do the requested operation
-			op();
+			// Do the requested operations
+			for (auto &op : ops)
+			{
+				op();
+			}
 		}
 		catch (std::exception &e)
 		{
