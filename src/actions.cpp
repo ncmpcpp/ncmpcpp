@@ -357,14 +357,7 @@ void UpdateEnvironment::run(bool update_timer, bool refresh_window, bool mpd_syn
 	}
 
 #	ifdef ENABLE_ARTWORK
-	if (!isVisible(myArtwork) && myArtwork->drawn)
-	{
-		myArtwork->removeArtwork();
-	}
-	else if (isVisible(myArtwork) && !myArtwork->drawn)
-	{
-		myArtwork->updateArtwork();
-	}
+	myArtwork->updatedVisibility();
 #	endif
 }
 

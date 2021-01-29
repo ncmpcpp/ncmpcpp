@@ -31,6 +31,9 @@
 #include "interfaces.h"
 #include "screens/screen.h"
 
+class ArtworkBackend;
+
+
 struct Artwork: Screen<NC::Window>, Tabbable
 {
 	Artwork();
@@ -52,8 +55,8 @@ struct Artwork: Screen<NC::Window>, Tabbable
 	static void removeArtwork(bool reset_artwork = false);
 	static void updateArtwork();
 	static void updateArtwork(std::string uri);
+	static void updatedVisibility();
 
-	static bool drawn;
 
 private:
 	static void stop();
@@ -63,11 +66,39 @@ private:
 	static void worker_removeArtwork(bool reset_artwork = false);
 	static void worker_updateArtwork();
 	static void worker_updateArtwork(const std::string &uri);
+	static void worker_updatedVisibility();
 	static std::vector<uint8_t> worker_fetchArtwork(const std::string &uri);
 
 	static std::string temp_file_name;
 	static std::ofstream temp_file;
 	static std::thread t;
+	static ArtworkBackend *backend;
+	static std::string current_artwork_path;
+	static std::string prev_uri;
+	static bool drawn;
+	static bool before_inital_draw;
+
+	// For signaling worker thread
+	static std::condition_variable worker_cv;
+	static std::mutex worker_mtx;
+
+	// last time worker thread queried MPD
+	static std::chrono::time_point<std::chrono::steady_clock> query_time;
+
+	// worker thread should exit
+	static bool worker_exit;
+
+	// Types of operations the worker thread can do. Worker thread will only
+	// run the latest of each operation per iteration
+	enum WorkerOp {
+		OP_UPDATE,
+		OP_UPDATE_URI,
+		OP_REMOVE,
+		OP_REMOVE_RESET,
+		OP_UPDATED_VIS,
+	};
+
+	static std::vector<std::pair<WorkerOp, std::function<void()>>> worker_queue;
 };
 
 class ArtworkBackend
