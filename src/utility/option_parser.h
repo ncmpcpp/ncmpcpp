@@ -82,6 +82,12 @@ std::vector<ValueT> list_of(const std::string &v)
 	return list_of<ValueT>(v, verbose_lexical_cast<ValueT>);
 }
 
+template <typename ValueT>
+std::vector<ValueT> list_of_allow_empty(const std::string &v)
+{
+	return list_of<ValueT>(v, verbose_lexical_cast<ValueT>, true);
+}
+
 bool yes_no(const std::string &v);
 
 std::vector<size_t> parse_ratio(const std::string &v, const std::vector<size_t>::size_type length);
