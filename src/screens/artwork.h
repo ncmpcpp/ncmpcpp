@@ -67,7 +67,8 @@ private:
 	static void worker_updateArtwork();
 	static void worker_updateArtwork(const std::string &uri);
 	static void worker_updatedVisibility();
-	static std::vector<uint8_t> worker_fetchArtwork(const std::string &uri);
+	static std::vector<uint8_t> worker_fetchArtwork(const std::string &uri, const std::string &cmd);
+	static std::string worker_fetchLocalArtwork(const std::string &uri);
 
 	static std::string temp_file_name;
 	static std::ofstream temp_file;
@@ -78,12 +79,15 @@ private:
 	static bool drawn;
 	static bool before_inital_draw;
 
+	enum ArtSource { LOCAL, MPD_DIR, MPD_EMBED };
+	const static std::map<ArtSource, std::string> art_source_cmd_map;
+
 	// For signaling worker thread
 	static std::condition_variable worker_cv;
 	static std::mutex worker_mtx;
 
-	// last time worker thread queried MPD
-	static std::chrono::time_point<std::chrono::steady_clock> query_time;
+	// last time worker thread updated artwork
+	static std::chrono::time_point<std::chrono::steady_clock> update_time;
 
 	// worker thread should exit
 	static bool worker_exit;
