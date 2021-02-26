@@ -34,6 +34,7 @@
 #include "format.h"
 #include "lyrics_fetcher.h"
 #include "screens/screen_type.h"
+#include "screens/artwork.h"
 
 struct Column
 {
@@ -228,6 +229,7 @@ struct Configuration
 
 	std::string albumart_default_path;
 	std::string albumart_scaler;
+	std::vector<Artwork::ArtSource> albumart_sources;
 };
 
 extern Configuration Config;

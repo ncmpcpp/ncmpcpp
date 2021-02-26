@@ -616,6 +616,8 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 
 	p.add("albumart_default_path", &albumart_default_path, "", adjust_path);
 	p.add("albumart_scaler", &albumart_scaler, "fit_contain");
+	p.add("albumart_sources", &albumart_sources,
+	      "local, mpd_albumart, mpd_readpicture", list_of_allow_empty<Artwork::ArtSource>);
 
 	return std::all_of(
 		config_paths.begin(),

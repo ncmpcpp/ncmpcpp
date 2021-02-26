@@ -133,6 +133,9 @@ For spectrum visualizer, left-most frequency of visualizer, must be less than HZ
 .B visualizer_spectrum_hz_max = Hz
 For spectrum visualizer, right-most frequency of visualizer, must be greater than HZ MIN.
 .TP
+.B albumart_sources = SOURCES
+List of sources of album art, highest priority sources first. "local" scans mpd_music_dir on the local machine, "mpd_albumart" and "mpd_readpicture" query MPD with the albumart and readpicture commands respectively. May be empty, in which case the albumart_default_path fallback will be used.
+.TP
 .B albumart_default_path = PATH
 Fallback to this image if no album cover art is found in the music library.
 .TP

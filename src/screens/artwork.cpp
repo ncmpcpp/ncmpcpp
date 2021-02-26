@@ -49,8 +49,8 @@ std::string Artwork::prev_uri = "";
 bool Artwork::drawn = false;
 bool Artwork::before_inital_draw = true;
 const std::map<Artwork::ArtSource, std::string> Artwork::art_source_cmd_map = {
-	{ MPD_DIR, "albumart" },
-	{ MPD_EMBED, "readpicture" },
+	{ MPD_ALBUMART, "albumart" },
+	{ MPD_READPICTURE, "readpicture" },
 };
 
 // For signaling worker thread
@@ -60,6 +60,21 @@ std::chrono::time_point<std::chrono::steady_clock> Artwork::update_time;
 bool Artwork::worker_exit = false;
 std::vector<std::pair<Artwork::WorkerOp, std::function<void()>>> Artwork::worker_queue;
 
+
+std::istream &operator>>(std::istream &is, Artwork::ArtSource &source)
+{
+	std::string s;
+	is >> s;
+	if (s == "local")
+		source = Artwork::LOCAL;
+	else if (s == "mpd_albumart")
+		source = Artwork::MPD_ALBUMART;
+	else if (s == "mpd_readpicture")
+		source = Artwork::MPD_READPICTURE;
+	else
+		is.setstate(std::ios::failbit);
+	return is;
+}
 
 Artwork::Artwork()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
@@ -187,10 +202,7 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 		return;
 	}
 
-	// TODO: make this order configurable
-	const std::vector<ArtSource> art_sources = { LOCAL, MPD_DIR, MPD_EMBED };
-
-	for (const auto &source : art_sources)
+	for (const auto &source : Config.albumart_sources)
 	{
 		switch (source)
 		{
@@ -214,8 +226,8 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 					worker_drawArtwork(*it, x_offset, MainStartY, width, MainHeight);
 					return;
 				}
-			case MPD_DIR:
-			case MPD_EMBED:
+			case MPD_ALBUMART:
+			case MPD_READPICTURE:
 				{
 					const std::string &cmd = art_source_cmd_map.at(source);
 					auto buffer = worker_fetchArtwork(uri, cmd);
@@ -236,7 +248,6 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 
 	// Draw default artwork if MPD doesn't return anything
 	worker_drawArtwork(Config.albumart_default_path, x_offset, MainStartY, width, MainHeight);
-	return;
 }
 
 void Artwork::worker_updatedVisibility()

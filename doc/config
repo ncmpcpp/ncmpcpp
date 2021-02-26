@@ -168,6 +168,13 @@
 ## Ueberzug must be installed and visible in PATH for artwork to be displayed.
 ##
 #
+## List of sources of album art, highest priority sources first. "local" scans
+## mpd_music_dir on the local machine, "mpd_albumart" and "mpd_readpicture"
+## query MPD with the albumart and readpicture commands respectively. May be
+## empty, in which case the albumart_default_path fallback will be used.
+#
+#albumart_sources = local, mpd_dir, mpd_embed
+#
 ## Fallback to this image if no album cover art is found in the music library.
 #
 #albumart_default_path = ""

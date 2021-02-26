@@ -57,6 +57,7 @@ struct Artwork: Screen<NC::Window>, Tabbable
 	static void updateArtwork(std::string uri);
 	static void updatedVisibility();
 
+	enum ArtSource { LOCAL, MPD_ALBUMART, MPD_READPICTURE };
 
 private:
 	static void stop();
@@ -79,7 +80,6 @@ private:
 	static bool drawn;
 	static bool before_inital_draw;
 
-	enum ArtSource { LOCAL, MPD_DIR, MPD_EMBED };
 	const static std::map<ArtSource, std::string> art_source_cmd_map;
 
 	// For signaling worker thread
@@ -104,6 +104,8 @@ private:
 
 	static std::vector<std::pair<WorkerOp, std::function<void()>>> worker_queue;
 };
+
+std::istream &operator>>(std::istream &is, Artwork::ArtSource &source);
 
 class ArtworkBackend
 {
