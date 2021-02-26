@@ -48,11 +48,15 @@ std::string Artwork::current_artwork_path = "";
 std::string Artwork::prev_uri = "";
 bool Artwork::drawn = false;
 bool Artwork::before_inital_draw = true;
+const std::map<Artwork::ArtSource, std::string> Artwork::art_source_cmd_map = {
+	{ MPD_DIR, "albumart" },
+	{ MPD_EMBED, "readpicture" },
+};
 
 // For signaling worker thread
 std::condition_variable Artwork::worker_cv;
 std::mutex Artwork::worker_mtx;
-std::chrono::time_point<std::chrono::steady_clock> Artwork::query_time;
+std::chrono::time_point<std::chrono::steady_clock> Artwork::update_time;
 bool Artwork::worker_exit = false;
 std::vector<std::pair<Artwork::WorkerOp, std::function<void()>>> Artwork::worker_queue;
 
@@ -172,6 +176,7 @@ void Artwork::worker_updateArtwork()
 
 void Artwork::worker_updateArtwork(const std::string &uri)
 {
+	update_time = std::chrono::steady_clock::now();
 	size_t x_offset, width;
 	myArtwork->getWindowResizeParams(x_offset, width);
 
@@ -182,20 +187,56 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 		return;
 	}
 
-	auto buffer = worker_fetchArtwork(uri);
+	// TODO: make this order configurable
+	const std::vector<ArtSource> art_sources = { LOCAL, MPD_DIR, MPD_EMBED };
 
-	// Draw default artwork if MPD doesn't return anything
-	if (buffer.empty()) {
-		worker_drawArtwork(Config.albumart_default_path, x_offset, MainStartY, width, MainHeight);
-		return;
+	for (const auto &source : art_sources)
+	{
+		switch (source)
+		{
+			case LOCAL:
+				{
+					// find the first suitable image to draw
+					std::string dir = uri.substr(0, uri.find_last_of('/'));
+					std::vector<std::string> candidate_paths = {
+						Config.mpd_music_dir + dir + "/cover.png",
+						Config.mpd_music_dir + dir + "/cover.jpg",
+						Config.mpd_music_dir + dir + "/cover.tiff",
+						Config.mpd_music_dir + dir + "/cover.bmp",
+					};
+					auto it = std::find_if(
+							candidate_paths.begin(), candidate_paths.end(),
+							[](const std::string &s) { return 0 == access(s.c_str(), R_OK); });
+					if (it == candidate_paths.end())
+						continue;
+
+					// draw the image
+					worker_drawArtwork(*it, x_offset, MainStartY, width, MainHeight);
+					return;
+				}
+			case MPD_DIR:
+			case MPD_EMBED:
+				{
+					const std::string &cmd = art_source_cmd_map.at(source);
+					auto buffer = worker_fetchArtwork(uri, cmd);
+
+					if (buffer.empty())
+						continue;
+
+					// Write artwork to a temporary file and draw
+					prev_uri = uri;
+					temp_file.open(temp_file_name, std::ios::trunc | std::ios::binary);
+					temp_file.write(reinterpret_cast<char *>(buffer.data()), buffer.size());
+					temp_file.close();
+					worker_drawArtwork(temp_file_name, x_offset, MainStartY, width, MainHeight);
+					return;
+				}
+		}
 	}
 
-	// Write artwork to a temporary file and draw
-	prev_uri = uri;
-	temp_file.open(temp_file_name, std::ios::trunc | std::ios::binary);
-	temp_file.write(reinterpret_cast<char *>(buffer.data()), buffer.size());
-	temp_file.close();
-	worker_drawArtwork(temp_file_name, x_offset, MainStartY, width, MainHeight);
+	// Draw default artwork if MPD doesn't return anything
+	worker_drawArtwork(Config.albumart_default_path, x_offset, MainStartY, width, MainHeight);
+	return;
 }
 
 void Artwork::worker_updatedVisibility()
@@ -210,7 +251,7 @@ void Artwork::worker_updatedVisibility()
 	}
 }
 
-std::vector<uint8_t> Artwork::worker_fetchArtwork(const std::string &uri)
+std::vector<uint8_t> Artwork::worker_fetchArtwork(const std::string &uri, const std::string &cmd)
 {
 
 	// Check if MPD connection is still alive
@@ -229,16 +270,10 @@ std::vector<uint8_t> Artwork::worker_fetchArtwork(const std::string &uri)
 	}
 
 	// Get artwork
-	// TODO: make this order configurable
-	const std::vector<std::string> art_sources = { "albumart", "readpicture" };
 	std::vector<uint8_t> buffer;
-	for (const auto &source : art_sources)
-	{
-		buffer = Mpd_artwork.GetArtwork(uri, source);
-		query_time = std::chrono::steady_clock::now();
-		if (!buffer.empty())
-			return buffer;
-	}
+	buffer = Mpd_artwork.GetArtwork(uri, cmd);
+	if (!buffer.empty())
+		return buffer;
 
 	return buffer;
 }
@@ -270,11 +305,10 @@ void Artwork::worker()
 			}
 			worker_queue.clear();
 
-			// If next work iteration requires MPD and we have previously queried
-			// MPD, wait a bit to avoid overwhelming MPD
+			// Avoid updating artwork too often
 			if (found_set.end() != found_set.find(OP_UPDATE_URI))
 			{
-				if (worker_cv.wait_until(lck, query_time + std::chrono::milliseconds(500), [] { return worker_exit; }))
+				if (worker_cv.wait_until(lck, update_time + std::chrono::milliseconds(500), [] { return worker_exit; }))
 				{
 					worker_exit = false;
 					return;
