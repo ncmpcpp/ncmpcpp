@@ -49,8 +49,8 @@ std::string Artwork::prev_uri = "";
 bool Artwork::drawn = false;
 bool Artwork::before_inital_draw = true;
 const std::map<Artwork::ArtSource, std::string> Artwork::art_source_cmd_map = {
-	{ MPD_ALBUMART, "albumart" },
-	{ MPD_READPICTURE, "readpicture" },
+	{ ArtSource::MPD_ALBUMART, "albumart" },
+	{ ArtSource::MPD_READPICTURE, "readpicture" },
 };
 
 // For signaling worker thread
@@ -66,11 +66,24 @@ std::istream &operator>>(std::istream &is, Artwork::ArtSource &source)
 	std::string s;
 	is >> s;
 	if (s == "local")
-		source = Artwork::LOCAL;
+		source = Artwork::ArtSource::LOCAL;
 	else if (s == "mpd_albumart")
-		source = Artwork::MPD_ALBUMART;
+		source = Artwork::ArtSource::MPD_ALBUMART;
 	else if (s == "mpd_readpicture")
-		source = Artwork::MPD_READPICTURE;
+		source = Artwork::ArtSource::MPD_READPICTURE;
+	else
+		is.setstate(std::ios::failbit);
+	return is;
+}
+
+std::istream &operator>>(std::istream &is, Artwork::ArtBackend &backend)
+{
+	std::string s;
+	is >> s;
+	if (s == "ueberzug")
+		backend = Artwork::ArtBackend::UEBERZUG;
+	else if (s == "kitty")
+		backend = Artwork::ArtBackend::KITTY;
 	else
 		is.setstate(std::ios::failbit);
 	return is;
@@ -82,7 +95,15 @@ Artwork::Artwork()
 	namespace fs = boost::filesystem;
 	temp_file_name = (fs::temp_directory_path() / fs::unique_path()).string();
 
-	backend = new UeberzugBackend;
+	switch (Config.albumart_backend)
+	{
+		case ArtBackend::UEBERZUG:
+			backend = new UeberzugBackend;
+			break;
+		case ArtBackend::KITTY:
+			backend = new KittyBackend;
+			break;
+	}
 	backend->init();
 
 	// Spawn worker thread
@@ -125,7 +146,7 @@ void Artwork::removeArtwork(bool reset_artwork)
 		// Need to specify distinct operations for reset_artwork true/false to
 		// guarantee that both are executed if they are called within one loop
 		// iteration of the worker thread
-		WorkerOp op = reset_artwork ? OP_REMOVE_RESET : OP_REMOVE;
+		WorkerOp op = reset_artwork ? WorkerOp::REMOVE_RESET : WorkerOp::REMOVE;
 		worker_queue.emplace_back(std::make_pair(op, [=] { worker_removeArtwork(reset_artwork); }));
 	}
 	worker_cv.notify_all();
@@ -135,7 +156,7 @@ void Artwork::updateArtwork()
 {
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace_back(std::make_pair(OP_UPDATE, [] { worker_updateArtwork(); }));
+		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE, [] { worker_updateArtwork(); }));
 	}
 	worker_cv.notify_all();
 }
@@ -144,7 +165,7 @@ void Artwork::updateArtwork(std::string uri)
 {
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace_back(std::make_pair(OP_UPDATE_URI, [=] { worker_updateArtwork(uri); }));
+		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE_URI, [=] { worker_updateArtwork(uri); }));
 	}
 	worker_cv.notify_all();
 }
@@ -153,7 +174,7 @@ void Artwork::updatedVisibility()
 {
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace_back(std::make_pair(OP_UPDATED_VIS, [=] { worker_updatedVisibility(); }));
+		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATED_VIS, [=] { worker_updatedVisibility(); }));
 	}
 	worker_cv.notify_all();
 }
@@ -206,7 +227,7 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 	{
 		switch (source)
 		{
-			case LOCAL:
+			case ArtSource::LOCAL:
 				{
 					// find the first suitable image to draw
 					std::string dir = uri.substr(0, uri.find_last_of('/'));
@@ -226,8 +247,8 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 					worker_drawArtwork(*it, x_offset, MainStartY, width, MainHeight);
 					return;
 				}
-			case MPD_ALBUMART:
-			case MPD_READPICTURE:
+			case ArtSource::MPD_ALBUMART:
+			case ArtSource::MPD_READPICTURE:
 				{
 					const std::string &cmd = art_source_cmd_map.at(source);
 					auto buffer = worker_fetchArtwork(uri, cmd);
@@ -317,7 +338,7 @@ void Artwork::worker()
 			worker_queue.clear();
 
 			// Avoid updating artwork too often
-			if (found_set.end() != found_set.find(OP_UPDATE_URI))
+			if (found_set.end() != found_set.find(WorkerOp::UPDATE_URI))
 			{
 				if (worker_cv.wait_until(lck, update_time + std::chrono::milliseconds(500), [] { return worker_exit; }))
 				{
@@ -409,6 +430,45 @@ void UeberzugBackend::stop()
 	// close the underlying pipe, which causes ueberzug to exit
 	stream.pipe().close();
 	process.wait();
+}
+
+
+// KittyBackend
+
+void KittyBackend::updateArtwork(std::string path, int x_offset, int y_offset, int width, int height)
+{
+	namespace bp = boost::process;
+
+	removeArtwork();
+
+	std::string place = (boost::format("%1%x%2%@%3%x%4%") %
+			width % height % x_offset % y_offset).str();
+	std::vector<std::string> args = {
+		"+kitten", "icat",
+		"--silent",
+		"--transfer-mode", "stream",
+		"--stdin", "no",
+		"--detection-timeout", "0",
+		"--place", place,
+		"--scale-up",
+		path,
+	};
+	bp::system(bp::search_path("kitty"), bp::args(args), bp::std_out > "/dev/null", bp::std_err > "/dev/null");
+}
+
+void KittyBackend::removeArtwork()
+{
+	namespace bp = boost::process;
+
+	std::vector<std::string> args = {
+		"+kitten", "icat",
+		"--silent",
+		"--transfer-mode", "stream",
+		"--stdin", "no",
+		"--detection-timeout", "0",
+		"--clear",
+	};
+	bp::system(bp::search_path("kitty"), bp::args(args), bp::std_out > "/dev/null", bp::std_err > "/dev/null");
 }
 
 #endif // ENABLE_ARTWORK
