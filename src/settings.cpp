@@ -614,6 +614,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("active_window_border", &active_window_border, "red",
 	      verbose_lexical_cast<NC::Color>);
 
+	p.add("albumart_backend", &albumart_backend, "ueberzug");
 	p.add("albumart_default_path", &albumart_default_path, "", adjust_path);
 	p.add("albumart_scaler", &albumart_scaler, "fit_contain");
 	p.add("albumart_sources", &albumart_sources,

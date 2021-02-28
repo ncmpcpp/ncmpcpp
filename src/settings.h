@@ -227,6 +227,7 @@ struct Configuration
 
 	LyricsFetchers lyrics_fetchers;
 
+	Artwork::ArtBackend albumart_backend;
 	std::string albumart_default_path;
 	std::string albumart_scaler;
 	std::vector<Artwork::ArtSource> albumart_sources;

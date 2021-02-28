@@ -57,7 +57,8 @@ struct Artwork: Screen<NC::Window>, Tabbable
 	static void updateArtwork(std::string uri);
 	static void updatedVisibility();
 
-	enum ArtSource { LOCAL, MPD_ALBUMART, MPD_READPICTURE };
+	enum struct ArtBackend { UEBERZUG, KITTY };
+	enum struct ArtSource { LOCAL, MPD_ALBUMART, MPD_READPICTURE };
 
 private:
 	static void stop();
@@ -94,18 +95,19 @@ private:
 
 	// Types of operations the worker thread can do. Worker thread will only
 	// run the latest of each operation per iteration
-	enum WorkerOp {
-		OP_UPDATE,
-		OP_UPDATE_URI,
-		OP_REMOVE,
-		OP_REMOVE_RESET,
-		OP_UPDATED_VIS,
+	enum struct WorkerOp {
+		UPDATE,
+		UPDATE_URI,
+		REMOVE,
+		REMOVE_RESET,
+		UPDATED_VIS,
 	};
 
 	static std::vector<std::pair<WorkerOp, std::function<void()>>> worker_queue;
 };
 
 std::istream &operator>>(std::istream &is, Artwork::ArtSource &source);
+std::istream &operator>>(std::istream &is, Artwork::ArtBackend &backend);
 
 class ArtworkBackend
 {
@@ -130,6 +132,13 @@ private:
 	static void stop();
 	static boost::process::child process;
 	static boost::process::opstream stream;
+};
+
+class KittyBackend : public ArtworkBackend
+{
+public:
+	virtual void updateArtwork(std::string path, int x_offset, int y_offset, int width, int height) override;
+	virtual void removeArtwork() override;
 };
 
 extern Artwork *myArtwork;
