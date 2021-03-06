@@ -386,6 +386,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	                nullptr,
 	                std::ref(selected_item_suffix_length),
 	                ph::_1));
+  	p.add("selected_item_x_offset", &selected_item_x_offset, "1");
 	p.add("modified_item_prefix", &modified_item_prefix, "$3>$9 ", buffer);
 	p.add("song_window_title_format", &song_window_title_format,
 	      "{%a - }{%t}|{%f}", [](std::string v) {
