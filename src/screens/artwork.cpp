@@ -59,8 +59,6 @@ std::mutex Artwork::worker_mtx;
 std::chrono::time_point<std::chrono::steady_clock> Artwork::update_time;
 bool Artwork::worker_exit = false;
 std::vector<std::pair<Artwork::WorkerOp, std::function<void()>>> Artwork::worker_queue;
-int Artwork::pipefd_read;
-Artwork::winsize_t Artwork::prev_winsize;
 
 namespace {
 	std::mutex worker_output_mtx;
@@ -132,19 +130,18 @@ void Artwork::drawToScreen()
 	char buf[BUF_SIZE];
 	read(pipefd_read, buf, BUF_SIZE);
 
-	auto output = backend->getOutput();
+	std::vector<uint8_t> output;
+	int x_offset, y_offset;
+	std::tie(output, x_offset, y_offset) = backend->getOutput();
 	if (output.empty())
 	{
 		return;
 	}
 
-	size_t beg_y, beg_x;
-	getbegyx(w.raw(), beg_y, beg_x);
-
 	// save current cursor position
 	std::cout << "\0337";
-	// move cursor
-	std::cout << boost::format("\033[%1%;%2%H") % beg_y % beg_x;
+	// move cursor, terminal coordinates are 1-indexed
+	std::cout << boost::format("\033[%1%;%2%H") % (y_offset+1) % (x_offset+1);
 	// write image data
 	std::copy(output.begin(), output.end(), std::ostreambuf_iterator<char>(std::cout));
 	// restore cursor position
@@ -256,47 +253,40 @@ void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int heig
 {
 	using namespace Magick;
 
-	if (backend->postprocess())
+	// retrieve and calculate terminal character size
+	const auto sz = getWinSize();
+	const auto char_xpixel = sz.ws_xpixel / sz.ws_col;
+	const auto char_ypixel = sz.ws_ypixel / sz.ws_row;
+	const auto pixel_width = char_xpixel * width;
+	const auto pixel_height = char_ypixel * height;
+
+	const auto out_geom = Geometry(pixel_width, pixel_height);
+	Image in_img;
+	try
 	{
-		// retrieve and calculate terminal character size
-		auto sz = getWinSize();
-		auto char_xpixel = sz.ws_xpixel / sz.ws_col;
-		auto char_ypixel = sz.ws_ypixel / sz.ws_row;
-		auto pixel_width = char_xpixel * width;
-		auto pixel_height = char_ypixel * height;
+		// read and process artwork
+		Blob in_blob(orig_art_buffer.data(), orig_art_buffer.size() * sizeof(orig_art_buffer[0]));
+		in_img.read(in_blob);
+		in_img.scale(out_geom);
 
-		auto out_geom = Geometry(pixel_width, pixel_height);
-		Image out_img(out_geom, "transparent");
-		Image in_img;
-		try
-		{
-			// read un-processed artwork
-			Blob in_blob(orig_art_buffer.data(), orig_art_buffer.size() * sizeof(orig_art_buffer[0]));
-			in_img.read(in_blob);
+		// write output to buffer
+		Blob out_blob;
+		in_img.magick("PNG");
+		in_img.write(&out_blob);
+		art_buffer.resize(out_blob.length());
+		std::memcpy(art_buffer.data(), out_blob.data(), out_blob.length());
 
-			// composite artwork onto output image
-			in_img.scale(out_geom);
-			out_img.composite(in_img, CenterGravity, OverCompositeOp);
-			out_img.magick("PNG");
-			out_img.depth(8);
-
-			// write output to buffer
-			Blob out_blob;
-			out_img.write(&out_blob);
-			art_buffer.resize(out_blob.length());
-			std::memcpy(art_buffer.data(), out_blob.data(), out_blob.length());
-		}
-		catch (Magick::Exception& e)
-		{
-			std::cerr << e.what() << std::endl;
-		}
+		// center image
+		const auto bb = in_img.boundingBox();
+		x_offset += (width - (bb.width() / char_xpixel)) / 2;
+		y_offset += (height - (bb.height() / char_ypixel)) / 2;
 	}
-	else
+	catch (Magick::Exception& e)
 	{
-		art_buffer = orig_art_buffer;
+		std::cerr << e.what() << std::endl;
 	}
 
-	backend->updateArtwork(art_buffer, x_offset, y_offset, width, height);
+	backend->updateArtwork(art_buffer, x_offset, y_offset);
 	drawn = true;
 	before_inital_draw = false;
 }
@@ -353,7 +343,6 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 							[](const std::string &s) { return 0 == access(s.c_str(), R_OK); });
 					if (it == candidate_paths.end())
 						continue;
-
 
 					// draw the image
 					worker_updateArtBuffer(*it);
@@ -414,9 +403,6 @@ std::vector<uint8_t> Artwork::worker_fetchArtwork(const std::string &uri, const 
 	// Get artwork
 	std::vector<uint8_t> buffer;
 	buffer = Mpd_artwork.GetArtwork(uri, cmd);
-	if (!buffer.empty())
-		return buffer;
-
 	return buffer;
 }
 
@@ -504,9 +490,7 @@ UeberzugBackend::UeberzugBackend()
 	catch (const bp::process_error &e) {}
 }
 
-bool UeberzugBackend::postprocess() { return false; }
-
-void UeberzugBackend::updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset, int width, int height)
+void UeberzugBackend::updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset)
 {
 	if (!process.running())
 		return;
@@ -519,14 +503,9 @@ void UeberzugBackend::updateArtwork(const std::vector<uint8_t>& buffer, int x_of
 	pt.put("action", "add");
 	pt.put("identifier", "albumart");
 	pt.put("synchronously_draw", true);
-	pt.put("scaling_position_x", 0.5);
-	pt.put("scaling_position_y", 0.5);
-	pt.put("scaler", Config.albumart_scaler);
 	pt.put("path", temp_file_name);
 	pt.put("x", x_offset);
 	pt.put("y", y_offset);
-	pt.put("width", width);
-	pt.put("height", height);
 
 	boost::property_tree::write_json(stream, pt, /* pretty */ false);
 	stream << std::endl;
@@ -556,9 +535,7 @@ void UeberzugBackend::stop()
 
 // KittyBackend
 
-bool KittyBackend::postprocess() { return true; }
-
-void KittyBackend::updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset, int width, int height)
+void KittyBackend::updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset)
 {
 	const auto sz = Artwork::getWinSize();
 	const auto pixel_width = sz.ws_xpixel / sz.ws_col;
@@ -569,9 +546,9 @@ void KittyBackend::updateArtwork(const std::vector<uint8_t>& buffer, int x_offse
 	cmd["f"] = "100"; // PNG
 	cmd["i"] = "1";   // image ID
 	cmd["p"] = "1";   // placement ID
-	cmd["q"] = "1";   // suppress ouput
+	cmd["q"] = "1";   // suppress output
 
-	writeChunked(cmd, buffer);
+	setOutput(writeChunked(cmd, buffer), x_offset, y_offset);
 }
 
 void KittyBackend::removeArtwork()
@@ -579,9 +556,9 @@ void KittyBackend::removeArtwork()
 	std::map<std::string, std::string> cmd;
 	cmd["a"] = "d";   // delete
 	cmd["i"] = "1";   // image ID
-	cmd["q"] = "1";   // suppress ouput
+	cmd["q"] = "1";   // suppress output
 
-	writeChunked(cmd, {});
+	setOutput(writeChunked(cmd, {}), 0, 0);
 }
 
 std::vector<uint8_t> KittyBackend::serializeGrCmd(std::map<std::string, std::string> cmd,
@@ -613,7 +590,7 @@ std::vector<uint8_t> KittyBackend::serializeGrCmd(std::map<std::string, std::str
 	return ret;
 }
 
-void KittyBackend::writeChunked(std::map<std::string, std::string> cmd, const std::vector<uint8_t>& data)
+std::vector<uint8_t> KittyBackend::writeChunked(std::map<std::string, std::string> cmd, const std::vector<uint8_t>& data)
 {
 	using namespace Magick;
 
@@ -636,23 +613,25 @@ void KittyBackend::writeChunked(std::map<std::string, std::string> cmd, const st
 	cmd["m"] = "0";
 	auto final_chunk = serializeGrCmd(cmd, {}, 0, 0);
 	output.insert(output.end(), final_chunk.begin(), final_chunk.end());
-
-	setOutput(output);
+	return output;
 }
 
-std::vector<uint8_t> KittyBackend::getOutput()
+std::tuple<std::vector<uint8_t>, int, int> KittyBackend::getOutput()
 {
 	std::lock_guard<std::mutex> lck(worker_output_mtx);
-	auto temp = output;
+	std::tuple<std::vector<uint8_t>, int, int> ret;
+	ret = {output, output_x_offset, output_y_offset};
 	output.clear();
-	return temp;
+	return ret;
 }
 
-void KittyBackend::setOutput(std::vector<uint8_t> buffer)
+void KittyBackend::setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset)
 {
 	{
 		std::lock_guard<std::mutex> lck(worker_output_mtx);
 		output = buffer;
+		output_x_offset = x_offset;
+		output_y_offset = y_offset;
 	}
 	char dummy[2] = "x";
 	write(pipefd_write, dummy, 1);
