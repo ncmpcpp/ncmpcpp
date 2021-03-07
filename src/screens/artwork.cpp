@@ -68,6 +68,7 @@ std::istream &operator>>(std::istream &is, Artwork::ArtSource &source)
 {
 	std::string s;
 	is >> s;
+	boost::algorithm::to_lower(s);
 	if (s == "local")
 		source = Artwork::ArtSource::LOCAL;
 	else if (s == "mpd_albumart")
@@ -83,12 +84,39 @@ std::istream &operator>>(std::istream &is, Artwork::ArtBackend &backend)
 {
 	std::string s;
 	is >> s;
+	boost::algorithm::to_lower(s);
 	if (s == "ueberzug")
 		backend = Artwork::ArtBackend::UEBERZUG;
 	else if (s == "kitty")
 		backend = Artwork::ArtBackend::KITTY;
 	else
 		is.setstate(std::ios::failbit);
+	return is;
+}
+
+std::istream &operator>>(std::istream &is, Artwork::ArtAlign &align)
+{
+	std::string s;
+	is >> s;
+	boost::algorithm::to_lower(s);
+	if (s == "n")
+		align = Artwork::ArtAlign::N;
+	else if (s == "ne")
+		align = Artwork::ArtAlign::NE;
+	else if (s == "e")
+		align = Artwork::ArtAlign::E;
+	else if (s == "se")
+		align = Artwork::ArtAlign::SE;
+	else if (s == "s")
+		align = Artwork::ArtAlign::S;
+	else if (s == "sw")
+		align = Artwork::ArtAlign::SW;
+	else if (s == "w")
+		align = Artwork::ArtAlign::W;
+	else if (s == "nw")
+		align = Artwork::ArtAlign::NW;
+	else if (s == "center")
+		align = Artwork::ArtAlign::CENTER;
 	return is;
 }
 
@@ -147,6 +175,9 @@ void Artwork::drawToScreen()
 	// restore cursor position
 	std::cout << "\0338";
 	std::cout.flush();
+
+	// redraw active window
+	Global::myScreen->activeWindow()->display();
 }
 
 void Artwork::resize()
@@ -278,8 +309,8 @@ void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int heig
 
 		// center image
 		const auto bb = in_img.boundingBox();
-		x_offset += (width - (bb.width() / char_xpixel)) / 2;
-		y_offset += (height - (bb.height() / char_ypixel)) / 2;
+		x_offset += worker_calcXOffset(width, bb.width(), char_xpixel);
+		y_offset += worker_calcYOffset(height, bb.height(), char_ypixel);
 	}
 	catch (Magick::Exception& e)
 	{
@@ -289,6 +320,46 @@ void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int heig
 	backend->updateArtwork(art_buffer, x_offset, y_offset);
 	drawn = true;
 	before_inital_draw = false;
+}
+
+int Artwork::worker_calcXOffset(int width, int bb_width, int char_xpixel)
+{
+	switch (Config.albumart_align)
+	{
+		case ArtAlign::SW:
+		case ArtAlign::W:
+		case ArtAlign::NW:
+			return 0;
+		case ArtAlign::N:
+		case ArtAlign::S:
+		case ArtAlign::CENTER:
+			return (width - (static_cast<double>(bb_width) / char_xpixel)) / 2;
+		case ArtAlign::NE:
+		case ArtAlign::E:
+		case ArtAlign::SE:
+			return width - (static_cast<double>(bb_width) / char_xpixel);
+	}
+	return 0;
+}
+
+int Artwork::worker_calcYOffset(int height, int bb_height, int char_ypixel)
+{
+	switch (Config.albumart_align)
+	{
+		case ArtAlign::N:
+		case ArtAlign::NE:
+		case ArtAlign::NW:
+			return 0;
+		case ArtAlign::E:
+		case ArtAlign::W:
+		case ArtAlign::CENTER:
+			return (height - (static_cast<double>(bb_height) / char_ypixel)) / 2;
+		case ArtAlign::SE:
+		case ArtAlign::S:
+		case ArtAlign::SW:
+			return height - (static_cast<double>(bb_height) / char_ypixel);
+	}
+	return 0;
 }
 
 void Artwork::worker_removeArtwork(bool reset_artwork)
