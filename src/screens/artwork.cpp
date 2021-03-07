@@ -132,7 +132,7 @@ void Artwork::drawToScreen()
 	char buf[BUF_SIZE];
 	read(pipefd_read, buf, BUF_SIZE);
 
-	std::string output = backend->getOutput();
+	auto output = backend->getOutput();
 	if (output.empty())
 	{
 		return;
@@ -144,9 +144,9 @@ void Artwork::drawToScreen()
 	// save current cursor position
 	std::cout << "\0337";
 	// move cursor
-	std::cout << boost::format("\033[%1%;%2%H") % (beg_y) % (beg_x);
+	std::cout << boost::format("\033[%1%;%2%H") % beg_y % beg_x;
 	// write image data
-	std::cout << output;
+	std::copy(output.begin(), output.end(), std::ostreambuf_iterator<char>(std::cout));
 	// restore cursor position
 	std::cout << "\0338";
 	std::cout.flush();
@@ -277,7 +277,7 @@ void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int heig
 			// composite artwork onto output image
 			in_img.scale(out_geom);
 			out_img.composite(in_img, CenterGravity, OverCompositeOp);
-			out_img.magick("RGBA");
+			out_img.magick("PNG");
 			out_img.depth(8);
 
 			// write output to buffer
@@ -566,9 +566,7 @@ void KittyBackend::updateArtwork(const std::vector<uint8_t>& buffer, int x_offse
 
 	std::map<std::string, std::string> cmd;
 	cmd["a"] = "T";   // transfer and display
-	cmd["f"] = "32";  // RGBA
-	cmd["s"] = std::to_string(width * pixel_width);
-	cmd["v"] = std::to_string(height * pixel_height);
+	cmd["f"] = "100"; // PNG
 	cmd["i"] = "1";   // image ID
 	cmd["p"] = "1";   // placement ID
 	cmd["q"] = "1";   // suppress ouput
@@ -586,64 +584,75 @@ void KittyBackend::removeArtwork()
 	writeChunked(cmd, {});
 }
 
-std::string KittyBackend::serializeGrCmd(std::map<std::string, std::string> cmd,
-					 const std::string &payload,
-					 size_t chunk_begin, size_t chunk_end)
+std::vector<uint8_t> KittyBackend::serializeGrCmd(std::map<std::string, std::string> cmd,
+		const std::vector<uint8_t> &payload,
+		size_t chunk_begin, size_t chunk_end)
 {
-    std::string cmd_str;
-    for (auto const &it : cmd) {
-	cmd_str += it.first + "=" + it.second + ",";
-    }
-    if (!cmd_str.empty()) {
-	cmd_str.resize(cmd_str.size() - 1);
-    }
+	std::string cmd_str;
+	for (auto const &it : cmd)
+	{
+		cmd_str += it.first + "=" + it.second + ",";
+	}
+	if (!cmd_str.empty())
+	{
+		cmd_str.resize(cmd_str.size() - 1);
+	}
 
-    std::string ret;
-    ret += "\x1B_G" + cmd_str;
-    if (chunk_begin != chunk_end) {
-	ret += ";" + payload.substr(chunk_begin, chunk_end-chunk_begin);
-    }
-    ret += "\x1B\\";
-    return ret;
+	std::vector<uint8_t> ret;
+	const std::string prefix = "\033_G" + cmd_str;
+	const std::string suffix = "\033\\";
+
+	ret.insert(ret.end(), prefix.begin(), prefix.end());
+	if (chunk_begin != chunk_end) {
+		ret.emplace_back(';');
+		const auto it_beg = payload.begin() + chunk_begin;
+		const auto it_end = chunk_end > payload.size() ? payload.end() : payload.begin() + chunk_end;
+		ret.insert(ret.end(), it_beg, it_end);
+	}
+	ret.insert(ret.end(), suffix.begin(), suffix.end());
+	return ret;
 }
 
 void KittyBackend::writeChunked(std::map<std::string, std::string> cmd, const std::vector<uint8_t>& data)
 {
 	using namespace Magick;
 
-	std::string str = "";
+	std::vector<uint8_t> output;
 
 	if (!data.empty())
 	{
 		Blob blob(data.data(), data.size() * sizeof(data[0]));
-		std::string b64_data = blob.base64();
+		std::string b64_data_str = blob.base64();
+		std::vector<uint8_t> b64_data(b64_data_str.begin(), b64_data_str.end());
 
 		const size_t CHUNK_SIZE = 4096;
-		for (size_t i = 0; i < b64_data.length(); i += CHUNK_SIZE)
+		for (size_t i = 0; i < b64_data.size(); i += CHUNK_SIZE)
 		{
 			cmd["m"] = "1";
-			str += serializeGrCmd(cmd, b64_data, i, i+CHUNK_SIZE);
+			auto chunk = serializeGrCmd(cmd, b64_data, i, i+CHUNK_SIZE);
+			output.insert(output.end(), chunk.begin(), chunk.end());
 		}
 	}
 	cmd["m"] = "0";
-	str += serializeGrCmd(cmd, "", 0, 0);
+	auto final_chunk = serializeGrCmd(cmd, {}, 0, 0);
+	output.insert(output.end(), final_chunk.begin(), final_chunk.end());
 
-	setOutput(str);
+	setOutput(output);
 }
 
-std::string KittyBackend::getOutput()
+std::vector<uint8_t> KittyBackend::getOutput()
 {
 	std::lock_guard<std::mutex> lck(worker_output_mtx);
-	std::string temp = output;
+	auto temp = output;
 	output.clear();
 	return temp;
 }
 
-void KittyBackend::setOutput(std::string str)
+void KittyBackend::setOutput(std::vector<uint8_t> buffer)
 {
 	{
 		std::lock_guard<std::mutex> lck(worker_output_mtx);
-		output = str;
+		output = buffer;
 	}
 	char dummy[2] = "x";
 	write(pipefd_write, dummy, 1);

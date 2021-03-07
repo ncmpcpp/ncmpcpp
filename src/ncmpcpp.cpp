@@ -182,7 +182,10 @@ int main(int argc, char **argv)
 				Status::clear();
 				// clear mpd callback
 				wFooter->clearFDCallbacksList();
+#	ifdef ENABLE_ARTWORK
+				// add artwork callback
 				Global::wFooter->addFDCallback(myArtwork->pipefd_read, ArtworkHelper::drawToScreen);
+#	endif
 
 				try
 				{
