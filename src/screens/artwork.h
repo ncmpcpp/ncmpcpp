@@ -157,7 +157,7 @@ public:
 
 	virtual void setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset) {}
 	// get output data, returns (output, x_offset, y_offset)
-	virtual std::tuple<std::vector<uint8_t>, int, int> getOutput() { return {{}, 0, 0}; }
+	virtual std::tuple<std::vector<uint8_t>, int, int> takeOutput() { return {{}, 0, 0}; }
 };
 
 class UeberzugBackend : public ArtworkBackend
@@ -180,7 +180,7 @@ public:
 	KittyBackend(int fd) : pipefd_write(fd) {}
 	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset) override;
 	virtual void removeArtwork() override;
-	virtual std::tuple<std::vector<uint8_t>, int, int> getOutput() override;
+	virtual std::tuple<std::vector<uint8_t>, int, int> takeOutput() override;
 
 private:
 	std::vector<uint8_t> serializeGrCmd(std::map<std::string, std::string> cmd,

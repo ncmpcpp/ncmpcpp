@@ -160,7 +160,7 @@ void Artwork::drawToScreen()
 
 	std::vector<uint8_t> output;
 	int x_offset, y_offset;
-	std::tie(output, x_offset, y_offset) = backend->getOutput();
+	std::tie(output, x_offset, y_offset) = backend->takeOutput();
 	if (output.empty())
 	{
 		return;
@@ -296,7 +296,7 @@ void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int heig
 	try
 	{
 		// read and process artwork
-		Blob in_blob(orig_art_buffer.data(), orig_art_buffer.size() * sizeof(orig_art_buffer[0]));
+		const Blob in_blob(orig_art_buffer.data(), orig_art_buffer.size() * sizeof(orig_art_buffer[0]));
 		in_img.read(in_blob);
 		in_img.scale(out_geom);
 
@@ -409,7 +409,7 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 						Config.mpd_music_dir + dir + "/cover.tiff",
 						Config.mpd_music_dir + dir + "/cover.bmp",
 					};
-					auto it = std::find_if(
+					const auto it = std::find_if(
 							candidate_paths.begin(), candidate_paths.end(),
 							[](const std::string &s) { return 0 == access(s.c_str(), R_OK); });
 					if (it == candidate_paths.end())
@@ -472,9 +472,7 @@ std::vector<uint8_t> Artwork::worker_fetchArtwork(const std::string &uri, const 
 	}
 
 	// Get artwork
-	std::vector<uint8_t> buffer;
-	buffer = Mpd_artwork.GetArtwork(uri, cmd);
-	return buffer;
+	return Mpd_artwork.GetArtwork(uri, cmd);
 }
 
 void Artwork::worker()
@@ -540,6 +538,7 @@ void Artwork::worker()
 
 
 // UeberzugBackend
+// https://github.com/seebye/ueberzug
 
 boost::process::child UeberzugBackend::process;
 boost::process::opstream UeberzugBackend::stream;
@@ -605,6 +604,7 @@ void UeberzugBackend::stop()
 
 
 // KittyBackend
+// https://sw.kovidgoyal.net/kitty/graphics-protocol.html
 
 void KittyBackend::updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset)
 {
@@ -682,12 +682,12 @@ std::vector<uint8_t> KittyBackend::writeChunked(std::map<std::string, std::strin
 		}
 	}
 	cmd["m"] = "0";
-	auto final_chunk = serializeGrCmd(cmd, {}, 0, 0);
+	const auto final_chunk = serializeGrCmd(cmd, {}, 0, 0);
 	output.insert(output.end(), final_chunk.begin(), final_chunk.end());
 	return output;
 }
 
-std::tuple<std::vector<uint8_t>, int, int> KittyBackend::getOutput()
+std::tuple<std::vector<uint8_t>, int, int> KittyBackend::takeOutput()
 {
 	std::lock_guard<std::mutex> lck(worker_output_mtx);
 	std::tuple<std::vector<uint8_t>, int, int> ret;
@@ -704,7 +704,9 @@ void KittyBackend::setOutput(std::vector<uint8_t> buffer, int x_offset, int y_of
 		output_x_offset = x_offset;
 		output_y_offset = y_offset;
 	}
-	char dummy[2] = "x";
+
+	// write dummy character to self-pipe, wakes up main thread to write output
+	const char dummy[2] = "x";
 	write(pipefd_write, dummy, 1);
 }
 
