@@ -175,15 +175,18 @@
 #
 #albumart_sources = local, mpd_dir, mpd_embed
 #
+## Method to draw album artwork to terminal. One of "ueberzug", "kitty".
+#
+#albumart_backend = "ueberzug"
+#
 ## Fallback to this image if no album cover art is found in the music library.
 #
 #albumart_default_path = ""
 #
-## Passed directly to Ueberzug to configure how artwork fills the screen. One of
-## "crop", "distort", "fit_contain", "contain", "forced_cover", "cover". See the
-## Ueberzug documentation for full descriptions or updated scalers.
+## Alignment of album artwork within window. One of "N", "NE", "E", "SE", "S",
+## "SW", "W", "NW", "center".
 #
-#albumart_scaler = "fit_contain"
+#albumart_align = "center"
 #
 ##### system encoding #####
 ##
