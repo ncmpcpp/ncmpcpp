@@ -57,22 +57,23 @@ struct Artwork: Screen<NC::Window>, Tabbable
 
 	void drawToScreen();
 
-	static void removeArtwork(bool reset_artwork = false);
-	static void updateArtwork();
-	static void updateArtwork(std::string uri);
-	static void updatedVisibility();
+	void removeArtwork(bool reset_artwork = false);
+	void updateArtwork();
+	void updateArtwork(std::string uri);
+	void updatedVisibility();
 
 	static winsize getWinSize();
 
 	enum struct ArtBackend { UEBERZUG, KITTY };
 	enum struct ArtSource { LOCAL, MPD_ALBUMART, MPD_READPICTURE };
+	enum struct ArtAlign { N, NE, E, SE, S, SW, W, NW, CENTER };
 
-	static int pipefd_read;
+	int pipefd_read;
 
 private:
-
 	static void stop();
 
+	// worker thread methods
 	static void worker();
 	static void worker_updateArtBuffer(std::string path);
 	static void worker_drawArtwork(int x_offset, int y_offset, int width, int height);
@@ -83,15 +84,15 @@ private:
 	static std::vector<uint8_t> worker_fetchArtwork(const std::string &uri, const std::string &cmd);
 	static std::string worker_fetchLocalArtwork(const std::string &uri);
 
+	static std::thread t;  // worker thread
 	static std::vector<uint8_t> art_buffer;
 	static std::vector<uint8_t> orig_art_buffer;
-	static std::thread t;
 	static ArtworkBackend *backend;
 	static std::string prev_uri;
 	static bool drawn;
 	static bool before_inital_draw;
 
-	//
+	// store window dimensions
 	struct winsize_s {
 		size_t x_offset;
 		size_t y_offset;
@@ -112,7 +113,7 @@ private:
 		}
 	};
 	typedef winsize_s winsize_t;
-	static winsize_t prev_winsize;
+	winsize_t prev_winsize;
 
 	const static std::map<ArtSource, std::string> art_source_cmd_map;
 
@@ -137,7 +138,6 @@ private:
 	};
 
 	static std::vector<std::pair<WorkerOp, std::function<void()>>> worker_queue;
-
 };
 
 std::istream &operator>>(std::istream &is, Artwork::ArtSource &source);
@@ -147,25 +147,22 @@ class ArtworkBackend
 {
 public:
 	// draw artwork, path relative to mpd_music_dir, units in terminal characters
-	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset, int width, int height) = 0;
+	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset) = 0;
 
 	// clear artwork from screen
 	virtual void removeArtwork() = 0;
 
-	// use ImageMagick to process image
-	virtual bool postprocess() = 0;
-
-	virtual std::vector<uint8_t> getOutput() { return {}; }
-	virtual void setOutput(std::vector<uint8_t> buffer) {}
+	virtual void setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset) {}
+	// get output data, returns (output, x_offset, y_offset)
+	virtual std::tuple<std::vector<uint8_t>, int, int> getOutput() { return {{}, 0, 0}; }
 };
 
 class UeberzugBackend : public ArtworkBackend
 {
 public:
 	UeberzugBackend();
-	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset, int width, int height) override;
+	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset) override;
 	virtual void removeArtwork() override;
-	virtual bool postprocess() override;
 
 private:
 	static void stop();
@@ -178,20 +175,21 @@ class KittyBackend : public ArtworkBackend
 {
 public:
 	KittyBackend(int fd) : pipefd_write(fd) {}
-	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset, int width, int height) override;
+	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset) override;
 	virtual void removeArtwork() override;
-	virtual bool postprocess() override;
-	virtual std::vector<uint8_t> getOutput() override;
+	virtual std::tuple<std::vector<uint8_t>, int, int> getOutput() override;
 
 private:
 	std::vector<uint8_t> serializeGrCmd(std::map<std::string, std::string> cmd,
 			const std::vector<uint8_t> &payload, size_t chunk_begin,
 			size_t chunk_end);
-	void writeChunked(std::map<std::string, std::string> cmd,
+	std::vector<uint8_t> writeChunked(std::map<std::string, std::string> cmd,
 			const std::vector<uint8_t> &data);
-	virtual void setOutput(std::vector<uint8_t> buffer) override;
+	virtual void setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset) override;
 
 	std::vector<uint8_t> output;
+	int output_x_offset;
+	int output_y_offset;
 	int pipefd_write;
 };
 
