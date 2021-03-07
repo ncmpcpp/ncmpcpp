@@ -33,6 +33,9 @@
 
 class ArtworkBackend;
 
+namespace ArtworkHelper {
+	void drawToScreen();
+}
 
 struct Artwork: Screen<NC::Window>, Tabbable
 {
@@ -52,19 +55,27 @@ struct Artwork: Screen<NC::Window>, Tabbable
 	virtual bool isLockable() override { return true; }
 	virtual bool isMergable() override { return true; }
 
+	void drawToScreen();
+
 	static void removeArtwork(bool reset_artwork = false);
 	static void updateArtwork();
 	static void updateArtwork(std::string uri);
 	static void updatedVisibility();
 
+	static winsize getWinSize();
+
 	enum struct ArtBackend { UEBERZUG, KITTY };
 	enum struct ArtSource { LOCAL, MPD_ALBUMART, MPD_READPICTURE };
 
+	static int pipefd_read;
+
 private:
+
 	static void stop();
 
 	static void worker();
-	static void worker_drawArtwork(std::string path, int x_offset, int y_offset, int width, int height);
+	static void worker_updateArtBuffer(std::string path);
+	static void worker_drawArtwork(int x_offset, int y_offset, int width, int height);
 	static void worker_removeArtwork(bool reset_artwork = false);
 	static void worker_updateArtwork();
 	static void worker_updateArtwork(const std::string &uri);
@@ -72,14 +83,36 @@ private:
 	static std::vector<uint8_t> worker_fetchArtwork(const std::string &uri, const std::string &cmd);
 	static std::string worker_fetchLocalArtwork(const std::string &uri);
 
-	static std::string temp_file_name;
-	static std::ofstream temp_file;
+	static std::vector<uint8_t> art_buffer;
+	static std::vector<uint8_t> orig_art_buffer;
 	static std::thread t;
 	static ArtworkBackend *backend;
-	static std::string current_artwork_path;
 	static std::string prev_uri;
 	static bool drawn;
 	static bool before_inital_draw;
+
+	//
+	struct winsize_s {
+		size_t x_offset;
+		size_t y_offset;
+		size_t width;
+		size_t height;
+
+		bool operator==(const winsize_s& rhs)
+		{
+			return x_offset == rhs.x_offset &&
+				y_offset == rhs.y_offset &&
+				width == rhs.width &&
+				height == rhs.height;
+		}
+
+		bool operator!=(const winsize_s& rhs)
+		{
+			return !(*this == rhs);
+		}
+	};
+	typedef winsize_s winsize_t;
+	static winsize_t prev_winsize;
 
 	const static std::map<ArtSource, std::string> art_source_cmd_map;
 
@@ -104,6 +137,7 @@ private:
 	};
 
 	static std::vector<std::pair<WorkerOp, std::function<void()>>> worker_queue;
+
 };
 
 std::istream &operator>>(std::istream &is, Artwork::ArtSource &source);
@@ -112,33 +146,53 @@ std::istream &operator>>(std::istream &is, Artwork::ArtBackend &backend);
 class ArtworkBackend
 {
 public:
-	virtual void init() { }
-
 	// draw artwork, path relative to mpd_music_dir, units in terminal characters
-	virtual void updateArtwork(std::string path, int x_offset, int y_offset, int width, int height) = 0;
+	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset, int width, int height) = 0;
 
 	// clear artwork from screen
 	virtual void removeArtwork() = 0;
+
+	// use ImageMagick to process image
+	virtual bool postprocess() = 0;
+
+	virtual std::string getOutput() { return ""; }
+	virtual void setOutput(std::string str) {}
 };
 
 class UeberzugBackend : public ArtworkBackend
 {
 public:
-	virtual void init() override;
-	virtual void updateArtwork(std::string path, int x_offset, int y_offset, int width, int height) override;
+	UeberzugBackend();
+	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset, int width, int height) override;
 	virtual void removeArtwork() override;
+	virtual bool postprocess() override;
 
 private:
 	static void stop();
 	static boost::process::child process;
 	static boost::process::opstream stream;
+	static std::string temp_file_name;
 };
 
 class KittyBackend : public ArtworkBackend
 {
 public:
-	virtual void updateArtwork(std::string path, int x_offset, int y_offset, int width, int height) override;
+	KittyBackend(int fd) : pipefd_write(fd) {}
+	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset, int width, int height) override;
 	virtual void removeArtwork() override;
+	virtual bool postprocess() override;
+	virtual std::string getOutput() override;
+
+private:
+ std::string serializeGrCmd(std::map<std::string, std::string> cmd,
+			    const std::string &payload, size_t chunk_begin,
+			    size_t chunk_end);
+ void writeChunked(std::map<std::string, std::string> cmd,
+		   const std::vector<uint8_t> &data);
+ virtual void setOutput(std::string str) override;
+
+ std::string output;
+ int pipefd_write;
 };
 
 extern Artwork *myArtwork;

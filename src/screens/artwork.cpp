@@ -22,11 +22,12 @@
 
 #ifdef ENABLE_ARTWORK
 
+#include <Magick++.h>
 #include <unistd.h>
 
 #include <boost/filesystem.hpp>
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
 #include <sstream>
 
 #include "macro_utilities.h"
@@ -40,11 +41,10 @@ using Global::MainStartY;
 
 Artwork* myArtwork;
 
-std::string Artwork::temp_file_name;
-std::ofstream Artwork::temp_file;
+std::vector<uint8_t> Artwork::art_buffer;
+std::vector<uint8_t> Artwork::orig_art_buffer;
 std::thread Artwork::t;
 ArtworkBackend* Artwork::backend;
-std::string Artwork::current_artwork_path = "";
 std::string Artwork::prev_uri = "";
 bool Artwork::drawn = false;
 bool Artwork::before_inital_draw = true;
@@ -59,7 +59,12 @@ std::mutex Artwork::worker_mtx;
 std::chrono::time_point<std::chrono::steady_clock> Artwork::update_time;
 bool Artwork::worker_exit = false;
 std::vector<std::pair<Artwork::WorkerOp, std::function<void()>>> Artwork::worker_queue;
+int Artwork::pipefd_read;
+Artwork::winsize_t Artwork::prev_winsize;
 
+namespace {
+	std::mutex worker_output_mtx;
+}
 
 std::istream &operator>>(std::istream &is, Artwork::ArtSource &source)
 {
@@ -92,23 +97,59 @@ std::istream &operator>>(std::istream &is, Artwork::ArtBackend &backend)
 Artwork::Artwork()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
 {
-	namespace fs = boost::filesystem;
-	temp_file_name = (fs::temp_directory_path() / fs::unique_path()).string();
+	// ncurses doesn't play well with writing concurrently, set up a self-pipe
+	// so the worker thread can signal the main select() loop to print
+	int pipefd[2];
+	pipe(pipefd);
+	pipefd_read = pipefd[0];
 
+	// Initialize the selected albumart backend
 	switch (Config.albumart_backend)
 	{
 		case ArtBackend::UEBERZUG:
 			backend = new UeberzugBackend;
 			break;
 		case ArtBackend::KITTY:
-			backend = new KittyBackend;
+			backend = new KittyBackend(pipefd[1]);
 			break;
 	}
-	backend->init();
 
 	// Spawn worker thread
 	t = std::thread(worker);
 	std::atexit(stop);
+}
+
+// callback for the main select() loop, draws artwork on screen
+void ArtworkHelper::drawToScreen()
+{
+	myArtwork->drawToScreen();
+}
+
+void Artwork::drawToScreen()
+{
+	// consume data in self-pipe
+	const size_t BUF_SIZE = 100;
+	char buf[BUF_SIZE];
+	read(pipefd_read, buf, BUF_SIZE);
+
+	std::string output = backend->getOutput();
+	if (output.empty())
+	{
+		return;
+	}
+
+	size_t beg_y, beg_x;
+	getbegyx(w.raw(), beg_y, beg_x);
+
+	// save current cursor position
+	std::cout << "\0337";
+	// move cursor
+	std::cout << boost::format("\033[%1%;%2%H") % (beg_y) % (beg_x);
+	// write image data
+	std::cout << output;
+	// restore cursor position
+	std::cout << "\0338";
+	std::cout.flush();
 }
 
 void Artwork::resize()
@@ -117,7 +158,23 @@ void Artwork::resize()
 	getWindowResizeParams(x_offset, width);
 	w.resize(width, MainHeight);
 	w.moveTo(x_offset, MainStartY);
-	updateArtwork();
+	w.clear();
+	refreshWindow();
+	hasToBeResized = 0;
+
+	winsize_t cur_winsize =  {
+		x_offset,
+		MainStartY,
+		width,
+		MainHeight
+	};
+
+	if (cur_winsize != prev_winsize)
+	{
+		updateArtwork();
+	}
+
+	prev_winsize = cur_winsize;
 }
 
 void Artwork::switchTo()
@@ -128,6 +185,13 @@ void Artwork::switchTo()
 
 std::wstring Artwork::title() { return L"Artwork"; }
 
+winsize Artwork::getWinSize()
+{
+	struct winsize sz;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &sz);
+	return sz;
+}
+
 void Artwork::stop()
 {
 	{
@@ -135,7 +199,6 @@ void Artwork::stop()
 		worker_exit = true;
 	}
 	worker_cv.notify_all();
-	std::remove(temp_file_name.c_str());
 	t.join();
 }
 
@@ -182,12 +245,60 @@ void Artwork::updatedVisibility()
 
 // Worker thread methods
 
-void Artwork::worker_drawArtwork(std::string path, int x_offset, int y_offset, int width, int height)
+void Artwork::worker_updateArtBuffer(std::string path)
 {
-	backend->updateArtwork(path, x_offset, y_offset, width, height);
+	std::ifstream s(path, std::ios::in | std::ios::binary);
+	std::vector<uint8_t> tmp_buf((std::istreambuf_iterator<char>(s)), std::istreambuf_iterator<char>());
+	orig_art_buffer = std::move(tmp_buf);
+}
+
+void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int height)
+{
+	using namespace Magick;
+
+	if (backend->postprocess())
+	{
+		// retrieve and calculate terminal character size
+		auto sz = getWinSize();
+		auto char_xpixel = sz.ws_xpixel / sz.ws_col;
+		auto char_ypixel = sz.ws_ypixel / sz.ws_row;
+		auto pixel_width = char_xpixel * width;
+		auto pixel_height = char_ypixel * height;
+
+		auto out_geom = Geometry(pixel_width, pixel_height);
+		Image out_img(out_geom, "transparent");
+		Image in_img;
+		try
+		{
+			// read un-processed artwork
+			Blob in_blob(orig_art_buffer.data(), orig_art_buffer.size() * sizeof(orig_art_buffer[0]));
+			in_img.read(in_blob);
+
+			// composite artwork onto output image
+			in_img.scale(out_geom);
+			out_img.composite(in_img, CenterGravity, OverCompositeOp);
+			out_img.magick("RGBA");
+			out_img.depth(8);
+
+			// write output to buffer
+			Blob out_blob;
+			out_img.write(&out_blob);
+			art_buffer.resize(out_blob.length());
+			std::memcpy(art_buffer.data(), out_blob.data(), out_blob.length());
+		}
+		catch (Magick::Exception& e)
+		{
+			std::cerr << e.what() << std::endl;
+		}
+	}
+	else
+	{
+		art_buffer = orig_art_buffer;
+	}
+
+	backend->updateArtwork(art_buffer, x_offset, y_offset, width, height);
 	drawn = true;
 	before_inital_draw = false;
-	current_artwork_path = path;
 }
 
 void Artwork::worker_removeArtwork(bool reset_artwork)
@@ -196,30 +307,30 @@ void Artwork::worker_removeArtwork(bool reset_artwork)
 	drawn = false;
 	if (reset_artwork)
 	{
-		current_artwork_path = "";
+		art_buffer.clear();
 	}
 }
 
 void Artwork::worker_updateArtwork()
 {
-	if (current_artwork_path == "")
+	if (art_buffer.empty())
 		return;
 
 	size_t x_offset, width;
-	myArtwork->getWindowResizeParams(x_offset, width);
-	worker_drawArtwork(current_artwork_path, x_offset, MainStartY, width, MainHeight);
+	myArtwork->getWindowResizeParams(x_offset, width, false);
+	worker_drawArtwork(x_offset, MainStartY, width, MainHeight);
 }
 
 void Artwork::worker_updateArtwork(const std::string &uri)
 {
 	update_time = std::chrono::steady_clock::now();
 	size_t x_offset, width;
-	myArtwork->getWindowResizeParams(x_offset, width);
+	myArtwork->getWindowResizeParams(x_offset, width, false);
 
 	// Draw same file if uri is unchanged
 	if (prev_uri == uri)
 	{
-		worker_drawArtwork(temp_file_name, x_offset, MainStartY, width, MainHeight);
+		worker_drawArtwork(x_offset, MainStartY, width, MainHeight);
 		return;
 	}
 
@@ -243,32 +354,32 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 					if (it == candidate_paths.end())
 						continue;
 
+
 					// draw the image
-					worker_drawArtwork(*it, x_offset, MainStartY, width, MainHeight);
+					worker_updateArtBuffer(*it);
+					worker_drawArtwork(x_offset, MainStartY, width, MainHeight);
 					return;
 				}
 			case ArtSource::MPD_ALBUMART:
 			case ArtSource::MPD_READPICTURE:
 				{
 					const std::string &cmd = art_source_cmd_map.at(source);
-					auto buffer = worker_fetchArtwork(uri, cmd);
+					orig_art_buffer = worker_fetchArtwork(uri, cmd);
 
-					if (buffer.empty())
+					if (art_buffer.empty())
 						continue;
 
 					// Write artwork to a temporary file and draw
 					prev_uri = uri;
-					temp_file.open(temp_file_name, std::ios::trunc | std::ios::binary);
-					temp_file.write(reinterpret_cast<char *>(buffer.data()), buffer.size());
-					temp_file.close();
-					worker_drawArtwork(temp_file_name, x_offset, MainStartY, width, MainHeight);
+					worker_drawArtwork(x_offset, MainStartY, width, MainHeight);
 					return;
 				}
 		}
 	}
 
 	// Draw default artwork if MPD doesn't return anything
-	worker_drawArtwork(Config.albumart_default_path, x_offset, MainStartY, width, MainHeight);
+	worker_updateArtBuffer(Config.albumart_default_path);
+	worker_drawArtwork(x_offset, MainStartY, width, MainHeight);
 }
 
 void Artwork::worker_updatedVisibility()
@@ -285,7 +396,6 @@ void Artwork::worker_updatedVisibility()
 
 std::vector<uint8_t> Artwork::worker_fetchArtwork(const std::string &uri, const std::string &cmd)
 {
-
 	// Check if MPD connection is still alive
 	try
 	{
@@ -376,10 +486,14 @@ void Artwork::worker()
 
 boost::process::child UeberzugBackend::process;
 boost::process::opstream UeberzugBackend::stream;
+std::string UeberzugBackend::temp_file_name;
 
-void UeberzugBackend::init()
+UeberzugBackend::UeberzugBackend()
 {
 	namespace bp = boost::process;
+	namespace fs = boost::filesystem;
+
+	temp_file_name = (fs::temp_directory_path() / fs::unique_path()).string();
 
 	std::vector<std::string> args = {"layer", "--silent", "--parser", "json"};
 	try
@@ -390,10 +504,16 @@ void UeberzugBackend::init()
 	catch (const bp::process_error &e) {}
 }
 
-void UeberzugBackend::updateArtwork(std::string path, int x_offset, int y_offset, int width, int height)
+bool UeberzugBackend::postprocess() { return false; }
+
+void UeberzugBackend::updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset, int width, int height)
 {
 	if (!process.running())
 		return;
+
+	std::ofstream temp_file(temp_file_name, std::ios::trunc | std::ios::binary);
+	temp_file.write(reinterpret_cast<const char *>(buffer.data()), buffer.size());
+	temp_file.close();
 
 	boost::property_tree::ptree pt;
 	pt.put("action", "add");
@@ -402,7 +522,7 @@ void UeberzugBackend::updateArtwork(std::string path, int x_offset, int y_offset
 	pt.put("scaling_position_x", 0.5);
 	pt.put("scaling_position_y", 0.5);
 	pt.put("scaler", Config.albumart_scaler);
-	pt.put("path", path);
+	pt.put("path", temp_file_name);
 	pt.put("x", x_offset);
 	pt.put("y", y_offset);
 	pt.put("width", width);
@@ -427,6 +547,7 @@ void UeberzugBackend::removeArtwork()
 
 void UeberzugBackend::stop()
 {
+	std::remove(temp_file_name.c_str());
 	// close the underlying pipe, which causes ueberzug to exit
 	stream.pipe().close();
 	process.wait();
@@ -435,40 +556,97 @@ void UeberzugBackend::stop()
 
 // KittyBackend
 
-void KittyBackend::updateArtwork(std::string path, int x_offset, int y_offset, int width, int height)
+bool KittyBackend::postprocess() { return true; }
+
+void KittyBackend::updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset, int width, int height)
 {
-	namespace bp = boost::process;
+	const auto sz = Artwork::getWinSize();
+	const auto pixel_width = sz.ws_xpixel / sz.ws_col;
+	const auto pixel_height = sz.ws_ypixel / sz.ws_row;
 
-	removeArtwork();
+	std::map<std::string, std::string> cmd;
+	cmd["a"] = "T";   // transfer and display
+	cmd["f"] = "32";  // RGBA
+	cmd["s"] = std::to_string(width * pixel_width);
+	cmd["v"] = std::to_string(height * pixel_height);
+	cmd["i"] = "1";   // image ID
+	cmd["p"] = "1";   // placement ID
+	cmd["q"] = "1";   // suppress ouput
 
-	std::string place = (boost::format("%1%x%2%@%3%x%4%") %
-			width % height % x_offset % y_offset).str();
-	std::vector<std::string> args = {
-		"+kitten", "icat",
-		"--silent",
-		"--transfer-mode", "stream",
-		"--stdin", "no",
-		"--detection-timeout", "0",
-		"--place", place,
-		"--scale-up",
-		path,
-	};
-	bp::system(bp::search_path("kitty"), bp::args(args), bp::std_out > "/dev/null", bp::std_err > "/dev/null");
+	writeChunked(cmd, buffer);
 }
 
 void KittyBackend::removeArtwork()
 {
-	namespace bp = boost::process;
+	std::map<std::string, std::string> cmd;
+	cmd["a"] = "d";   // delete
+	cmd["i"] = "1";   // image ID
+	cmd["q"] = "1";   // suppress ouput
 
-	std::vector<std::string> args = {
-		"+kitten", "icat",
-		"--silent",
-		"--transfer-mode", "stream",
-		"--stdin", "no",
-		"--detection-timeout", "0",
-		"--clear",
-	};
-	bp::system(bp::search_path("kitty"), bp::args(args), bp::std_out > "/dev/null", bp::std_err > "/dev/null");
+	writeChunked(cmd, {});
+}
+
+std::string KittyBackend::serializeGrCmd(std::map<std::string, std::string> cmd,
+					 const std::string &payload,
+					 size_t chunk_begin, size_t chunk_end)
+{
+    std::string cmd_str;
+    for (auto const &it : cmd) {
+	cmd_str += it.first + "=" + it.second + ",";
+    }
+    if (!cmd_str.empty()) {
+	cmd_str.resize(cmd_str.size() - 1);
+    }
+
+    std::string ret;
+    ret += "\x1B_G" + cmd_str;
+    if (chunk_begin != chunk_end) {
+	ret += ";" + payload.substr(chunk_begin, chunk_end-chunk_begin);
+    }
+    ret += "\x1B\\";
+    return ret;
+}
+
+void KittyBackend::writeChunked(std::map<std::string, std::string> cmd, const std::vector<uint8_t>& data)
+{
+	using namespace Magick;
+
+	std::string str = "";
+
+	if (!data.empty())
+	{
+		Blob blob(data.data(), data.size() * sizeof(data[0]));
+		std::string b64_data = blob.base64();
+
+		const size_t CHUNK_SIZE = 4096;
+		for (size_t i = 0; i < b64_data.length(); i += CHUNK_SIZE)
+		{
+			cmd["m"] = "1";
+			str += serializeGrCmd(cmd, b64_data, i, i+CHUNK_SIZE);
+		}
+	}
+	cmd["m"] = "0";
+	str += serializeGrCmd(cmd, "", 0, 0);
+
+	setOutput(str);
+}
+
+std::string KittyBackend::getOutput()
+{
+	std::lock_guard<std::mutex> lck(worker_output_mtx);
+	std::string temp = output;
+	output.clear();
+	return temp;
+}
+
+void KittyBackend::setOutput(std::string str)
+{
+	{
+		std::lock_guard<std::mutex> lck(worker_output_mtx);
+		output = str;
+	}
+	char dummy[2] = "x";
+	write(pipefd_write, dummy, 1);
 }
 
 #endif // ENABLE_ARTWORK

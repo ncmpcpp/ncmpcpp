@@ -492,7 +492,7 @@ void Status::Changes::database()
 	myLibrary->requestSongsUpdate();
 }
 
-void Status::Changes::playerState()
+void Status::Changes::playerState(bool drawArtwork)
 {
 	if (!Config.execute_on_player_state_change.empty())
 	{
@@ -521,7 +521,10 @@ void Status::Changes::playerState()
 			{
 				drawTitle(np);
 #	ifdef ENABLE_ARTWORK
-				myArtwork->updateArtwork(np.getURI());
+				if (drawArtwork)
+				{
+					myArtwork->updateArtwork(np.getURI());
+				}
 #	endif // ENABLE_ARTWORK
       }
 			myPlaylist->reloadRemaining();
