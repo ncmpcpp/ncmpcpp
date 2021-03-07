@@ -237,7 +237,7 @@ void resizeScreen(bool reload_main_window)
 	applyToVisibleWindows(&BaseScreen::refresh);
 
 	Status::Changes::elapsedTime(false);
-	Status::Changes::playerState();
+	Status::Changes::playerState(false);
 	// Note: routines for drawing separator if alternative user
 	// interface is active and header is hidden are placed in
 	// NcmpcppStatusChanges.StatusFlags

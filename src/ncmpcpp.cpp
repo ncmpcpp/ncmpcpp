@@ -182,6 +182,8 @@ int main(int argc, char **argv)
 				Status::clear();
 				// clear mpd callback
 				wFooter->clearFDCallbacksList();
+				Global::wFooter->addFDCallback(myArtwork->pipefd_read, ArtworkHelper::drawToScreen);
+
 				try
 				{
 					Mpd.Connect();

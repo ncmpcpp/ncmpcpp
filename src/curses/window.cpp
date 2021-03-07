@@ -31,6 +31,7 @@
 #include "utility/string.h"
 #include "utility/wide_string.h"
 #include "window.h"
+#include "screens/artwork.h"
 
 namespace {
 
