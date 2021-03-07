@@ -155,8 +155,8 @@ public:
 	// use ImageMagick to process image
 	virtual bool postprocess() = 0;
 
-	virtual std::string getOutput() { return ""; }
-	virtual void setOutput(std::string str) {}
+	virtual std::vector<uint8_t> getOutput() { return {}; }
+	virtual void setOutput(std::vector<uint8_t> buffer) {}
 };
 
 class UeberzugBackend : public ArtworkBackend
@@ -181,18 +181,18 @@ public:
 	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset, int width, int height) override;
 	virtual void removeArtwork() override;
 	virtual bool postprocess() override;
-	virtual std::string getOutput() override;
+	virtual std::vector<uint8_t> getOutput() override;
 
 private:
- std::string serializeGrCmd(std::map<std::string, std::string> cmd,
-			    const std::string &payload, size_t chunk_begin,
-			    size_t chunk_end);
- void writeChunked(std::map<std::string, std::string> cmd,
-		   const std::vector<uint8_t> &data);
- virtual void setOutput(std::string str) override;
+	std::vector<uint8_t> serializeGrCmd(std::map<std::string, std::string> cmd,
+			const std::vector<uint8_t> &payload, size_t chunk_begin,
+			size_t chunk_end);
+	void writeChunked(std::map<std::string, std::string> cmd,
+			const std::vector<uint8_t> &data);
+	virtual void setOutput(std::vector<uint8_t> buffer) override;
 
- std::string output;
- int pipefd_write;
+	std::vector<uint8_t> output;
+	int pipefd_write;
 };
 
 extern Artwork *myArtwork;
