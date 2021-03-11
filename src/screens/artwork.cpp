@@ -426,7 +426,7 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 					const std::string &cmd = art_source_cmd_map.at(source);
 					orig_art_buffer = worker_fetchArtwork(uri, cmd);
 
-					if (art_buffer.empty())
+					if (orig_art_buffer.empty())
 						continue;
 
 					// Write artwork to a temporary file and draw
