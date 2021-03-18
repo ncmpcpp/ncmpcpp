@@ -83,7 +83,9 @@ Visualizer::Visualizer()
   HZ_MIN(Config.visualizer_spectrum_hz_min),
   HZ_MAX(Config.visualizer_spectrum_hz_max),
   GAIN(Config.visualizer_spectrum_gain),
-  SMOOTH_CHARS(ToWString("▁▂▃▄▅▆▇█"))
+  SMOOTH_CHARS(ToWString("▁▂▃▄▅▆▇█")),
+  LOG_SCALE_X(Config.visualizer_spectrum_log_scale_x),
+  LOG_SCALE_Y(Config.visualizer_spectrum_log_scale_y)
 #endif
 {
 	InitDataSource();
@@ -95,7 +97,7 @@ Visualizer::Visualizer()
 	memset(m_fftw_input, 0, sizeof(double)*DFT_TOTAL_SIZE);
 	m_fftw_output = static_cast<fftw_complex *>(fftw_malloc(sizeof(fftw_complex)*m_fftw_results));
 	m_fftw_plan = fftw_plan_dft_r2c_1d(DFT_TOTAL_SIZE, m_fftw_input, m_fftw_output, FFTW_ESTIMATE);
-	m_dft_logspace.reserve(500);
+    m_dft_freqspace.reserve(500);
 	m_bar_heights.reserve(100);
 #	endif // HAVE_FFTW3_H
 }
@@ -107,7 +109,7 @@ void Visualizer::switchTo()
 	m_reset_output = true;
 	drawHeader();
 #	ifdef HAVE_FFTW3_H
-	GenLogspace();
+    GenFreqSpace();
 	m_bar_heights.reserve(w.getWidth());
 #	endif // HAVE_FFTW3_H
 }
@@ -121,7 +123,7 @@ void Visualizer::resize()
 	hasToBeResized = 0;
 	InitVisualization();
 #	ifdef HAVE_FFTW3_H
-	GenLogspace();
+    GenFreqSpace();
 	m_bar_heights.reserve(w.getWidth());
 #	endif // HAVE_FFTW3_H
 }
@@ -449,7 +451,7 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 	const size_t win_width = w.getWidth();
 
 	size_t cur_bin = 0;
-	while (cur_bin < m_fftw_results && Bin2Hz(cur_bin) < m_dft_logspace[0])
+	while (cur_bin < m_fftw_results && Bin2Hz(cur_bin) < m_dft_freqspace[0])
 		++cur_bin;
 	for (size_t x = 0; x < win_width; ++x)
 	{
@@ -458,10 +460,10 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 		// accumulate bins
 		size_t count = 0;
 		// check right bound
-		while (cur_bin < m_fftw_results && Bin2Hz(cur_bin) < m_dft_logspace[x])
+		while (cur_bin < m_fftw_results && Bin2Hz(cur_bin) < m_dft_freqspace[x])
 		{
 			// check left bound if not first index
-			if (x == 0 || Bin2Hz(cur_bin) >= m_dft_logspace[x-1])
+			if (x == 0 || Bin2Hz(cur_bin) >= m_dft_freqspace[x-1])
 			{
 				bar_height += m_freq_magnitudes[cur_bin];
 				++count;
@@ -475,8 +477,19 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 		// average bins
 		bar_height /= count;
 
-		// log scale bar heights
-		bar_height = (20 * log10(bar_height) + DYNAMIC_RANGE + GAIN) / DYNAMIC_RANGE;
+        // apply scaling to bar heights
+        if (LOG_SCALE_Y) {
+            bar_height = (20 * log10(bar_height) + DYNAMIC_RANGE + GAIN) / DYNAMIC_RANGE;
+        } else {
+            // apply gain
+            bar_height *= pow(10, 1.8 + GAIN / 20);
+            // buff higher frequencies
+            bar_height *= log2(2 + x) * 80.0/win_width;
+            // moderately normalize the heights
+            bar_height = pow(bar_height, 0.65);
+
+            //bar_height = pow(10, 1 + GAIN / 20) * bar_height;
+        }
 		// Scale bar height between 0 and height
 		bar_height = bar_height > 0 ? bar_height * height : 0;
 		bar_height = bar_height > height ? height : bar_height;
@@ -498,7 +511,11 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 				++h_idx;
 		} else {
 			// data point does not exist, need to interpolate
-			h = Interpolate(x, h_idx);
+            if (LOG_SCALE_Y) {
+                h = Interpolate(x, h_idx);
+            } else {
+                h = 0;
+            }
 		}
 
 		for (size_t j = 0; j < h; ++j)
@@ -617,11 +634,36 @@ void Visualizer::GenLogspace()
 	const size_t win_width = w.getWidth();
 	const size_t left_bins = (log10(HZ_MIN) - win_width*log10(HZ_MIN)) / (log10(HZ_MIN) - log10(HZ_MAX));
 	// Generate logspaced frequencies
-	m_dft_logspace.resize(win_width);
-	const double log_scale = log10(HZ_MAX) / (left_bins + m_dft_logspace.size() - 1);
-	for (size_t i = left_bins; i < m_dft_logspace.size() + left_bins; ++i) {
-		m_dft_logspace[i - left_bins] = pow(10, i * log_scale);
+	m_dft_freqspace.resize(win_width);
+	const double log_scale = log10(HZ_MAX) / (left_bins + m_dft_freqspace.size() - 1);
+	for (size_t i = left_bins; i < m_dft_freqspace.size() + left_bins; ++i) {
+		m_dft_freqspace[i - left_bins] = pow(10, i * log_scale);
 	}
+}
+
+// Generate vector of linearly-spaced frequencies from HZ_MIN to HZ_MAX
+void Visualizer::GenLinspace()
+{
+    // Calculate number of extra bins needed between 0 HZ and HZ_MIN
+    const size_t win_width = w.getWidth();
+    const size_t left_bins = (HZ_MIN - win_width * HZ_MIN) / (HZ_MIN - HZ_MAX);
+    // Generate linspaced frequencies
+    m_dft_freqspace.resize(win_width);
+    const double lin_scale = HZ_MAX / (left_bins + m_dft_freqspace.size() - 1);
+    for (size_t i = left_bins; i < m_dft_freqspace.size() + left_bins; ++i) {
+        m_dft_freqspace[i - left_bins] = i * lin_scale;
+    }
+}
+
+// Generate vector of spectrum frequencies from HZ_MIN to HZ_MAX
+// Frequencies are (not) log-scaled depending on LOG_SCALE_X
+void Visualizer::GenFreqSpace()
+{
+    if (LOG_SCALE_X) {
+        GenLogspace();
+    } else {
+        GenLinspace();
+    }
 }
 #endif // HAVE_FFTW3_H
 

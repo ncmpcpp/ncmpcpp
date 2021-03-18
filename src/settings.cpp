@@ -277,6 +277,8 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			lowerBoundCheck<double>(result, Config.visualizer_spectrum_hz_min+1);
 			return result;
 			});
+    p.add("visualizer_spectrum_log_scale_x", &visualizer_spectrum_log_scale_x, "no", yes_no);
+    p.add("visualizer_spectrum_log_scale_y", &visualizer_spectrum_log_scale_y, "no", yes_no);
 	p.add("visualizer_color", &visualizer_colors,
 	      "blue, cyan, green, yellow, magenta, red", list_of<NC::FormattedColor>);
 	p.add("system_encoding", &system_encoding, "", [](std::string encoding) {
