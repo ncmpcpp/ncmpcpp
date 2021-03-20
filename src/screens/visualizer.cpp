@@ -422,7 +422,7 @@ void Visualizer::DrawSoundEllipseStereo(const int16_t *buf_left, const int16_t *
 		auto c = toColor(sqrt(x*x + 4*y*y), radius, true);
 		w << NC::XY(left_half_width + x, top_half_height + y)
 		  << c
-		  << Config.visualizer_chars[1]
+		  << Config.visualizer_chars[0]
 		  << NC::FormattedColor::End<>(c);
 	}
 }
