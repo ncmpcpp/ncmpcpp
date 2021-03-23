@@ -511,7 +511,7 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 				++h_idx;
 		} else {
 			// data point does not exist, need to interpolate
-            if (LOG_SCALE_Y) {
+            if (LOG_SCALE_X) {
                 h = Interpolate(x, h_idx);
             } else {
                 h = 0;
