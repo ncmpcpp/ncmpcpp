@@ -83,7 +83,8 @@ Visualizer::Visualizer()
   HZ_MIN(Config.visualizer_spectrum_hz_min),
   HZ_MAX(Config.visualizer_spectrum_hz_max),
   GAIN(Config.visualizer_spectrum_gain),
-  SMOOTH_CHARS(ToWString("▁▂▃▄▅▆▇█"))
+  SMOOTH_CHARS(ToWString(        "▁▂▃▄▅▆▇█")),
+  SMOOTH_CHARS_FLIPPED(ToWString("▔🮂🮃🮄🬎🮅🮆█")) // https://unicode.org/charts/PDF/U1FB00.pdf
 #endif
 {
 	InitDataSource();
@@ -518,8 +519,7 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 				} else {
 					// fractional height
 					if (flipped) {
-						ch = SMOOTH_CHARS[size-idx-2];
-						color = NC::FormattedColor(color.color(), {NC::Format::Reverse});
+						ch = SMOOTH_CHARS_FLIPPED[idx];
 					} else {
 						ch = SMOOTH_CHARS[idx];
 					}
