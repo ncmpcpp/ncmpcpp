@@ -49,10 +49,10 @@
 ## the relevant section for mpd.conf:
 ##
 ## audio_output {
-##        type            "fifo"
-##        name            "Visualizer feed"
-##        path            "/tmp/mpd.fifo"
-##        format          "44100:16:2"
+##		type			"fifo"
+##		name			"Visualizer feed"
+##		path			"/tmp/mpd.fifo"
+##		format		  "44100:16:2"
 ## }
 ##
 ## If the visualization on occasion diverges from the audio output, please set
@@ -64,8 +64,8 @@
 ##
 ## [audio]
 ## output = tee name=t ! queue ! autoaudiosink t.
-##        ! queue ! audio/x-raw,rate=44100,channels=2,format=S16LE
-##        ! udpsink host=localhost port=5555
+##		! queue ! audio/x-raw,rate=44100,channels=2,format=S16LE
+##		! udpsink host=localhost port=5555
 ##
 ## will make localhost:5555 available as a source of data for the stereo
 ## visualizer.
@@ -143,8 +143,8 @@
 #
 ## Use log scaling for the frequency spectrum axes
 #
-#visualizer_spectrum_log_scale_x = no
-#visualizer_spectrum_log_scale_y = no
+#visualizer_spectrum_log_scale_x = yes
+#visualizer_spectrum_log_scale_y = yes
 #
 ##### system encoding #####
 ##
@@ -540,11 +540,11 @@
 ## - 1 - use mpd built-in searching (no regexes, pattern matching)
 ##
 ## - 2 - use ncmpcpp searching (pattern matching with support for regexes, but
-##       if your mpd is on a remote machine, downloading big database to process
-##       it can take a while
+##	   if your mpd is on a remote machine, downloading big database to process
+##	   it can take a while
 ##
 ## - 3 - match only exact values (this mode uses mpd function for searching in
-##       database and local one for searching in current playlist)
+##	   database and local one for searching in current playlist)
 ##
 #
 #search_engine_default_search_mode = 1

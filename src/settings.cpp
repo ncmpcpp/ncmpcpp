@@ -180,8 +180,8 @@ NC::Buffer buffer(const std::string &v)
 }
 
 NC::Buffer buffer_wlength(const NC::Buffer *target,
-                          size_t &wlength,
-                          const std::string &v)
+						  size_t &wlength,
+						  const std::string &v)
 {
 	// Compatibility layer between highlight color and new highlight prefix and
 	// suffix. Basically, for older configurations if highlight color is provided,
@@ -197,11 +197,11 @@ NC::Buffer buffer_wlength(const NC::Buffer *target,
 }
 
 void deprecated(const char *option, const char *version_removal,
-                const std::string &advice)
+				const std::string &advice)
 {
 	std::cerr << "WARNING: Variable '" << option
-	          << "' is deprecated and will be removed in "
-	          << version_removal;
+			  << "' is deprecated and will be removed in "
+			  << version_removal;
 	if (!advice.empty())
 		std::cerr << " (" << advice << ")";
 	std::cerr << ".\n";
@@ -235,9 +235,9 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("visualizer_in_stereo", &visualizer_in_stereo, "yes", yes_no);
 	p.add("visualizer_type", &visualizer_type,
 #ifdef HAVE_FFTW3_H
-	      "spectrum"
+		  "spectrum"
 #else
-	      "ellipse"
+		  "ellipse"
 #endif
 		);
 	p.add("visualizer_look", &visualizer_chars, "●▮", [](std::string s) {
@@ -277,10 +277,10 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			lowerBoundCheck<double>(result, Config.visualizer_spectrum_hz_min+1);
 			return result;
 			});
-    p.add("visualizer_spectrum_log_scale_x", &visualizer_spectrum_log_scale_x, "no", yes_no);
-    p.add("visualizer_spectrum_log_scale_y", &visualizer_spectrum_log_scale_y, "no", yes_no);
+	p.add("visualizer_spectrum_log_scale_x", &visualizer_spectrum_log_scale_x, "yes", yes_no);
+	p.add("visualizer_spectrum_log_scale_y", &visualizer_spectrum_log_scale_y, "yes", yes_no);
 	p.add("visualizer_color", &visualizer_colors,
-	      "blue, cyan, green, yellow, magenta, red", list_of<NC::FormattedColor>);
+		  "blue, cyan, green, yellow, magenta, red", list_of<NC::FormattedColor>);
 	p.add("system_encoding", &system_encoding, "", [](std::string encoding) {
 #ifdef HAVE_LANGINFO_H
 			// try to autodetect system encoding
@@ -294,106 +294,106 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			return encoding;
 		});
 	p.add("playlist_disable_highlight_delay", &playlist_disable_highlight_delay,
-	      "5", [](std::string v) {
-		      return boost::posix_time::seconds(verbose_lexical_cast<unsigned>(v));
-	      });
+		  "5", [](std::string v) {
+			  return boost::posix_time::seconds(verbose_lexical_cast<unsigned>(v));
+		  });
 	p.add("message_delay_time", &message_delay_time, "5");
 	p.add("song_list_format", &song_list_format,
-	      "{%a - }{%t}|{$8%f$9}$R{$3%l$9}", [](std::string v) {
-		      return Format::parse(v);
-	      });
+		  "{%a - }{%t}|{$8%f$9}$R{$3%l$9}", [](std::string v) {
+			  return Format::parse(v);
+		  });
 	p.add("song_status_format", &song_status_format,
-	      "{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}", [this](std::string v) {
-		      auto flags = Format::Flags::All ^ Format::Flags::OutputSwitch;
-		      // precompute wide format for status display
-		      song_status_wformat = Format::parse(ToWString(v), flags);
-		      return Format::parse(v, flags);
+		  "{{%a{ \"%b\"{ (%y)}} - }{%t}}|{%f}", [this](std::string v) {
+			  auto flags = Format::Flags::All ^ Format::Flags::OutputSwitch;
+			  // precompute wide format for status display
+			  song_status_wformat = Format::parse(ToWString(v), flags);
+			  return Format::parse(v, flags);
 	});
 	p.add("song_library_format", &song_library_format,
-	      "{%n - }{%t}|{%f}", [](std::string v) {
-		      return Format::parse(v);
-	      });
+		  "{%n - }{%t}|{%f}", [](std::string v) {
+			  return Format::parse(v);
+		  });
 	p.add("alternative_header_first_line_format", &new_header_first_line,
-	      "$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b", [](std::string v) {
-		      return Format::parse(ToWString(std::move(v)),
-		                           Format::Flags::All ^ Format::Flags::OutputSwitch);
+		  "$b$1$aqqu$/a$9 {%t}|{%f} $1$atqq$/a$9$/b", [](std::string v) {
+			  return Format::parse(ToWString(std::move(v)),
+								   Format::Flags::All ^ Format::Flags::OutputSwitch);
 	});
 	p.add("alternative_header_second_line_format", &new_header_second_line,
-	      "{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}", [](std::string v) {
-		      return Format::parse(ToWString(std::move(v)),
-		                           Format::Flags::All ^ Format::Flags::OutputSwitch);
+		  "{{$4$b%a$/b$9}{ - $7%b$9}{ ($4%y$9)}}|{%D}", [](std::string v) {
+			  return Format::parse(ToWString(std::move(v)),
+								   Format::Flags::All ^ Format::Flags::OutputSwitch);
 	});
 	p.add("current_item_prefix", &current_item_prefix, "$(yellow)$r",
-	      std::bind(buffer_wlength,
-	                &current_item_prefix,
-	                std::ref(current_item_prefix_length),
-	                ph::_1));
+		  std::bind(buffer_wlength,
+					&current_item_prefix,
+					std::ref(current_item_prefix_length),
+					ph::_1));
 	p.add("current_item_suffix", &current_item_suffix, "$/r$(end)",
-	      std::bind(buffer_wlength,
-	                &current_item_suffix,
-	                std::ref(current_item_suffix_length),
-	                ph::_1));
+		  std::bind(buffer_wlength,
+					&current_item_suffix,
+					std::ref(current_item_suffix_length),
+					ph::_1));
 	p.add("current_item_inactive_column_prefix", &current_item_inactive_column_prefix,
-	      "$(white)$r",
-	      std::bind(buffer_wlength,
-	                &current_item_inactive_column_prefix,
-	                std::ref(current_item_inactive_column_prefix_length),
-	                ph::_1));
+		  "$(white)$r",
+		  std::bind(buffer_wlength,
+					&current_item_inactive_column_prefix,
+					std::ref(current_item_inactive_column_prefix_length),
+					ph::_1));
 	p.add("current_item_inactive_column_suffix", &current_item_inactive_column_suffix,
-	      "$/r$(end)",
-	      std::bind(buffer_wlength,
-	                &current_item_inactive_column_suffix,
-	                std::ref(current_item_inactive_column_suffix_length),
-	                ph::_1));
+		  "$/r$(end)",
+		  std::bind(buffer_wlength,
+					&current_item_inactive_column_suffix,
+					std::ref(current_item_inactive_column_suffix_length),
+					ph::_1));
 	p.add("now_playing_prefix", &now_playing_prefix, "$b",
-	      std::bind(buffer_wlength,
-	                nullptr,
-	                std::ref(now_playing_prefix_length),
-	                ph::_1));
+		  std::bind(buffer_wlength,
+					nullptr,
+					std::ref(now_playing_prefix_length),
+					ph::_1));
 	p.add("now_playing_suffix", &now_playing_suffix, "$/b",
-	      std::bind(buffer_wlength,
-	                nullptr,
-	                std::ref(now_playing_suffix_length),
-	                ph::_1));
+		  std::bind(buffer_wlength,
+					nullptr,
+					std::ref(now_playing_suffix_length),
+					ph::_1));
 	p.add("browser_playlist_prefix", &browser_playlist_prefix, "$2playlist$9 ", buffer);
 	p.add("selected_item_prefix", &selected_item_prefix, "$6",
-	      std::bind(buffer_wlength,
-	                nullptr,
-	                std::ref(selected_item_prefix_length),
-	                ph::_1));
+		  std::bind(buffer_wlength,
+					nullptr,
+					std::ref(selected_item_prefix_length),
+					ph::_1));
 	p.add("selected_item_suffix", &selected_item_suffix, "$9",
-	      std::bind(buffer_wlength,
-	                nullptr,
-	                std::ref(selected_item_suffix_length),
-	                ph::_1));
+		  std::bind(buffer_wlength,
+					nullptr,
+					std::ref(selected_item_suffix_length),
+					ph::_1));
 	p.add("modified_item_prefix", &modified_item_prefix, "$3>$9 ", buffer);
 	p.add("song_window_title_format", &song_window_title_format,
-	      "{%a - }{%t}|{%f}", [](std::string v) {
-		      return Format::parse(v, Format::Flags::Tag);
-	      });
+		  "{%a - }{%t}|{%f}", [](std::string v) {
+			  return Format::parse(v, Format::Flags::Tag);
+		  });
 	p.add("browser_sort_mode", &browser_sort_mode, "type", [](std::string v) {
 		if (v == "noop")
 		{
 			deprecated("browser_sort_mode = 'noop'",
-			           "0.10",
-			           "use 'none' instead");
+					   "0.10",
+					   "use 'none' instead");
 			v = "none";
 		}
 		return verbose_lexical_cast<SortMode>(v);
 	});
 	p.add("browser_sort_format", &browser_sort_format,
-	      "{%a - }{%t}|{%f} {%l}", [](std::string v) {
-		      return Format::parse(v, Format::Flags::Tag);
-	      });
+		  "{%a - }{%t}|{%f} {%l}", [](std::string v) {
+			  return Format::parse(v, Format::Flags::Tag);
+		  });
 	p.add("song_columns_list_format", &song_columns_mode_format,
-	      "(20)[]{a} (6f)[green]{NE} (50)[white]{t|f:Title} (20)[cyan]{b} (7f)[magenta]{l}",
-	      [this](std::string v) {
-		      columns = generate_columns(v);
-		      return columns_to_format(columns);
-	      });
+		  "(20)[]{a} (6f)[green]{NE} (50)[white]{t|f:Title} (20)[cyan]{b} (7f)[magenta]{l}",
+		  [this](std::string v) {
+			  columns = generate_columns(v);
+			  return columns_to_format(columns);
+		  });
 	p.add("execute_on_song_change", &execute_on_song_change, "", adjust_path);
 	p.add("execute_on_player_state_change", &execute_on_player_state_change,
-	      "", adjust_path);
+		  "", adjust_path);
 	p.add("playlist_show_mpd_host", &playlist_show_mpd_host, "no", yes_no);
 	p.add("playlist_show_remaining_time", &playlist_show_remaining_time, "no", yes_no);
 	p.add("playlist_shorten_total_times", &playlist_shorten_total_times, "no", yes_no);
@@ -403,7 +403,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("search_engine_display_mode", &search_engine_display_mode, "classic");
 	p.add("playlist_editor_display_mode", &playlist_editor_display_mode, "classic");
 	p.add("discard_colors_if_item_is_selected", &discard_colors_if_item_is_selected,
-	      "yes", yes_no);
+		  "yes", yes_no);
 	p.add("show_duplicate_tags", &MPD::Song::ShowDuplicateTags, "yes", yes_no);
 	p.add("incremental_seeking", &incremental_seeking, "yes", yes_no);
 	p.add("seek_time", &seek_time, "1");
@@ -480,16 +480,16 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	      });
 	p.add("follow_now_playing_lyrics", &now_playing_lyrics, "no", yes_no);
 	p.add("fetch_lyrics_for_current_song_in_background", &fetch_lyrics_in_background,
-	      "no", yes_no);
+		  "no", yes_no);
 	p.add("store_lyrics_in_song_dir", &store_lyrics_in_song_dir, "no", yes_no);
 	p.add("generate_win32_compatible_filenames", &generate_win32_compatible_filenames,
-	      "yes", yes_no);
+		  "yes", yes_no);
 	p.add("allow_for_physical_item_deletion", &allow_for_physical_item_deletion,
-	      "no", yes_no);
+		  "no", yes_no);
 	p.add("lastfm_preferred_language", &lastfm_preferred_language, "en");
 	p.add("space_add_mode", &space_add_mode, "add_remove");
 	p.add("show_hidden_files_in_local_browser", &local_browser_show_hidden_files,
-	      "no", yes_no);
+		  "no", yes_no);
 	p.add<void>(
 		"screen_switcher_mode", nullptr, "playlist, browser",
 		[this](std::string v) {
@@ -524,9 +524,9 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 		});
 	p.add("startup_slave_screen_focus", &startup_slave_screen_focus, "no", yes_no);
 	p.add("locked_screen_width_part", &locked_screen_width_part,
-	      "50", [](std::string v) {
-		      return verbose_lexical_cast<double>(v) / 100;
-	      });
+		  "50", [](std::string v) {
+			  return verbose_lexical_cast<double>(v) / 100;
+		  });
 	p.add("ask_for_locked_screen_width_part", &ask_for_locked_screen_width_part,
 	      "yes", yes_no);
 	p.add("media_library_column_width_ratio_two", &media_library_column_width_ratio_two,
@@ -536,11 +536,11 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("playlist_editor_column_width_ratio", &playlist_editor_column_width_ratio,
 			"1:2", std::bind(parse_ratio, ph::_1, 2));
 	p.add("jump_to_now_playing_song_at_start", &jump_to_now_playing_song_at_start,
-	      "yes", yes_no);
+		  "yes", yes_no);
 	p.add("ask_before_clearing_playlists", &ask_before_clearing_playlists,
-	      "yes", yes_no);
+		  "yes", yes_no);
 	p.add("ask_before_shuffling_playlists", &ask_before_shuffling_playlists,
-	      "yes", yes_no);
+		  "yes", yes_no);
 	p.add("clock_display_seconds", &clock_display_seconds, "no", yes_no);
 	p.add("display_volume_level", &display_volume_level, "yes", yes_no);
 	p.add("display_bitrate", &display_bitrate, "no", yes_no);
@@ -561,7 +561,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("ignore_leading_the", &ignore_leading_the, "no", yes_no);
 	p.add("ignore_diacritics", &ignore_diacritics, "no", yes_no);
 	p.add("block_search_constraints_change_if_items_found",
-	      &block_search_constraints_change, "yes", yes_no);
+		  &block_search_constraints_change, "yes", yes_no);
 	p.add("mouse_support", &mouse_support, "yes", yes_no);
 	p.add("mouse_list_scroll_whole_page", &mouse_list_scroll_whole_page, "no", yes_no);
 	p.add("lines_scrolled", &lines_scrolled, "5");
@@ -574,8 +574,8 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			// in emacs terminal nor tty (through any wrapper like screen).
 			auto term = getenv("TERM");
 			if (term != nullptr
-			    && strstr(term, "linux") == nullptr
-			    && strncmp(term, "eterm", const_strlen("eterm")))
+				&& strstr(term, "linux") == nullptr
+				&& strncmp(term, "eterm", const_strlen("eterm")))
 				return yes_no(v);
 			else
 			{
@@ -584,11 +584,11 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			}
 		});
 	p.add("search_engine_default_search_mode", &search_engine_default_search_mode,
-	      "1", [](std::string v) {
-		      auto mode = verbose_lexical_cast<unsigned>(v);
-		      boundsCheck<unsigned>(mode, 1, 3);
-		      return --mode;
-	      });
+		  "1", [](std::string v) {
+			  auto mode = verbose_lexical_cast<unsigned>(v);
+			  boundsCheck<unsigned>(mode, 1, 3);
+			  return --mode;
+		  });
 	p.add("external_editor", &external_editor, "nano", adjust_path);
 	p.add("use_console_editor", &use_console_editor, "yes", yes_no);
 	p.add("colors_enabled", &colors_enabled, "yes", yes_no);
@@ -608,7 +608,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("alternative_ui_separator_color", &alternative_ui_separator_color, "black:b");
 	p.add("window_border_color", &window_border, "green", verbose_lexical_cast<NC::Color>);
 	p.add("active_window_border", &active_window_border, "red",
-	      verbose_lexical_cast<NC::Color>);
+		  verbose_lexical_cast<NC::Color>);
 
 	return std::all_of(
 		config_paths.begin(),

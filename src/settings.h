@@ -90,8 +90,8 @@ struct Configuration
 	double visualizer_spectrum_gain;
 	double visualizer_spectrum_hz_min;
 	double visualizer_spectrum_hz_max;
-    bool visualizer_spectrum_log_scale_x;
-    bool visualizer_spectrum_log_scale_y;
+	bool visualizer_spectrum_log_scale_x;
+	bool visualizer_spectrum_log_scale_y;
 
 	std::string pattern;
 
