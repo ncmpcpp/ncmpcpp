@@ -113,8 +113,6 @@ private:
 	const double DYNAMIC_RANGE;
 	const double HZ_MIN;
 	const double HZ_MAX;
-	const bool LOG_SCALE_X;
-	const bool LOG_SCALE_Y;
 	const double GAIN;
 	const std::wstring SMOOTH_CHARS;
 	std::vector<double> m_dft_freqspace;

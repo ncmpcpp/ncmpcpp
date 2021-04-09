@@ -83,9 +83,7 @@ Visualizer::Visualizer()
   HZ_MIN(Config.visualizer_spectrum_hz_min),
   HZ_MAX(Config.visualizer_spectrum_hz_max),
   GAIN(Config.visualizer_spectrum_gain),
-  SMOOTH_CHARS(ToWString("▁▂▃▄▅▆▇█")),
-  LOG_SCALE_X(Config.visualizer_spectrum_log_scale_x),
-  LOG_SCALE_Y(Config.visualizer_spectrum_log_scale_y)
+  SMOOTH_CHARS(ToWString("▁▂▃▄▅▆▇█"))
 #endif
 {
 	InitDataSource();
@@ -97,7 +95,7 @@ Visualizer::Visualizer()
 	memset(m_fftw_input, 0, sizeof(double)*DFT_TOTAL_SIZE);
 	m_fftw_output = static_cast<fftw_complex *>(fftw_malloc(sizeof(fftw_complex)*m_fftw_results));
 	m_fftw_plan = fftw_plan_dft_r2c_1d(DFT_TOTAL_SIZE, m_fftw_input, m_fftw_output, FFTW_ESTIMATE);
-    m_dft_freqspace.reserve(500);
+	m_dft_freqspace.reserve(500);
 	m_bar_heights.reserve(100);
 #	endif // HAVE_FFTW3_H
 }
@@ -109,7 +107,7 @@ void Visualizer::switchTo()
 	m_reset_output = true;
 	drawHeader();
 #	ifdef HAVE_FFTW3_H
-    GenFreqSpace();
+	GenFreqSpace();
 	m_bar_heights.reserve(w.getWidth());
 #	endif // HAVE_FFTW3_H
 }
@@ -123,7 +121,7 @@ void Visualizer::resize()
 	hasToBeResized = 0;
 	InitVisualization();
 #	ifdef HAVE_FFTW3_H
-    GenFreqSpace();
+	GenFreqSpace();
 	m_bar_heights.reserve(w.getWidth());
 #	endif // HAVE_FFTW3_H
 }
@@ -151,7 +149,7 @@ void Visualizer::update()
 	// PCM in format 44100:16:1 (for mono visualization) and
 	// 44100:16:2 (for stereo visualization) is supported.
 	ssize_t bytes_read = read(m_source_fd, m_incoming_samples.data(),
-	                          sizeof(int16_t) * m_incoming_samples.size());
+							  sizeof(int16_t) * m_incoming_samples.size());
 	if (bytes_read > 0)
 	{
 		const auto begin = m_incoming_samples.begin();
@@ -190,7 +188,7 @@ void Visualizer::update()
 		requested_samples *= 2;
 
 	//Statusbar::printf("Samples: %1%, %2%, %3%", m_buffered_samples.size(),
-	//                  requested_samples, m_sample_consumption_rate);
+	//				  requested_samples, m_sample_consumption_rate);
 
 	size_t new_samples = m_buffered_samples.get(requested_samples, m_rendered_samples);
 	if (new_samples == 0)
@@ -477,19 +475,19 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 		// average bins
 		bar_height /= count;
 
-        // apply scaling to bar heights
-        if (LOG_SCALE_Y) {
-            bar_height = (20 * log10(bar_height) + DYNAMIC_RANGE + GAIN) / DYNAMIC_RANGE;
-        } else {
-            // apply gain
-            bar_height *= pow(10, 1.8 + GAIN / 20);
-            // buff higher frequencies
-            bar_height *= log2(2 + x) * 80.0/win_width;
-            // moderately normalize the heights
-            bar_height = pow(bar_height, 0.65);
+		// apply scaling to bar heights
+		if (Config.visualizer_spectrum_log_scale_y) {
+			bar_height = (20 * log10(bar_height) + DYNAMIC_RANGE + GAIN) / DYNAMIC_RANGE;
+		} else {
+			// apply gain
+			bar_height *= pow(10, 1.8 + GAIN / 20);
+			// buff higher frequencies
+			bar_height *= log2(2 + x) * 80.0/win_width;
+			// moderately normalize the heights
+			bar_height = pow(bar_height, 0.65);
 
-            //bar_height = pow(10, 1 + GAIN / 20) * bar_height;
-        }
+			//bar_height = pow(10, 1 + GAIN / 20) * bar_height;
+		}
 		// Scale bar height between 0 and height
 		bar_height = bar_height > 0 ? bar_height * height : 0;
 		bar_height = bar_height > height ? height : bar_height;
@@ -511,11 +509,11 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 				++h_idx;
 		} else {
 			// data point does not exist, need to interpolate
-            if (LOG_SCALE_X) {
-                h = Interpolate(x, h_idx);
-            } else {
-                h = 0;
-            }
+			if (Config.visualizer_spectrum_log_scale_x) {
+				h = Interpolate(x, h_idx);
+			} else {
+				h = 0;
+			}
 		}
 
 		for (size_t j = 0; j < h; ++j)
@@ -644,26 +642,27 @@ void Visualizer::GenLogspace()
 // Generate vector of linearly-spaced frequencies from HZ_MIN to HZ_MAX
 void Visualizer::GenLinspace()
 {
-    // Calculate number of extra bins needed between 0 HZ and HZ_MIN
-    const size_t win_width = w.getWidth();
-    const size_t left_bins = (HZ_MIN - win_width * HZ_MIN) / (HZ_MIN - HZ_MAX);
-    // Generate linspaced frequencies
-    m_dft_freqspace.resize(win_width);
-    const double lin_scale = HZ_MAX / (left_bins + m_dft_freqspace.size() - 1);
-    for (size_t i = left_bins; i < m_dft_freqspace.size() + left_bins; ++i) {
-        m_dft_freqspace[i - left_bins] = i * lin_scale;
-    }
+	// Calculate number of extra bins needed between 0 HZ and HZ_MIN
+	const size_t win_width = w.getWidth();
+	const size_t left_bins = (HZ_MIN - win_width * HZ_MIN) / (HZ_MIN - HZ_MAX);
+	// Generate linspaced frequencies
+	m_dft_freqspace.resize(win_width);
+	const double lin_scale = HZ_MAX / (left_bins + m_dft_freqspace.size() - 1);
+	for (size_t i = left_bins; i < m_dft_freqspace.size() + left_bins; ++i) {
+		m_dft_freqspace[i - left_bins] = i * lin_scale;
+	}
 }
 
 // Generate vector of spectrum frequencies from HZ_MIN to HZ_MAX
-// Frequencies are (not) log-scaled depending on LOG_SCALE_X
+// Frequencies are (not) log-scaled depending on
+// Config.visualizer_spectrum_log_scale_x
 void Visualizer::GenFreqSpace()
 {
-    if (LOG_SCALE_X) {
-        GenLogspace();
-    } else {
-        GenLinspace();
-    }
+	if (Config.visualizer_spectrum_log_scale_x) {
+		GenLogspace();
+	} else {
+		GenLinspace();
+	}
 }
 #endif // HAVE_FFTW3_H
 
@@ -748,7 +747,7 @@ void Visualizer::Clear()
 		ssize_t bytes_read;
 		do
 			bytes_read = read(m_source_fd, m_incoming_samples.data(),
-			                  sizeof(int16_t) * m_incoming_samples.size());
+							  sizeof(int16_t) * m_incoming_samples.size());
 		while (bytes_read > 0);
 	}
 
@@ -795,11 +794,11 @@ void Visualizer::OpenDataSource()
 		hints.ai_protocol = IPPROTO_UDP;
 
 		int errcode = getaddrinfo(m_source_location.c_str(), m_source_port.c_str(),
-		                          &hints, &res);
+								  &hints, &res);
 		if (errcode != 0)
 		{
 			Statusbar::printf("Couldn't resolve \"%1%:%2%\": %3%",
-			                  m_source_location, m_source_port, gai_strerror(errcode));
+							  m_source_location, m_source_port, gai_strerror(errcode));
 			return;
 		}
 
@@ -832,7 +831,7 @@ void Visualizer::OpenDataSource()
 		m_source_fd = open(m_source_location.c_str(), O_RDONLY | O_NONBLOCK);
 		if (m_source_fd < 0)
 			Statusbar::printf("Couldn't open \"%1%\" for reading PCM data: %2%",
-			                  m_source_location, strerror(errno));
+							  m_source_location, strerror(errno));
 	}
 }
 
