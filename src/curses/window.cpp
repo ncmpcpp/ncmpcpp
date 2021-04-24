@@ -682,13 +682,16 @@ void Window::moveTo(size_t new_x, size_t new_y)
 
 void Window::adjustDimensions(size_t width, size_t height)
 {
+	// NOTE: when dimensions get small, integer overflow will cause calls to
+	// `Menu<T>::refresh()` to run for a very long time.
+
 	if (m_border)
 	{
-		width -= 2;
-		height -= 2;
+		width -= width >= 2 ? 2 : 0;
+		height -= height >= 2 ? 2 : 0;
 	}
 	if (!m_title.empty())
-		height -= 2;
+		height -= height >= 2 ? 2 : 0;
 	m_height = height;
 	m_width = width;
 }
