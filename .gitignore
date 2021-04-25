@@ -6,13 +6,16 @@ Makefile
 Makefile.in
 aclocal.m4
 autom4te.cache/
+compile
 config.*
 configure
 depcomp
+**/.dirstamp
 install-sh
 libtool
 ltmain.sh
 missing
-src/.deps/
+**.m4
+**/.deps/
 src/ncmpcpp
 stamp-h1
