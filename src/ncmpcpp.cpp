@@ -121,7 +121,6 @@ int main(int argc, char **argv)
 		Config.statusbar_visibility = 0;
 	
 	Actions::setWindowsDimensions();
-	Actions::validateScreenSize();
 	Actions::initializeScreens();
 	
 	wHeader = new NC::Window(0, 0, COLS, Actions::HeaderHeight, "", Config.header_color, NC::Border());
