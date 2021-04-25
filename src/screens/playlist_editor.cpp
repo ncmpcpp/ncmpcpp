@@ -66,10 +66,14 @@ PlaylistEditor::PlaylistEditor()
 , m_window_timeout(Config.data_fetching_delay ? 250 : BaseScreen::defaultWindowTimeout)
 , m_fetching_delay(boost::posix_time::milliseconds(Config.data_fetching_delay ? 250 : -1))
 {
-	LeftColumnWidth = COLS/3-1;
+	size_t ra = Config.playlist_editor_column_width_ratio[0];
+	size_t rb = Config.playlist_editor_column_width_ratio[1];
+
+	LeftColumnWidth = COLS*ra/(ra+rb)-1;
 	RightColumnStartX = LeftColumnWidth+1;
 	RightColumnWidth = COLS-LeftColumnWidth-1;
-	
+
+
 	Playlists = NC::Menu<MPD::Playlist>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Playlists" : "", Config.main_color, NC::Border());
 	setHighlightFixes(Playlists);
 	Playlists.cyclicScrolling(Config.use_cyclic_scrolling);
@@ -108,11 +112,14 @@ void PlaylistEditor::resize()
 	size_t x_offset, width;
 	getWindowResizeParams(x_offset, width);
 	
+	size_t ra = Config.playlist_editor_column_width_ratio[0];
+	size_t rb = Config.playlist_editor_column_width_ratio[1];
+
 	LeftColumnStartX = x_offset;
-	LeftColumnWidth = width/3-1;
+	LeftColumnWidth = width*ra/(ra+rb)-1;
 	RightColumnStartX = LeftColumnStartX+LeftColumnWidth+1;
 	RightColumnWidth = width-LeftColumnWidth-1;
-	
+
 	Playlists.resize(LeftColumnWidth, MainHeight);
 	Content.resize(RightColumnWidth, MainHeight);
 	

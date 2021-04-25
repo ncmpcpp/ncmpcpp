@@ -191,11 +191,16 @@ MediaLibrary::MediaLibrary()
 {
 	hasTwoColumns = 0;
 	isAlbumOnly = 0;
-	itsLeftColWidth = COLS/3-1;
-	itsMiddleColWidth = COLS/3;
+
+	size_t ra = Config.media_library_column_width_ratio_three[0];
+	size_t rb = Config.media_library_column_width_ratio_three[1];
+	size_t rc = Config.media_library_column_width_ratio_three[2];
+
+	itsLeftColWidth = COLS*ra/(ra+rb+rc)-1;
 	itsMiddleColStartX = itsLeftColWidth+1;
-	itsRightColWidth = COLS-COLS/3*2-1;
-	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
+	itsMiddleColWidth = COLS*rb/(ra+rb+rc);
+	itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
+	itsRightColWidth = COLS-itsLeftColWidth-itsMiddleColWidth-2;
 	
 	Tags = NC::Menu<PrimaryTag>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? tagTypeToString(Config.media_lib_primary_tag) + "s" : "", Config.main_color, NC::Border());
 	setHighlightFixes(Tags);
@@ -240,18 +245,25 @@ void MediaLibrary::resize()
 	getWindowResizeParams(x_offset, width);
 	if (!hasTwoColumns)
 	{
+		size_t ra = Config.media_library_column_width_ratio_three[0];
+		size_t rb = Config.media_library_column_width_ratio_three[1];
+		size_t rc = Config.media_library_column_width_ratio_three[2];
+
 		itsLeftColStartX = x_offset;
-		itsLeftColWidth = width/3-1;
+		itsLeftColWidth = width*ra/(ra+rb+rc)-1;
 		itsMiddleColStartX = itsLeftColStartX+itsLeftColWidth+1;
-		itsMiddleColWidth = width/3;
+		itsMiddleColWidth = width*rb/(ra+rb+rc);
 		itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
-		itsRightColWidth = width-width/3*2-1;
+		itsRightColWidth = width-itsLeftColWidth-itsMiddleColWidth-2;
 	}
 	else
 	{
+		size_t ra = Config.media_library_column_width_ratio_two[0];
+		size_t rb = Config.media_library_column_width_ratio_two[1];
+
 		itsMiddleColStartX = x_offset;
-		itsMiddleColWidth = width/2;
-		itsRightColStartX = x_offset+itsMiddleColWidth+1;
+		itsMiddleColWidth = width*ra/(ra+rb);
+		itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
 		itsRightColWidth = width-itsMiddleColWidth-1;
 	}
 	

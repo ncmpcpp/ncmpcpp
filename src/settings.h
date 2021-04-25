@@ -93,6 +93,10 @@ struct Configuration
 
 	std::string pattern;
 
+	std::vector<size_t> playlist_editor_column_width_ratio;
+	std::vector<size_t> media_library_column_width_ratio_two;
+	std::vector<size_t> media_library_column_width_ratio_three;
+
 	std::vector<Column> columns;
 
 	DisplayMode playlist_display_mode;

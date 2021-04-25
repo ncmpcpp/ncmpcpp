@@ -56,15 +56,24 @@ DestT verbose_lexical_cast(const std::string &v)
 }
 
 template <typename ValueT, typename ConvertT>
-std::vector<ValueT> list_of(const std::string &v, ConvertT convert)
+std::vector<ValueT> list_of(const std::string &v, ConvertT convert, const typename std::vector<ValueT>::size_type length, const std::string &escape, const std::string &sep, const std::string &quote)
 {
 	std::vector<ValueT> result;
-	boost::tokenizer<boost::escaped_list_separator<char>> elems(v);
+	boost::escaped_list_separator<char> esq(escape, sep, quote);
+	boost::tokenizer<boost::escaped_list_separator<char>> elems(v, esq);
 	for (auto &value : elems)
 		result.push_back(convert(boost::trim_copy(value)));
 	if (result.empty())
 		throw std::runtime_error("empty list");
+	if (length > 0 && result.size() != length)
+		throw std::runtime_error("invalid list length");
 	return result;
+}
+
+template <typename ValueT, typename ConvertT>
+std::vector<ValueT> list_of(const std::string &v, ConvertT convert)
+{
+	return list_of<ValueT>(v, convert, 0, "\\", ",", "\"");
 }
 
 template <typename ValueT>
@@ -74,6 +83,8 @@ std::vector<ValueT> list_of(const std::string &v)
 }
 
 bool yes_no(const std::string &v);
+
+std::vector<size_t> parse_ratio(const std::string &v, const std::vector<size_t>::size_type length);
 
 ////////////////////////////////////////////////////////////////////////////////
 
