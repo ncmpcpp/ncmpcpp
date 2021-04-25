@@ -92,9 +92,9 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const SongList &list,
 			{
 				// Draw a separator when the next album is different than the current
 				// one. In case there are two albums with the same name, but a different
-				// artist, compare also artists.
+				// album artist, compare also album artists.
 				separate_albums = next->song()->getAlbum() != s.getAlbum()
-				               || next->song()->getArtist() != s.getArtist();
+				               || next->song()->getAlbumArtist() != s.getAlbumArtist();
 			}
 		}
 	}
