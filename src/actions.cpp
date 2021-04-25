@@ -124,18 +124,6 @@ size_t HeaderHeight;
 size_t FooterHeight;
 size_t FooterStartY;
 
-void validateScreenSize()
-{
-	using Global::MainHeight;
-	
-	if (COLS < 30 || MainHeight < 5)
-	{
-		NC::destroyScreen();
-		std::cout << "Screen is too small to handle ncmpcpp correctly\n";
-		exit(1);
-	}
-}
-
 void initializeScreens()
 {
 	myHelp = new Help;
@@ -220,8 +208,6 @@ void resizeScreen(bool reload_main_window)
 	}
 
 	MainHeight = std::max(LINES-(Config.design == Design::Alternative ? 7 : 4), 0);
-
-	validateScreenSize();
 
 	if (!Config.header_visibility)
 		MainHeight += 2;
