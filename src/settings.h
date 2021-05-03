@@ -86,6 +86,7 @@ struct Configuration
 	size_t visualizer_fps;
 	bool visualizer_autoscale;
 	bool visualizer_spectrum_smooth_look;
+	bool visualizer_spectrum_use_legacy_chars;
 	uint32_t visualizer_spectrum_dft_size;
 	double visualizer_spectrum_gain;
 	double visualizer_spectrum_hz_min;

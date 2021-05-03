@@ -519,7 +519,12 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 				} else {
 					// fractional height
 					if (flipped) {
-						ch = SMOOTH_CHARS_FLIPPED[idx];
+						if (Config.visualizer_spectrum_use_legacy_chars) {
+							ch = SMOOTH_CHARS_FLIPPED[idx];
+						} else {
+							ch = SMOOTH_CHARS[size-idx-2];
+							color = NC::FormattedColor(color.color(), {NC::Format::Reverse});
+						}
 					} else {
 						ch = SMOOTH_CHARS[idx];
 					}
