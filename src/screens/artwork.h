@@ -81,8 +81,8 @@ private:
 	static void worker_updateArtwork();
 	static void worker_updateArtwork(const std::string &uri);
 	static void worker_updatedVisibility();
-	static int worker_calcXOffset(int width, int bb_width, int char_xpixel);
-	static int worker_calcYOffset(int height, int bb_height, int char_ypixel);
+	static int worker_calcXOffset(int width, int img_width, int char_xpixel);
+	static int worker_calcYOffset(int height, int img_height, int char_ypixel);
 	static std::vector<uint8_t> worker_fetchArtwork(const std::string &uri, const std::string &cmd);
 	static std::string worker_fetchLocalArtwork(const std::string &uri);
 

@@ -292,25 +292,24 @@ void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int heig
 	const auto pixel_height = char_ypixel * height;
 
 	const auto out_geom = Geometry(pixel_width, pixel_height);
-	Image in_img;
+	Image img;
 	try
 	{
 		// read and process artwork
 		const Blob in_blob(orig_art_buffer.data(), orig_art_buffer.size() * sizeof(orig_art_buffer[0]));
-		in_img.read(in_blob);
-		in_img.scale(out_geom);
+		img.read(in_blob);
+		img.resize(out_geom);
 
 		// write output to buffer
 		Blob out_blob;
-		in_img.magick("PNG");
-		in_img.write(&out_blob);
+		img.magick("PNG");
+		img.write(&out_blob);
 		art_buffer.resize(out_blob.length());
 		std::memcpy(art_buffer.data(), out_blob.data(), out_blob.length());
 
 		// center image
-		const auto bb = in_img.boundingBox();
-		x_offset += worker_calcXOffset(width, bb.width(), char_xpixel);
-		y_offset += worker_calcYOffset(height, bb.height(), char_ypixel);
+		x_offset += worker_calcXOffset(width, img.columns(), char_xpixel);
+		y_offset += worker_calcYOffset(height, img.rows(), char_ypixel);
 	}
 	catch (Magick::Exception& e)
 	{
@@ -322,7 +321,7 @@ void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int heig
 	before_inital_draw = false;
 }
 
-int Artwork::worker_calcXOffset(int width, int bb_width, int char_xpixel)
+int Artwork::worker_calcXOffset(int width, int img_width, int char_xpixel)
 {
 	switch (Config.albumart_align)
 	{
@@ -333,16 +332,16 @@ int Artwork::worker_calcXOffset(int width, int bb_width, int char_xpixel)
 		case ArtAlign::N:
 		case ArtAlign::S:
 		case ArtAlign::CENTER:
-			return (width - (static_cast<double>(bb_width) / char_xpixel)) / 2;
+			return (width - (static_cast<double>(img_width) / char_xpixel)) / 2;
 		case ArtAlign::NE:
 		case ArtAlign::E:
 		case ArtAlign::SE:
-			return width - (static_cast<double>(bb_width) / char_xpixel);
+			return width - (static_cast<double>(img_width) / char_xpixel);
 	}
 	return 0;
 }
 
-int Artwork::worker_calcYOffset(int height, int bb_height, int char_ypixel)
+int Artwork::worker_calcYOffset(int height, int img_height, int char_ypixel)
 {
 	switch (Config.albumart_align)
 	{
@@ -353,11 +352,11 @@ int Artwork::worker_calcYOffset(int height, int bb_height, int char_ypixel)
 		case ArtAlign::E:
 		case ArtAlign::W:
 		case ArtAlign::CENTER:
-			return (height - (static_cast<double>(bb_height) / char_ypixel)) / 2;
+			return (height - (static_cast<double>(img_height) / char_ypixel)) / 2;
 		case ArtAlign::SE:
 		case ArtAlign::S:
 		case ArtAlign::SW:
-			return height - (static_cast<double>(bb_height) / char_ypixel);
+			return height - (static_cast<double>(img_height) / char_ypixel);
 	}
 	return 0;
 }
