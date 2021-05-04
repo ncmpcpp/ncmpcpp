@@ -221,6 +221,8 @@ struct Configuration
 	boost::optional<ScreenType> startup_slave_screen_type;
 	std::vector<ScreenType> screen_sequence;
 
+	std::string random_default_type;
+	unsigned random_default_number;
 	std::string random_exclude_pattern;
 	SortMode browser_sort_mode;
 
