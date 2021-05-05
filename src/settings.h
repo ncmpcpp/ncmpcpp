@@ -232,6 +232,8 @@ struct Configuration
 	Artwork::ArtAlign albumart_align;
 	std::string albumart_default_path;
 	std::vector<Artwork::ArtSource> albumart_sources;
+	size_t font_width, font_height;
+	int albumart_xoffset, albumart_yoffset;
 };
 
 extern Configuration Config;

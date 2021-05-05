@@ -145,6 +145,18 @@ Fallback to this image if no album cover art is found in the music library.
 .B albumart_align = ALIGN
 Alignment of album artwork within window. One of "N", "NE", "E", "SE", "S", "SW", "W", "NW", "center".
 .TP
+.B font_width = pixels
+Manually set font width in pixels. Set to 0 to try auto detection, support depends on terminal emulator. Check error log if no image appears.
+.TP
+.B font_height = pixels
+Same as font_width, but for height.
+.TP
+.B albumart_xoffset = chars
+Move album artwork horizontally by specified number of characters.
+.TP
+.B albumart_yoffset = chars
+Same as albumart_xoffset, but move vertically.
+.TP
 .B system_encoding = ENCODING
 If you use encoding other than utf8, set it in order to handle utf8 encoded strings properly.
 .TP

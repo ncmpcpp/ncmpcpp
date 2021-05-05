@@ -184,6 +184,17 @@
 #
 #albumart_align = "center"
 #
+## Manually set font width/height in pixels. Set to 0 to try auto detection,
+## support depends on terminal emulator. Check error log if no image appears.
+#
+#font_width = 0
+#font_height = 0
+#
+## Move album artwork horizontally/vertically by specified number of characters.
+#
+#albumart_xoffset = 0
+#albumart_yoffset = 0
+#
 ##### system encoding #####
 ##
 ## ncmpcpp should detect your charset encoding but if it failed to do so, you

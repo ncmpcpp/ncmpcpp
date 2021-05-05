@@ -620,6 +620,10 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("albumart_default_path", &albumart_default_path, "", adjust_path);
 	p.add("albumart_sources", &albumart_sources,
 	      "local, mpd_albumart, mpd_readpicture", list_of<Artwork::ArtSource>);
+	p.add("font_width", &font_width, "0");
+	p.add("font_height", &font_height, "0");
+	p.add("albumart_xoffset", &albumart_xoffset, "0");
+	p.add("albumart_yoffset", &albumart_yoffset, "0");
 
 	return std::all_of(
 		config_paths.begin(),

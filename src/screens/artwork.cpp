@@ -308,11 +308,20 @@ void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int heig
 
 	// retrieve and calculate terminal character size
 	const auto sz = getWinSize();
-	const auto char_xpixel = sz.ws_xpixel / sz.ws_col;
-	const auto char_ypixel = sz.ws_ypixel / sz.ws_row;
+	const auto char_xpixel = Config.font_width == 0
+			? sz.ws_xpixel / sz.ws_col
+			: Config.font_width;
+	const auto char_ypixel = Config.font_height == 0
+			? sz.ws_ypixel / sz.ws_row
+			: Config.font_height;
 	const auto pixel_width = char_xpixel * width;
 	const auto pixel_height = char_ypixel * height;
 	const auto out_geom = Geometry(pixel_width, pixel_height);
+	if (char_xpixel == 0 || char_ypixel == 0)
+	{
+		std::cerr << "Couldn't detect font size, set font_width/font_height" << std::endl;
+		return;
+	}
 
 	try
 	{
@@ -326,7 +335,9 @@ void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int heig
 
 		// center image
 		x_offset += worker_calcXOffset(width, img.columns(), char_xpixel);
+		x_offset += Config.albumart_xoffset;
 		y_offset += worker_calcYOffset(height, img.rows(), char_ypixel);
+		y_offset += Config.albumart_yoffset;
 	}
 	catch (Magick::Exception& e)
 	{
@@ -624,10 +635,6 @@ void UeberzugBackend::stop()
 
 void KittyBackend::updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset)
 {
-	const auto sz = Artwork::getWinSize();
-	const auto pixel_width = sz.ws_xpixel / sz.ws_col;
-	const auto pixel_height = sz.ws_ypixel / sz.ws_row;
-
 	std::map<std::string, std::string> cmd;
 	cmd["a"] = "T";   // transfer and display
 	cmd["f"] = "100"; // PNG
