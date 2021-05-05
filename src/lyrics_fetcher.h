@@ -23,6 +23,8 @@
 
 #include "config.h"
 
+#include <song.h>
+
 #include <memory>
 #include <string>
 
@@ -33,7 +35,7 @@ struct LyricsFetcher
 	virtual ~LyricsFetcher() { }
 
 	virtual const char *name() const = 0;
-	virtual Result fetch(const std::string &artist, const std::string &title);
+	virtual Result fetch(const std::string &artist, const std::string &title, const MPD::Song &song);
 	
 protected:
 	virtual const char *urlTemplate() const = 0;
@@ -57,7 +59,7 @@ std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher);
 
 struct GoogleLyricsFetcher : public LyricsFetcher
 {
-	virtual Result fetch(const std::string &artist, const std::string &title);
+	virtual Result fetch(const std::string &artist, const std::string &title, const MPD::Song &song);
 	
 protected:
 	virtual const char *urlTemplate() const { return URL; }
@@ -156,7 +158,7 @@ protected:
 struct InternetLyricsFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const override { return "the Internet"; }
-	virtual Result fetch(const std::string &artist, const std::string &title) override;
+	virtual Result fetch(const std::string &artist, const std::string &title, const MPD::Song &song) override;
 	
 protected:
 	virtual const char *siteKeyword() const override { return nullptr; }
@@ -167,5 +169,17 @@ protected:
 private:
 	std::string URL;
 };
+
+#ifdef HAVE_TAGLIB_H
+struct TagsLyricsFetcher : public LyricsFetcher
+{
+	virtual const char *name() const override { return "tags"; }
+	virtual Result fetch(const std::string &artist, const std::string &title, const MPD::Song &song) override;
+
+protected:
+	virtual const char *urlTemplate() const override { return ""; }
+	virtual const char *regex() const override { return ""; }
+};
+#endif // HAVE_TAGLIB_H
 
 #endif // NCMPCPP_LYRICS_FETCHER_H
