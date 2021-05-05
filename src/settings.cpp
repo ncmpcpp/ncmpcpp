@@ -614,6 +614,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("active_window_border", &active_window_border, "red",
 	      verbose_lexical_cast<NC::Color>);
 
+#	ifdef ENABLE_ARTWORK
 	p.add("albumart", &albumart, "no", yes_no);
 	p.add("albumart_backend", &albumart_backend, "ueberzug");
 	p.add("albumart_align", &albumart_align, "center");
@@ -624,6 +625,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("font_height", &font_height, "0");
 	p.add("albumart_xoffset", &albumart_xoffset, "0");
 	p.add("albumart_yoffset", &albumart_yoffset, "0");
+#	endif
 
 	return std::all_of(
 		config_paths.begin(),

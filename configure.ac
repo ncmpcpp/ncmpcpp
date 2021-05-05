@@ -28,22 +28,6 @@ if test "$clock" = "yes"; then
 	AC_DEFINE([ENABLE_CLOCK], [1], [enables clock screen])
 fi
 
-if test "$artwork" = "yes" ; then
-	PKG_CHECK_MODULES([MAGICK], [ImageMagick], [
-			AC_PATH_PROG(MAGICKPP_CONFIG, Magick++-config)
-			if test "$MAGICKPP_CONFIG" != "" ; then
-				LDFLAGS="$LDFLAGS `$MAGICKPP_CONFIG --ldflags`"
-				CPPFLAGS="$CPPFLAGS `$MAGICKPP_CONFIG --cxxflags`"
-				AC_CHECK_HEADERS([Magick++.h], , AC_MSG_ERROR([missing Magick++.h header]))
-				AC_DEFINE([ENABLE_ARTWORK], [1], [enables album artwork screen])
-			else
-				AC_MSG_ERROR([Magick++-config executable is missing])
-			fi
-		],
-		AC_MSG_ERROR([ImageMagick is required!])
-	)
-fi
-
 # -flto
 if test "$lto" != "no"; then
   AC_MSG_CHECKING([whether compiler supports -flto])
@@ -305,6 +289,23 @@ if test "$taglib" != "no" ; then
 		)
 	fi
 fi
+
+if test "$artwork" = "yes" ; then
+	PKG_CHECK_MODULES([MAGICK], [ImageMagick], [
+			AC_PATH_PROG(MAGICKPP_CONFIG, Magick++-config)
+			if test "$MAGICKPP_CONFIG" != "" ; then
+				LDFLAGS="$LDFLAGS `$MAGICKPP_CONFIG --ldflags`"
+				CPPFLAGS="$CPPFLAGS `$MAGICKPP_CONFIG --cxxflags`"
+				AC_CHECK_HEADERS([Magick++.h], , AC_MSG_ERROR([missing Magick++.h header]))
+				AC_DEFINE([ENABLE_ARTWORK], [1], [enables album artwork screen])
+			else
+				AC_MSG_ERROR([Magick++-config executable is missing])
+			fi
+		],
+		AC_MSG_ERROR([ImageMagick is required!])
+	)
+fi
+
 
 AC_CONFIG_FILES([Makefile src/Makefile doc/Makefile])
 AC_OUTPUT
