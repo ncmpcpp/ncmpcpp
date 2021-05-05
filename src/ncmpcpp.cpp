@@ -184,7 +184,8 @@ int main(int argc, char **argv)
 				wFooter->clearFDCallbacksList();
 #	ifdef ENABLE_ARTWORK
 				// add artwork callback
-				Global::wFooter->addFDCallback(myArtwork->pipefd_read, ArtworkHelper::drawToScreen);
+				if (Config.albumart)
+					Global::wFooter->addFDCallback(myArtwork->pipefd_read, ArtworkHelper::drawToScreen);
 #	endif
 
 				try

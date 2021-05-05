@@ -25,6 +25,8 @@
 
 #ifdef ENABLE_ARTWORK
 
+#include <Magick++.h>
+
 #include <boost/process.hpp>
 
 #include "curses/window.h"
@@ -87,7 +89,7 @@ private:
 	static std::string worker_fetchLocalArtwork(const std::string &uri);
 
 	static std::thread t;  // worker thread
-	static std::vector<uint8_t> art_buffer;
+	static Magick::Blob art_buffer;
 	static std::vector<uint8_t> orig_art_buffer;
 	static ArtworkBackend *backend;
 	static std::string prev_uri;
@@ -150,7 +152,7 @@ class ArtworkBackend
 {
 public:
 	// draw artwork, path relative to mpd_music_dir, units in terminal characters
-	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset) = 0;
+	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) = 0;
 
 	// clear artwork from screen
 	virtual void removeArtwork() = 0;
@@ -164,7 +166,7 @@ class UeberzugBackend : public ArtworkBackend
 {
 public:
 	UeberzugBackend();
-	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset) override;
+	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) override;
 	virtual void removeArtwork() override;
 
 private:
@@ -180,7 +182,7 @@ class KittyBackend : public ArtworkBackend
 	// when scrolling the other screen
 public:
 	KittyBackend(int fd) : pipefd_write(fd) {}
-	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset) override;
+	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) override;
 	virtual void removeArtwork() override;
 	virtual std::tuple<std::vector<uint8_t>, int, int> takeOutput() override;
 
@@ -189,7 +191,7 @@ private:
 			const std::vector<uint8_t> &payload, size_t chunk_begin,
 			size_t chunk_end);
 	std::vector<uint8_t> writeChunked(std::map<std::string, std::string> cmd,
-			const std::vector<uint8_t> &data);
+			const Magick::Blob &data);
 	virtual void setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset) override;
 
 	std::vector<uint8_t> output;

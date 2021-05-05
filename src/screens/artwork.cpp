@@ -41,7 +41,7 @@ using Global::MainStartY;
 
 Artwork* myArtwork;
 
-std::vector<uint8_t> Artwork::art_buffer;
+Magick::Blob Artwork::art_buffer;
 std::vector<uint8_t> Artwork::orig_art_buffer;
 std::thread Artwork::t;
 ArtworkBackend* Artwork::backend;
@@ -122,7 +122,11 @@ std::istream &operator>>(std::istream &is, Artwork::ArtAlign &align)
 
 Artwork::Artwork()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
+, prev_winsize({})
 {
+	if (!Config.albumart)
+		return;
+
 	// ncurses doesn't play well with writing concurrently, set up a self-pipe
 	// so the worker thread can signal the main select() loop to print
 	int pipefd[2];
@@ -148,11 +152,17 @@ Artwork::Artwork()
 // callback for the main select() loop, draws artwork on screen
 void ArtworkHelper::drawToScreen()
 {
+	if (!Config.albumart)
+		return;
+
 	myArtwork->drawToScreen();
 }
 
 void Artwork::drawToScreen()
 {
+	if (!Config.albumart)
+		return;
+
 	// consume data in self-pipe
 	const size_t BUF_SIZE = 100;
 	char buf[BUF_SIZE];
@@ -232,6 +242,9 @@ void Artwork::stop()
 
 void Artwork::removeArtwork(bool reset_artwork)
 {
+	if (!Config.albumart)
+		return;
+
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
 		// Need to specify distinct operations for reset_artwork true/false to
@@ -245,6 +258,9 @@ void Artwork::removeArtwork(bool reset_artwork)
 
 void Artwork::updateArtwork()
 {
+	if (!Config.albumart)
+		return;
+
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
 		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE, [] { worker_updateArtwork(); }));
@@ -254,6 +270,9 @@ void Artwork::updateArtwork()
 
 void Artwork::updateArtwork(std::string uri)
 {
+	if (!Config.albumart)
+		return;
+
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
 		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE_URI, [=] { worker_updateArtwork(uri); }));
@@ -263,6 +282,9 @@ void Artwork::updateArtwork(std::string uri)
 
 void Artwork::updatedVisibility()
 {
+	if (!Config.albumart)
+		return;
+
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
 		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATED_VIS, [=] { worker_updatedVisibility(); }));
@@ -290,22 +312,17 @@ void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int heig
 	const auto char_ypixel = sz.ws_ypixel / sz.ws_row;
 	const auto pixel_width = char_xpixel * width;
 	const auto pixel_height = char_ypixel * height;
-
 	const auto out_geom = Geometry(pixel_width, pixel_height);
-	Image img;
+
 	try
 	{
 		// read and process artwork
 		const Blob in_blob(orig_art_buffer.data(), orig_art_buffer.size() * sizeof(orig_art_buffer[0]));
-		img.read(in_blob);
+		Image img(in_blob);
 		img.resize(out_geom);
 
 		// write output to buffer
-		Blob out_blob;
-		img.magick("PNG");
-		img.write(&out_blob);
-		art_buffer.resize(out_blob.length());
-		std::memcpy(art_buffer.data(), out_blob.data(), out_blob.length());
+		img.write(&art_buffer, "PNG");
 
 		// center image
 		x_offset += worker_calcXOffset(width, img.columns(), char_xpixel);
@@ -367,13 +384,13 @@ void Artwork::worker_removeArtwork(bool reset_artwork)
 	drawn = false;
 	if (reset_artwork)
 	{
-		art_buffer.clear();
+		art_buffer = Magick::Blob();
 	}
 }
 
 void Artwork::worker_updateArtwork()
 {
-	if (art_buffer.empty())
+	if (0 == art_buffer.length())
 		return;
 
 	size_t x_offset, width;
@@ -559,13 +576,13 @@ UeberzugBackend::UeberzugBackend()
 	catch (const bp::process_error &e) {}
 }
 
-void UeberzugBackend::updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset)
+void UeberzugBackend::updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset)
 {
 	if (!process.running())
 		return;
 
 	std::ofstream temp_file(temp_file_name, std::ios::trunc | std::ios::binary);
-	temp_file.write(reinterpret_cast<const char *>(buffer.data()), buffer.size());
+	temp_file.write(reinterpret_cast<const char *>(buffer.data()), buffer.length());
 	temp_file.close();
 
 	boost::property_tree::ptree pt;
@@ -605,7 +622,7 @@ void UeberzugBackend::stop()
 // KittyBackend
 // https://sw.kovidgoyal.net/kitty/graphics-protocol.html
 
-void KittyBackend::updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset)
+void KittyBackend::updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset)
 {
 	const auto sz = Artwork::getWinSize();
 	const auto pixel_width = sz.ws_xpixel / sz.ws_col;
@@ -660,16 +677,15 @@ std::vector<uint8_t> KittyBackend::serializeGrCmd(std::map<std::string, std::str
 	return ret;
 }
 
-std::vector<uint8_t> KittyBackend::writeChunked(std::map<std::string, std::string> cmd, const std::vector<uint8_t>& data)
+std::vector<uint8_t> KittyBackend::writeChunked(std::map<std::string, std::string> cmd, const Magick::Blob& data)
 {
 	using namespace Magick;
 
 	std::vector<uint8_t> output;
 
-	if (!data.empty())
+	if (0 != data.length())
 	{
-		Blob blob(data.data(), data.size() * sizeof(data[0]));
-		std::string b64_data_str = blob.base64();
+		std::string b64_data_str = data.base64();
 		std::vector<uint8_t> b64_data(b64_data_str.begin(), b64_data_str.end());
 
 		const size_t CHUNK_SIZE = 4096;

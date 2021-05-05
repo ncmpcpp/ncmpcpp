@@ -159,19 +159,19 @@
 ## ncmpcpp can display artwork in the terminal. The artwork is shown in the
 ## "artwork" screen, which can be optionally be displayed side-by-side with
 ## another screen via ncmpcpp's slave screen functionality.
-##
-## The "mpd_music_dir" config option should be set accordingly. ncmpcpp will
-## attempt to find and display an image named "cover.png", "cover.jpg",
-## "cover.tiff", or "cover.bmp" in the same directory as the current playing
-## song.
-##
 ## Ueberzug must be installed and visible in PATH for artwork to be displayed.
 ##
 #
+## Enable album art display
+#
+#albumart = no
+#
 ## List of sources of album art, highest priority sources first. "local" scans
-## mpd_music_dir on the local machine, "mpd_albumart" and "mpd_readpicture"
-## query MPD with the albumart and readpicture commands respectively. May be
-## empty, in which case the albumart_default_path fallback will be used.
+## mpd_music_dir on the local machine and attempt to display an image named
+## "cover.png", "cover.jpg", "cover.tiff", or "cover.bmp". "mpd_albumart" and
+## "mpd_readpicture" query MPD with the albumart and readpicture commands
+## respectively. May be empty, in which case the albumart_default_path fallback
+## will be used.
 #
 #albumart_sources = local, mpd_dir, mpd_embed
 #
