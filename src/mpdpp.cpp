@@ -931,9 +931,9 @@ std::vector<uint8_t> Connection::GetArtwork(const std::string &uri, const std::s
 		offset += binary;
 		++count;
 	}
-	std::cerr << cmd.c_str() << ": " << uri
-		<< ", roundtrips: " << count
-		<< ", size: " << buffer.size() << std::endl;
+	// std::cerr << cmd.c_str() << ": " << uri
+		// << ", roundtrips: " << count
+		// << ", size: " << buffer.size() << std::endl;
 	return buffer;
 }
 

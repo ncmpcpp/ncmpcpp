@@ -176,6 +176,8 @@ private:
 
 class KittyBackend : public ArtworkBackend
 {
+	// Kitty backend has an issue when in slave screen mode, the image scrolls
+	// when scrolling the other screen
 public:
 	KittyBackend(int fd) : pipefd_write(fd) {}
 	virtual void updateArtwork(const std::vector<uint8_t>& buffer, int x_offset, int y_offset) override;

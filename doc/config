@@ -175,10 +175,6 @@
 #
 #albumart_sources = local, mpd_dir, mpd_embed
 #
-## Method to draw album artwork to terminal. One of "ueberzug", "kitty".
-#
-#albumart_backend = "ueberzug"
-#
 ## Fallback to this image if no album cover art is found in the music library.
 #
 #albumart_default_path = ""
