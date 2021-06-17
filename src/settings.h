@@ -70,6 +70,7 @@ struct Configuration
 	Format::AST<char> song_window_title_format;
 	Format::AST<char> song_library_format;
 	Format::AST<char> song_columns_mode_format;
+	Format::AST<char> song_columns_mode_now_playing_format;
 	Format::AST<char> browser_sort_format;
 	Format::AST<char> song_status_format;
 	Format::AST<wchar_t> song_status_wformat;
@@ -98,6 +99,7 @@ struct Configuration
 	std::vector<size_t> media_library_column_width_ratio_three;
 
 	std::vector<Column> columns;
+	std::vector<Column> now_playing_columns;
 
 	DisplayMode playlist_display_mode;
 	DisplayMode browser_display_mode;

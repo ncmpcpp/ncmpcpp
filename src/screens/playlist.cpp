@@ -345,7 +345,10 @@ std::string songToString(const MPD::Song &s)
 			result = Format::stringify<char>(Config.song_list_format, &s);
 			break;
 		case DisplayMode::Columns:
-			result = Format::stringify<char>(Config.song_columns_mode_format, &s);
+			if (Status::State::currentSongPosition() == s.getPosition())
+				result = Format::stringify<char>(Config.song_columns_mode_now_playing_format, &s);
+			else
+				result = Format::stringify<char>(Config.song_columns_mode_format, &s);
 	}
 	return result;
 }
