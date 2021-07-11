@@ -510,9 +510,10 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 		} else {
 			// data point does not exist, need to interpolate
 			if (Config.visualizer_spectrum_log_scale_x) {
-				h = Interpolate(x, h_idx);
+				h = InterpolateCubic(x, h_idx);
 			} else {
-				h = 0;
+				h = std::min(InterpolateLinear(x, h_idx), height / 1.0);
+				//h = 0;
 			}
 		}
 
@@ -559,7 +560,7 @@ void Visualizer::DrawFrequencySpectrumStereo(const int16_t *buf_left, const int1
 	DrawFrequencySpectrum(buf_right, samples, height, w.getHeight() - height);
 }
 
-double Visualizer::Interpolate(size_t x, size_t h_idx)
+double Visualizer::InterpolateCubic(size_t x, size_t h_idx)
 {
 	const double x_next = m_bar_heights[h_idx].first;
 	const double h_next = m_bar_heights[h_idx].second;
@@ -601,6 +602,33 @@ double Visualizer::Interpolate(size_t x, size_t h_idx)
 	}
 
 	// less than two data points on right, no interp, should never happen unless VERY low DFT size
+	return h_next;
+}
+
+double Visualizer::InterpolateLinear(size_t x, size_t h_idx)
+{
+	const double x_next = m_bar_heights[h_idx].first;
+	const double h_next = m_bar_heights[h_idx].second;
+
+	double dh = 0;
+	if (h_idx == 0) {
+		// no data points on the left, linear extrapolation
+		if (h_idx < m_bar_heights.size()) {
+			const double x_next2 = m_bar_heights[h_idx+1].first;
+			const double h_next2 = m_bar_heights[h_idx+1].second;
+			dh = (h_next2 - h_next) / (x_next2 - x_next);
+		}
+		return h_next - dh * (x_next - x);
+	} else if (h_idx < m_bar_heights.size()) {
+		// simple linear interpolation
+		const double x_prev = m_bar_heights[h_idx-1].first;
+		const double h_prev = m_bar_heights[h_idx-1].second;
+
+		const double m = (h_next - h_prev) / (x_next - x_prev);
+		return h_prev + m * (x - x_prev);
+	}
+
+	// no data points on the right: don't interpolate
 	return h_next;
 }
 

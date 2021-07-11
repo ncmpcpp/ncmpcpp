@@ -79,7 +79,8 @@ private:
 	void GenLinspace();
 	void GenFreqSpace();
 	double Bin2Hz(size_t);
-	double Interpolate(size_t, size_t);
+	double InterpolateCubic(size_t, size_t);
+	double InterpolateLinear(size_t, size_t);
 #	endif // HAVE_FFTW3_H
 
 	void InitDataSource();
