@@ -498,7 +498,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add<void>(
 		"screen_switcher_mode", nullptr, "playlist, browser",
 		[this](std::string v) {
-			if (v == "previous")f
+			if (v == "previous")
 				screen_switcher_previous = true;
 			else
 			{
