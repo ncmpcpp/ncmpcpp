@@ -118,7 +118,7 @@ struct GeniusFetcher : public GoogleLyricsFetcher
 	virtual const char *name() const override { return "genius.com"; }
 
 protected:
-	virtual const char *regex() const override { return "<div class=\"[Ll]yrics.*?>(.*?)</div>"; }
+	virtual const char *regex() const override { return "<div.*?class=\"(?:lyrics|Lyrics__Container).*?>(.*?)</div>"; }
 };
 
 struct JahLyricsFetcher : public GoogleLyricsFetcher
