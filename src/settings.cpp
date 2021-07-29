@@ -212,28 +212,6 @@ void deprecated(const char *option, const char *version_removal,
 bool Configuration::read(const std::vector<std::string> &config_paths, bool ignore_errors)
 {
 	option_parser p;
-
-	// Deprecated options.
-	p.add("visualizer_fifo_path", &visualizer_fifo_path, "", [](std::string v) {
-		if (!v.empty())
-		{
-			deprecated("visualizer_fifo_path",
-			           "0.10",
-			           "replaced by visualizer_data_source");
-		}
-		return adjust_path(v);
-	});
-	p.add<void>("visualizer_sync_interval", nullptr, "", [](std::string v) {
-		if (!v.empty())
-		{
-			deprecated("visualizer_sync_interval",
-			           "0.10",
-			           "set 'buffer_time' parameter of your MPD audio output to '100000' "
-			           "(100ms) or lower if you experience synchronization issues "
-			           "between audio and visualization");
-		}
-	});
-
 	// keep the same order of variables as in configuration file
 	p.add("ncmpcpp_directory", &ncmpcpp_directory, "~/.config/ncmpcpp/", adjust_directory);
 	p.add("lyrics_directory", &lyrics_directory, "~/.lyrics/", adjust_directory);
