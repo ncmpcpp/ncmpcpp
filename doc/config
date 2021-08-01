@@ -407,7 +407,7 @@
 #
 #cyclic_scrolling = no
 #
-#lyrics_fetchers = azlyrics, genius, musixmatch, sing365, metrolyrics, justsomelyrics, jahlyrics, plyrics, tekstowo, zeneszoveg, internet
+#lyrics_fetchers = azlyrics, genius, musixmatch, sing365, metrolyrics, justsomelyrics, jahlyrics, plyrics, tekstowo, zeneszoveg, letras, internet
 #
 #follow_now_playing_lyrics = no
 #
