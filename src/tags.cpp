@@ -92,7 +92,7 @@ void readID3v2Tags(mpd_song *s, TagLib::ID3v2::Tag *tag)
 	readFrame(frames["TRCK"], "Track");
 	readFrame(frames["TCON"], "Genre");
 	readFrame(frames["TCOM"], "Composer");
-	readFrame(frames["TPE3"], "Performer");
+	readFrame(frames["TPE4"], "Performer");
 	readFrame(frames["TPOS"], "Disc");
 	readFrame(frames["COMM"], "Comment");
 }
@@ -166,7 +166,7 @@ void writeID3v2Tags(const MPD::MutableSong &s, TagLib::ID3v2::Tag *tag)
 	writeID3v2("TRCK", tagList(s, &MPD::Song::getTrack));
 	writeID3v2("TCON", tagList(s, &MPD::Song::getGenre));
 	writeID3v2("TCOM", tagList(s, &MPD::Song::getComposer));
-	writeID3v2("TPE3", tagList(s, &MPD::Song::getPerformer));
+	writeID3v2("TPE4", tagList(s, &MPD::Song::getPerformer));
 	writeID3v2("TPOS", tagList(s, &MPD::Song::getDisc));
 	writeID3v2("COMM", tagList(s, &MPD::Song::getComment));
 }
