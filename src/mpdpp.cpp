@@ -147,7 +147,7 @@ unsigned Connection::Version() const
 void Connection::SetHostname(const std::string &host)
 {
 	size_t at = host.find("@");
-	if (at != std::string::npos)
+	if (at != 0 && at != std::string::npos)
 	{
 		m_password = host.substr(0, at);
 		m_host = host.substr(at+1);
