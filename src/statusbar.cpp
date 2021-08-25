@@ -62,11 +62,11 @@ void Progressbar::draw(unsigned int elapsed, unsigned int time)
 	*wFooter << Config.progressbar_color;
 
 	// set the different bar characters depending on the amount of configured chars
-	char bar_start_char = Config.progressbar[0];
-	char bar_time_char = Config.progressbar[0];
-	char bar_time_end_char = Config.progressbar[1];
-	char bar_remaining_char = Config.progressbar[2];
-	char bar_remaining_end_char = Config.progressbar[2];
+	wchar_t bar_start_char = Config.progressbar[0];
+	wchar_t bar_time_char = Config.progressbar[0];
+	wchar_t bar_time_end_char = Config.progressbar[1];
+	wchar_t bar_remaining_char = Config.progressbar[2];
+	wchar_t bar_remaining_end_char = Config.progressbar[2];
 	if (Config.progressbar[3] != '\0') 
 	{
 		bar_time_char = Config.progressbar[1];
