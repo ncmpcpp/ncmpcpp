@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -74,13 +74,13 @@ void expand_home(std::string &path)
 bool configure(int argc, char **argv)
 {
 	const std::vector<std::string> default_config_paths = {
-		"~/.ncmpcpp/config",
-		xdg_config_home() + "ncmpcpp/config"
+		xdg_config_home() + "ncmpcpp/config",
+		"~/.ncmpcpp/config"
 	};
 
 	const std::vector<std::string> default_bindings_paths = {
-		"~/.ncmpcpp/bindings",
-		xdg_config_home() + "ncmpcpp/bindings"
+		xdg_config_home() + "ncmpcpp/bindings",
+		"~/.ncmpcpp/bindings"
 	};
 
 	std::vector<std::string> bindings_paths;
@@ -156,11 +156,10 @@ bool configure(int argc, char **argv)
 		if (vm.count("test-lyrics-fetchers"))
 		{
 			std::vector<std::tuple<std::string, std::string, std::string>> fetcher_data = {
-				std::make_tuple("lyricwiki", "rihanna", "umbrella"),
 				std::make_tuple("azlyrics", "rihanna", "umbrella"),
 				std::make_tuple("genius", "rihanna", "umbrella"),
+				std::make_tuple("musixmatch", "rihanna", "umbrella"),
 				std::make_tuple("sing365", "rihanna", "umbrella"),
-				std::make_tuple("lyricsmania", "rihanna", "umbrella"),
 				std::make_tuple("metrolyrics", "rihanna", "umbrella"),
 				std::make_tuple("justsomelyrics", "rihanna", "umbrella"),
 				std::make_tuple("jahlyrics", "sean kingston", "dry your eyes"),

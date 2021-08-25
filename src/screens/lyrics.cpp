@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -34,6 +34,7 @@
 #include "format_impl.h"
 #include "global.h"
 #include "helpers.h"
+#include "macro_utilities.h"
 #include "screens/lyrics.h"
 #include "screens/playlist.h"
 #include "settings.h"
@@ -323,24 +324,15 @@ void Lyrics::edit()
 
 	Statusbar::print("Opening lyrics in external editor...");
 
-	GNUC_UNUSED int res;
-	std::string command;
 	std::string filename = lyricsFilename(m_song);
 	escapeSingleQuotes(filename);
 	if (Config.use_console_editor)
 	{
-		command = Config.external_editor + " '" + filename + "'";
-		NC::pauseScreen();
-		res = system(command.c_str());
-		NC::unpauseScreen();
+		runExternalConsoleCommand(Config.external_editor + " '" + filename + "'");
 		fetch(m_song);
 	}
 	else
-	{
-		command = "nohup " + Config.external_editor
-			+ " '" + filename + "' > /dev/null 2>&1 &";
-		res = system(command.c_str());
-	}
+		runExternalCommand(Config.external_editor + " '" + filename + "'", false);
 }
 
 void Lyrics::toggleFetcher()

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -528,11 +528,11 @@ inline const char *withErrors(bool success)
 	return success ? "" : " " "(with errors)";
 }
 
+void deleteSelectedSongsFromPlaylist(NC::Menu<MPD::Song> &playlist);
+
 bool addSongToPlaylist(const MPD::Song &s, bool play, int position = -1);
 
 const MPD::Song *currentSong(const BaseScreen *screen);
-
-MPD::SongIterator getDatabaseIterator(MPD::Connection &mpd);
 
 std::string timeFormat(const char *format, time_t t);
 

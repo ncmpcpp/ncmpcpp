@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -29,10 +29,12 @@
 #include "curses/window.h"
 #include "interfaces.h"
 #include "screens/screen.h"
+#include "utility/sample_buffer.h"
 
 #ifdef HAVE_FFTW3_H
 # include <fftw3.h>
 #endif
+
 
 struct Visualizer: Screen<NC::Window>, Tabbable
 {
@@ -54,36 +56,65 @@ struct Visualizer: Screen<NC::Window>, Tabbable
 	virtual bool isLockable() override { return true; }
 	virtual bool isMergable() override { return true; }
 
-	// private members
+	void Clear();
+	void OpenDataSource();
+	void CloseDataSource();
+
 	void ToggleVisualizationType();
-	void SetFD();
-	void ResetFD();
 	void FindOutputID();
 	void ResetAutoScaleMultiplier();
 
 private:
-	void DrawSoundWave(int16_t *, ssize_t, size_t, size_t);
-	void DrawSoundWaveStereo(int16_t *, int16_t *, ssize_t, size_t);
-	void DrawSoundWaveFill(int16_t *, ssize_t, size_t, size_t);
-	void DrawSoundWaveFillStereo(int16_t *, int16_t *, ssize_t, size_t);
-	void DrawSoundEllipse(int16_t *, ssize_t, size_t, size_t);
-	void DrawSoundEllipseStereo(int16_t *, int16_t *, ssize_t, size_t);
+	void DrawSoundWave(const int16_t *, ssize_t, size_t, size_t);
+	void DrawSoundWaveStereo(const int16_t *, const int16_t *, ssize_t, size_t);
+	void DrawSoundWaveFill(const int16_t *, ssize_t, size_t, size_t);
+	void DrawSoundWaveFillStereo(const int16_t *, const int16_t *, ssize_t, size_t);
+	void DrawSoundEllipse(const int16_t *, ssize_t, size_t, size_t);
+	void DrawSoundEllipseStereo(const int16_t *, const int16_t *, ssize_t, size_t);
 #	ifdef HAVE_FFTW3_H
-	void DrawFrequencySpectrum(int16_t *, ssize_t, size_t, size_t);
-	void DrawFrequencySpectrumStereo(int16_t *, int16_t *, ssize_t, size_t);
+	void DrawFrequencySpectrum(const int16_t *, ssize_t, size_t, size_t);
+	void DrawFrequencySpectrumStereo(const int16_t *, const int16_t *, ssize_t, size_t);
+	void ApplyWindow(double *, const int16_t *, ssize_t);
+	void GenLogspace();
+	double Bin2Hz(size_t);
+	double Interpolate(size_t, size_t);
 #	endif // HAVE_FFTW3_H
 
-	int m_output_id;
-	boost::posix_time::ptime m_timer;
+	void InitDataSource();
+	void InitVisualization();
 
-	int m_fifo;
-	size_t m_samples;
+	void (Visualizer::*draw)(const int16_t *, ssize_t, size_t, size_t);
+	void (Visualizer::*drawStereo)(const int16_t *, const int16_t *, ssize_t, size_t);
+
+	int m_output_id;
+	bool m_reset_output;
+
+	int m_source_fd;
+	std::string m_source_location;
+	std::string m_source_port;
+
+	std::vector<int16_t> m_rendered_samples;
+	std::vector<int16_t> m_incoming_samples;
+	SampleBuffer m_buffered_samples;
+	size_t m_sample_consumption_rate;
+	size_t m_sample_consumption_rate_up_ctr;
+	size_t m_sample_consumption_rate_dn_ctr;
+
 	double m_auto_scale_multiplier;
 #	ifdef HAVE_FFTW3_H
 	size_t m_fftw_results;
 	double *m_fftw_input;
 	fftw_complex *m_fftw_output;
 	fftw_plan m_fftw_plan;
+	const uint32_t DFT_NONZERO_SIZE;
+	const uint32_t DFT_TOTAL_SIZE;
+	const double DYNAMIC_RANGE;
+	const double HZ_MIN;
+	const double HZ_MAX;
+	const double GAIN;
+	const std::wstring SMOOTH_CHARS;
+	std::vector<double> m_dft_logspace;
+	std::vector<std::pair<size_t, double>> m_bar_heights;
 
 	std::vector<double> m_freq_magnitudes;
 #	endif // HAVE_FFTW3_H

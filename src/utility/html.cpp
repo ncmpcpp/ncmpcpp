@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -54,6 +54,7 @@ std::string unescapeHtmlUtf8(const std::string &data)
 void unescapeHtmlEntities(std::string &s)
 {
 	// well, at least some of them.
+	boost::replace_all(s, "&apos;", "'");
 	boost::replace_all(s, "&amp;", "&");
 	boost::replace_all(s, "&gt;", ">");
 	boost::replace_all(s, "&lt;", "<");

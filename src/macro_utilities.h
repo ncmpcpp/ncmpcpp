@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -70,6 +70,21 @@ private:
 	std::string m_command;
 };
 
+struct RunExternalConsoleCommand: BaseAction
+{
+	RunExternalConsoleCommand(std::string &&command);
+
+private:
+	virtual void run() override;
+
+	std::string m_command;
+};
+
 }
+
+// Helpers
+
+void runExternalConsoleCommand(const std::string &cmd);
+void runExternalCommand(const std::string &cmd, bool block);
 
 #endif // NCMPCPP_MACRO_UTILITIES_H

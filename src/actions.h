@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -77,6 +77,7 @@ enum class Type
 	MoveSelectedItemsDown,
 	MoveSelectedItemsTo,
 	Add,
+	Load,
 	SeekForward,
 	SeekBackward,
 	ToggleDisplayMode,
@@ -427,6 +428,7 @@ struct VolumeUp: BaseAction
 	VolumeUp(): BaseAction(Type::VolumeUp, "volume_up") { }
 	
 private:
+	virtual bool canBeRun() override;
 	virtual void run() override;
 };
 
@@ -435,6 +437,7 @@ struct VolumeDown: BaseAction
 	VolumeDown(): BaseAction(Type::VolumeDown, "volume_down") { }
 	
 private:
+	virtual bool canBeRun() override;
 	virtual void run() override;
 };
 
@@ -492,6 +495,7 @@ struct ReplaySong: BaseAction
 	ReplaySong(): BaseAction(Type::ReplaySong, "replay_song") { }
 	
 private:
+	virtual bool canBeRun() override;
 	virtual void run() override;
 };
 
@@ -600,6 +604,15 @@ private:
 struct Add: BaseAction
 {
 	Add(): BaseAction(Type::Add, "add") { }
+	
+private:
+	virtual bool canBeRun() override;
+	virtual void run() override;
+};
+
+struct Load: BaseAction
+{
+	Load(): BaseAction(Type::Load, "load") { }
 	
 private:
 	virtual bool canBeRun() override;
@@ -781,6 +794,7 @@ struct SetVolume: BaseAction
 	SetVolume(): BaseAction(Type::SetVolume, "set_volume") { }
 	
 private:
+	virtual bool canBeRun() override;
 	virtual void run() override;
 };
 

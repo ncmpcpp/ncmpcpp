@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -88,8 +88,14 @@ void setProperties(NC::Menu<T> &menu, const MPD::Song &s, const SongList &list,
 		auto next = list.beginS() + drawn_pos + 1;
 		if (next != list.endS())
 		{
-			if (next->song() != nullptr && next->song()->getAlbum() != s.getAlbum())
-				separate_albums = true;
+			if (next->song() != nullptr)
+			{
+				// Draw a separator when the next album is different than the current
+				// one. In case there are two albums with the same name, but a different
+				// album artist, compare also album artists.
+				separate_albums = next->song()->getAlbum() != s.getAlbum()
+				               || next->song()->getAlbumArtist() != s.getAlbumArtist();
+			}
 		}
 	}
 	if (separate_albums)

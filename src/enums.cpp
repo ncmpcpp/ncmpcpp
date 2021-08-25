@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -78,6 +78,9 @@ std::ostream &operator<<(std::ostream &os, SortMode sm)
 {
 	switch (sm)
 	{
+		case SortMode::Type:
+			os << "type";
+			break;
 		case SortMode::Name:
 			os << "name";
 			break;
@@ -87,8 +90,8 @@ std::ostream &operator<<(std::ostream &os, SortMode sm)
 		case SortMode::CustomFormat:
 			os << "format";
 			break;
-		case SortMode::NoOp:
-			os << "noop";
+		case SortMode::None:
+			os << "none";
 			break;
 	}
 	return os;
@@ -98,14 +101,16 @@ std::istream &operator>>(std::istream &is, SortMode &sm)
 {
 	std::string ssm;
 	is >> ssm;
-	if (ssm == "name")
+	if (ssm == "type")
+		sm = SortMode::Type;
+	else if (ssm == "name")
 		sm = SortMode::Name;
 	else if (ssm == "mtime")
 		sm = SortMode::ModificationTime;
 	else if (ssm == "format")
 		sm = SortMode::CustomFormat;
-	else if (ssm == "noop")
-		sm = SortMode::NoOp;
+	else if (ssm == "none")
+		sm = SortMode::None;
 	else
 		is.setstate(std::ios::failbit);
 	return is;

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -32,7 +32,7 @@ enum class SpaceAddMode { AddRemove, AlwaysAdd };
 std::ostream &operator<<(std::ostream &os, SpaceAddMode sam);
 std::istream &operator>>(std::istream &is, SpaceAddMode &sam);
 
-enum class SortMode { Name, ModificationTime, CustomFormat, NoOp };
+enum class SortMode { Type, Name, ModificationTime, CustomFormat, None };
 std::ostream &operator<<(std::ostream &os, SortMode sm);
 std::istream &operator>>(std::istream &is, SortMode &sm);
 

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -129,7 +129,8 @@ std::vector<MPD::Song> BrowserWindow::getSelectedSongs()
 /**********************************************************************/
 
 Browser::Browser()
-: m_update_request(true)
+: m_redraw_header(false)
+, m_update_request(true)
 , m_local_browser(false)
 , m_scroll_beginning(0)
 , m_current_directory("/")
@@ -165,7 +166,7 @@ void Browser::resize()
 void Browser::switchTo()
 {
 	SwitchTo::execute(this);
-	drawHeader();
+	m_redraw_header = true;
 }
 
 std::wstring Browser::title()
@@ -180,7 +181,6 @@ void Browser::update()
 	if (m_update_request)
 	{
 		m_update_request = false;
-		bool directory_changed = false;
 		do
 		{
 			try
@@ -193,17 +193,17 @@ void Browser::update()
 				// If current directory doesn't exist, try getting its
 				// parent until we either succeed or reach the root.
 				if (err.code() == MPD_SERVER_ERROR_NO_EXIST)
-				{
 					m_current_directory = getParentDirectory(m_current_directory);
-					directory_changed = true;
-				}
 				else
 					throw;
 			}
 		}
 		while (w.empty() && !inRootDirectory());
-		if (directory_changed)
-			drawHeader();
+	}
+	if (m_redraw_header)
+	{
+		drawHeader();
+		m_redraw_header = false;
 	}
 }
 
@@ -305,14 +305,13 @@ bool Browser::itemAvailable()
 
 bool Browser::addItemToPlaylist(bool play)
 {
-	bool result = false;
+	bool success = false;
 
 	auto tryToPlay = [] {
-		// Cheap trick that might fail in presence of multiple
-		// clients modifying the playlist at the same time, but
-		// oh well, this approach correctly loads cue playlists
-		// and is much faster in general as it doesn't require
-		// fetching song data.
+		// Cheap trick that might fail in presence of multiple clients modifying the
+		// playlist at the same time, but oh well, this approach correctly loads cue
+		// playlists and is much faster in general as it doesn't require fetching
+		// song data.
 		try
 		{
 			Mpd.Play(Status::State::playlistLength());
@@ -334,31 +333,30 @@ bool Browser::addItemToPlaylist(bool play)
 			{
 				std::vector<MPD::Song> songs;
 				getLocalDirectoryRecursively(songs, item.directory().path());
-				result = addSongsToPlaylist(songs.begin(), songs.end(), play, -1);
+				success = addSongsToPlaylist(songs.begin(), songs.end(), play, -1);
 			}
 			else
 			{
-				Mpd.Add(item.directory().path());
+				success = Mpd.Add(item.directory().path());
 				if (play)
 					tryToPlay();
-				result = true;
 			}
 			Statusbar::printf("Directory \"%1%\" added%2%",
-				item.directory().path(), withErrors(result));
+				item.directory().path(), withErrors(success));
 			break;
 		}
 		case MPD::Item::Type::Song:
-			result = addSongToPlaylist(item.song(), play);
+			success = addSongToPlaylist(item.song(), play);
 			break;
 		case MPD::Item::Type::Playlist:
-			Mpd.LoadPlaylist(item.playlist().path());
+			success = Mpd.LoadPlaylist(item.playlist().path());
 			if (play)
 				tryToPlay();
-			Statusbar::printf("Playlist \"%1%\" loaded", item.playlist().path());
-			result = true;
+			if (success)
+				Statusbar::printf("Playlist \"%1%\" loaded", item.playlist().path());
 			break;
 	}
-	return result;
+	return success;
 }
 
 std::vector<MPD::Song> Browser::getSelectedSongs()
@@ -429,18 +427,26 @@ void Browser::locateSong(const MPD::Song &s)
 
 	w.clearFilter();
 
-	// change to relevant directory
-	if (m_current_directory != s.getDirectory())
+	try
 	{
-		getDirectory(s.getDirectory());
-		drawHeader();
-	}
+		// Try to change to relevant directory.
+		if (m_current_directory != s.getDirectory())
+			getDirectory(s.getDirectory());
 
-	// highlight the item
-	auto begin = w.beginV(), end = w.endV();
-	auto it = std::find(begin, end, MPD::Item(s));
-	if (it != end)
-		w.highlight(it-begin);
+		// Highlight the item.
+		auto begin = w.beginV(), end = w.endV();
+		auto it = std::find(begin, end, MPD::Item(s));
+		if (it != end)
+			w.highlight(it-begin);
+	}
+	catch (MPD::ServerError &err)
+	{
+		// If the directory is invalid, recover by invoking the update.
+		if (err.code() == MPD_SERVER_ERROR_NO_EXIST)
+			requestUpdate();
+		else
+			throw;
+	}
 }
 
 bool Browser::enterDirectory()
@@ -452,7 +458,6 @@ bool Browser::enterDirectory()
 		if (item.type() == MPD::Item::Type::Directory)
 		{
 			getDirectory(item.directory().path());
-			drawHeader();
 			result = true;
 		}
 	}
@@ -469,7 +474,10 @@ void Browser::getDirectory(std::string directory)
 
 		// Reset the position if we change directories.
 		if (m_current_directory != directory)
+		{
 			w.reset();
+			m_redraw_header = true;
+		}
 
 		// Check if it's a parent directory.
 		if (isStringParentDirectory(directory))
@@ -490,7 +498,15 @@ void Browser::getDirectory(std::string directory)
 		}
 
 		if (m_local_browser)
+		{
 			getLocalDirectory(w, directory);
+			if (Config.browser_sort_mode == SortMode::None
+			    || Config.browser_sort_mode == SortMode::Type)
+			{
+				Statusbar::print("Switching to sorting songs by name for the local browser");
+				Config.browser_sort_mode = SortMode::Name;
+			}
+		}
 		else
 		{
 			MPD::ItemIterator end;
@@ -498,10 +514,12 @@ void Browser::getDirectory(std::string directory)
 				w.addItem(std::move(*dir));
 		}
 
-		if (Config.browser_sort_mode != SortMode::NoOp)
+		if (Config.browser_sort_mode != SortMode::None)
 		{
-			std::sort(w.begin() + (is_root ? 0 : 1), w.end(),
-			          LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the, Config.browser_sort_mode));
+			std::stable_sort(
+				w.begin() + (is_root ? 0 : 1), w.end(),
+				LocaleBasedItemSorting(std::locale(), Config.ignore_leading_the,
+				                       Config.browser_sort_mode));
 		}
 	}
 
@@ -538,7 +556,6 @@ void Browser::changeBrowseMode()
 		m_current_directory = "/";
 	w.reset();
 	getDirectory(m_current_directory);
-	drawHeader();
 }
 
 void Browser::remove(const MPD::Item &item)
@@ -679,10 +696,10 @@ void getLocalDirectoryRecursively(std::vector<MPD::Song> &songs, const std::stri
 			songs.push_back(getLocalSong(*entry, false));
 	};
 
-	if (Config.browser_sort_mode != SortMode::NoOp)
+	if (Config.browser_sort_mode != SortMode::None)
 	{
-		std::sort(songs.begin()+sort_offset, songs.end(),
-			LocaleBasedSorting(std::locale(), Config.ignore_leading_the)
+		std::stable_sort(songs.begin()+sort_offset, songs.end(),
+		                 LocaleBasedSorting(std::locale(), Config.ignore_leading_the)
 		);
 	}
 }

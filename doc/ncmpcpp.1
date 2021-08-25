@@ -26,7 +26,7 @@ Specify configuration file(s)
 \fB\-\-ignore-config-errors\fR
 Ignore unknown and invalid options in configuration files
 .TP
-\fB\-c\fR, \fB\-\-bindings\fR=\fIFILE\fR
+\fB\-b\fR, \fB\-\-bindings\fR=\fIFILE\fR
 Specify bindings file(s)
 .TP
 \fB\-s\fR, \fB\-\-screen <name>\fR
@@ -45,7 +45,12 @@ Display help.
 Display version information.
 
 .SH "CONFIGURATION"
-When ncmpcpp starts, it tries to read user's settings from $HOME/.ncmpcpp/config and $XDG_CONFIG_HOME/ncmpcpp/config files. If no configuration is found, ncmpcpp uses its default configuration. An example configuration file containing all default values is provided with ncmpcpp and can be usually found in /usr/share/doc/ncmpcpp (exact location may depend on used distribution or configure prefix).
+When ncmpcpp starts, it tries to read settings from
+$XDG_CONFIG_HOME/ncmpcpp/config and $HOME/.ncmpcpp/config files. If no
+configuration is found, ncmpcpp uses its default configuration. An example
+configuration file containing all default values is provided with ncmpcpp and
+can be usually found in /usr/share/doc/ncmpcpp (the exact location may depend on
+your operating system or configure prefix).
 
 Note: Configuration option values can either be enclosed in quotation marks or not.
  - If they are enclosed, the leftmost and the rightmost quotation marks are treated as delimiters, therefore it is not necessary to escape quotation marks you use within the value itself.
@@ -69,6 +74,9 @@ Connect to MPD running on specified host/unix socket. When HOST starts with a '/
 .B mpd_port = PORT
 Connect to MPD on the specified port. Note: MPD_PORT environment variable overrides this setting.
 .TP
+.B mpd_password = PASSWORD
+Use PASSWORD to authenticate to MPD.
+.TP
 .B mpd_music_dir = PATH
 Search for files in specified directory. This is needed for tag editor to work.
 .TP
@@ -78,17 +86,15 @@ Set connection timeout to MPD to given value.
 .B mpd_crossfade_time = SECONDS
 Default number of seconds to crossfade, if enabled by ncmpcpp.
 .TP
-.B visualizer_fifo_path = PATH
-Path to mpd fifo output. This is needed to make music visualizer work (note that output sound format of this fifo has to be either 44100:16:1 or 44100:16:2, depending on whether you want mono or stereo visualization)
+.B visualizer_data_source = LOCATION
+Source of data for the visualizer. For MPD it's going to be a fifo output, for
+Mopidy a udpsink output (see the example configuration file for more details).
 .TP
 .B visualizer_output_name = NAME
 Name of output that provides data for visualizer. Needed to keep sound and visualization in sync.
 .TP
 .B visualizer_in_stereo = yes/no
 Should be set to 'yes', if fifo output's format was set to 44100:16:2.
-.TP
-.B visualizer_sync_interval = SECONDS
-Defines interval between syncing visualizer and audio outputs.
 .TP
 .B visualizer_type = spectrum/wave/wave_filled/ellipse
 Defines default visualizer type (spectrum is available only if ncmpcpp was compiled with fftw support).
@@ -98,6 +104,27 @@ Defines visualizer's look (string has to be exactly 2 characters long: first one
 .TP
 .B visualizer_color = COLORS
 Comma separated list of colors to be used in music visualization.
+.TP
+.B visualizer_fps = FPS
+The amount of frames per second for the visualizer.
+.TP
+.B visualizer_autoscale = yes/no
+Automatically scale visualizer size.
+.TP
+.B visualizer_spectrum_smooth_look = yes/no
+For spectrum visualizer, use unicode block characters for a smoother, more continuous look. This will override the visualizer_look option. With transparent terminals and visualizer_in_stereo set, artifacts may be visible on the bottom half of the visualization.
+.TP
+.B visualizer_spectrum_dft_size = NUMBER
+For spectrum visualizer, a value between 1 and 5 inclusive. Specifying a larger value makes the visualizer look at a larger slice of time, which results in less jumpy visualizer output.
+.TP
+.B visualizer_spectrum_gain = dB
+Gain for spectrum visualizer in dB, larger/smaller values shift bars up/down.
+.TP
+.B visualizer_spectrum_hz_min = Hz
+For spectrum visualizer, left-most frequency of visualizer, must be less than HZ MAX.
+.TP
+.B visualizer_spectrum_hz_max = Hz
+For spectrum visualizer, right-most frequency of visualizer, must be greater than HZ MIN.
 .TP
 .B system_encoding = ENCODING
 If you use encoding other than utf8, set it in order to handle utf8 encoded strings properly.
@@ -154,7 +181,7 @@ Suffix for selected items.
 Prefix for modified item (tag editor).
 .TP
 .B browser_sort_mode
-Determines sort mode for browser. Possible values are "name", "mtime", "format" and "noop".
+Determines sort mode for browser. Possible values are "type", "name", "mtime", "format" and "none".
 .TP
 .B browser_sort_format
 Format to use for sorting songs in browser. For this option to be effective, browser_sort_mode must be set to "format".
@@ -236,6 +263,9 @@ Default tag type for leftmost column in media library.
 .B media_library_albums_split_by_date = yes/no
 Determines whether albums in media library should be split by date.
 .TP
+.B media_library_hide_album_dates = yes/no
+Determines whether album dates in media library should be hidden.
+.TP
 .B default_find_mode = wrapped/normal
 If set to "wrapped", going from last found position to next will take you to the first one (same goes for the first position and going to previous one), otherwise no actions will be performed.
 .TP
@@ -259,9 +289,6 @@ If enabled, text in header window will scroll if its length is longer then actua
 .TP
 .B cyclic_scrolling = yes/no
 If enabled, cyclic scrolling is used (e.g. if you press down arrow being at the end of list, it'll take you to the beginning)
-.TP
-.B lines_scrolled = NUMBER
-Number of lines that are scrolled with mouse wheel.
 .TP
 .B lyrics_fetchers = FETCHERS
 Comma separated list of lyrics fetchers.
@@ -308,6 +335,15 @@ If you want to lock a screen, ncmpcpp asks for % of locked screen's width to be 
 .B ask_for_locked_screen_width_part = yes/no
 If enabled, ncmpcpp will ask for % of locked screen's width each time you want to lock a screen. If you disable that, it'll silently attempt to use default value.
 .TP
+.B media_library_column_width_ratio_two = a:b
+The ratio of the column widths in the media library, when there are two columns.
+.TP
+.B media_library_column_width_ratio_three = a:b:c
+The ratio of the column widths in the media library, when there are three columns.
+.TP
+.B playlist_editor_column_width_ratio = a:b
+The ratio of the column widths in the playlist editor.
+.TP
 .B jump_to_now_playing_song_at_start = yes/no
 If enabled, ncmpcpp will jump at start to now playing song if mpd is playing or paused.
 .TP
@@ -343,6 +379,9 @@ If set to yes, mouse support will be enabled.
 .TP
 .B mouse_list_scroll_whole_page = yes/no
 If enabled, mouse wheel will scroll the whole page of item list at a time, otherwise the number of lines specified by lines_scrolled variable.
+.TP
+.B lines_scrolled = NUMBER
+Number of lines that are scrolled with mouse wheel.
 .TP
 .B empty_tag_marker = TEXT
 Text that will be displayed, if requested tag is not set.
@@ -420,7 +459,11 @@ Border color of pop-up windows. If set to 'none', no border will be shown.
 Color of active window's border.
 .TP
 .SH "BINDINGS"
-When ncmpcpp starts, it tries to read user's bindings from ~/.ncmpcpp/bindings and $XDG_CONFIG_HOME/ncmpcpp/bindings files. If no bindings file is found, ncmpcpp uses the defaults. An example bindings file with the default values can be found usually in /usr/share/doc/ncmpcpp (exact location may depend on used distribution or configure prefix).
+When ncmpcpp starts, it tries to read bindings from
+$XDG_CONFIG_HOME/ncmpcpp/bindings and ~/.ncmpcpp/bindings files. If no bindings
+file is found, ncmpcpp uses the defaults. An example bindings file with default
+values can be found usually in /usr/share/doc/ncmpcpp (the exact location may
+depend on your operating system or configure prefix).
 
 You can view current keybindings by pressing F1.
 .SH "SONG FORMAT"

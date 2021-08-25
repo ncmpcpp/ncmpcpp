@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -28,6 +28,7 @@
 #include "format_impl.h"
 #include "global.h"
 #include "helpers.h"
+#include "macro_utilities.h"
 #include "screens/lyrics.h"
 #include "screens/media_library.h"
 #include "screens/outputs.h"
@@ -162,8 +163,8 @@ void initialize_status()
 	myOutputs->fetchList();
 #	endif // ENABLE_OUTPUTS
 #	ifdef ENABLE_VISUALIZER
-	myVisualizer->ResetFD();
-	myVisualizer->SetFD();
+	myVisualizer->CloseDataSource();
+	myVisualizer->OpenDataSource();
 	myVisualizer->FindOutputID();
 #	endif // ENABLE_VISUALIZER
 
@@ -191,14 +192,29 @@ void Status::handleServerError(MPD::ServerError &e)
 	Statusbar::printf("MPD: %1%", e.what());
 	if (e.code() == MPD_SERVER_ERROR_PERMISSION)
 	{
-		NC::Window::ScopedPromptHook helper(*wFooter, nullptr);
-		Statusbar::put() << "Password: ";
-		Mpd.SetPassword(wFooter->prompt("", -1, true));
-		try {
+		try
+		{
+			NC::Window::ScopedPromptHook helper(*wFooter, nullptr);
+			Statusbar::put() << "Password: ";
+			Mpd.SetPassword(wFooter->prompt("", -1, true));
 			Mpd.SendPassword();
 			Statusbar::print("Password accepted");
-		} catch (MPD::ServerError &e_prim) {
-			handleServerError(e_prim);
+		}
+		// SendPassword might throw if connection is closed
+		catch (MPD::ClientError &e_prim)
+		{
+			handleClientError(e_prim);
+		}
+		// Wrong password, we'll ask again later
+		catch (MPD::ServerError &e_prim)
+		{
+			Statusbar::printf("MPD: %1%", e_prim.what());
+		}
+		// If prompt asking for a password is aborted, exit the application to
+		// prevent getting stuck in the prompt indefinitely.
+		catch (NC::PromptAborted &)
+		{
+			Actions::ExitMainLoop = true;
 		}
 	}
 }
@@ -209,15 +225,6 @@ void Status::trace(bool update_timer, bool update_window_timeout)
 {
 	if (update_timer)
 		Timer = boost::posix_time::microsec_clock::local_time();
-	if (update_window_timeout)
-	{
-		// set appropriate window timeout
-		int nc_wtimeout = std::numeric_limits<int>::max();
-		applyToVisibleWindows([&nc_wtimeout](BaseScreen *s) {
-			nc_wtimeout = std::min(nc_wtimeout, s->windowTimeout());
-		});
-		wFooter->setTimeout(nc_wtimeout);
-	}
 	if (Mpd.Connected())
 	{
 		if (!m_status_initialized)
@@ -236,6 +243,16 @@ void Status::trace(bool update_timer, bool update_window_timeout)
 		Statusbar::tryRedraw();
 
 		Mpd.idle();
+	}
+	// Update timeout after MPD as it may depend on its status.
+	if (update_window_timeout)
+	{
+		// set appropriate window timeout
+		int nc_wtimeout = std::numeric_limits<int>::max();
+		applyToVisibleWindows([&nc_wtimeout](BaseScreen *s) {
+			nc_wtimeout = std::min(nc_wtimeout, s->windowTimeout());
+		});
+		wFooter->setTimeout(nc_wtimeout);
 	}
 }
 
@@ -488,9 +505,9 @@ void Status::Changes::playerState()
 			}
 			throw std::logic_error("unreachable");
 		};
-		GNUC_UNUSED int res;
 		setenv("MPD_PLAYER_STATE", stateToEnv(m_player_state), 1);
-		res = system(Config.execute_on_player_state_change.c_str());
+		// Since we're setting a MPD_PLAYER_STATE, we need to block.
+		runExternalCommand(Config.execute_on_player_state_change, true);
 		unsetenv("MPD_PLAYER_STATE");
 	}
 
@@ -518,7 +535,7 @@ void Status::Changes::playerState()
 			}
 #			ifdef ENABLE_VISUALIZER
 			if (isVisible(myVisualizer))
-				myVisualizer->main().clear();
+				myVisualizer->Clear();
 #			endif // ENABLE_VISUALIZER
 			break;
 		default:
@@ -567,9 +584,12 @@ void Status::Changes::songID(int song_id)
 		const auto &s = it != pl.endV() ? *it : Mpd.GetCurrentSong();
 		if (!s.empty())
 		{
-			GNUC_UNUSED int res;
 			if (!Config.execute_on_song_change.empty())
-				res = system(Config.execute_on_song_change.c_str());
+			{
+				// We need to block to allow sending output to the terminal so a script
+				// can e.g. set the album art.
+				runExternalCommand(Config.execute_on_song_change, true);
+			}
 
 			if (Config.fetch_lyrics_in_background)
 				myLyrics->fetchInBackground(s, false);

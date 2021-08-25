@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -459,12 +459,16 @@ void initScreen(bool enable_colors, bool enable_mouse)
 
 void pauseScreen()
 {
+	if (Mouse::supportEnabled)
+		Mouse::disable();
 	def_prog_mode();
 	endwin();
 }
 
 void unpauseScreen()
 {
+	if (Mouse::supportEnabled)
+		Mouse::enable();
 	refresh();
 }
 
@@ -678,13 +682,16 @@ void Window::moveTo(size_t new_x, size_t new_y)
 
 void Window::adjustDimensions(size_t width, size_t height)
 {
+	// NOTE: when dimensions get small, integer overflow will cause calls to
+	// `Menu<T>::refresh()` to run for a very long time.
+
 	if (m_border)
 	{
-		width -= 2;
-		height -= 2;
+		width -= width >= 2 ? 2 : 0;
+		height -= height >= 2 ? 2 : 0;
 	}
 	if (!m_title.empty())
-		height -= 2;
+		height -= height >= 2 ? 2 : 0;
 	m_height = height;
 	m_width = width;
 }
@@ -948,6 +955,8 @@ Key::Type Window::getInputChar(int key)
 			m_mouse_event.y = (raw_y - 33) & 0xff;
 			return define_mouse_event(key);
 		}
+		case 'P': // st
+			return Key::Delete;
 		case 'Z':
 			return Key::Shift | Key::Tab;
 		case '[': // F1 to F5 in tty

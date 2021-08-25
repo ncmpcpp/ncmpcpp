@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -173,11 +173,12 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::ShowServerInfo, "Show server info");
 
 	key_section(w, "Global");
+	key(w, Type::Play, "Play");
 	key(w, Type::Stop, "Stop");
 	key(w, Type::Pause, "Pause");
 	key(w, Type::Next, "Next track");
 	key(w, Type::Previous, "Previous track");
-	key(w, Type::ReplaySong, "Replay playing song");
+	key(w, Type::ReplaySong, "Replay current song");
 	key(w, Type::SeekForward, "Seek forward in playing song");
 	key(w, Type::SeekBackward, "Seek backward in playing song");
 	key(w, Type::VolumeDown,
@@ -247,6 +248,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::MoveSelectedItemsDown, "Move selected item(s) down");
 	key(w, Type::MoveSelectedItemsTo, "Move selected item(s) to cursor position");
 	key(w, Type::Add, "Add item to playlist");
+	key(w, Type::Load, "Load stored playlist");
 #	ifdef HAVE_TAGLIB_H
 	key(w, Type::EditSong, "Edit song");
 #	endif // HAVE_TAGLIB_H

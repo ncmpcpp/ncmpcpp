@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -58,6 +58,9 @@ bool LocaleBasedItemSorting::operator()(const MPD::Item &a, const MPD::Item &b) 
 	{
 		switch (m_sort_mode)
 		{
+			case SortMode::Type:
+				result = a.type() > b.type();
+				break;
 			case SortMode::Name:
 				switch (a.type())
 				{
@@ -101,8 +104,8 @@ bool LocaleBasedItemSorting::operator()(const MPD::Item &a, const MPD::Item &b) 
 						break;
 				}
 				break;
-			case SortMode::NoOp:
-				throw std::logic_error("can't sort with NoOp sorting mode");
+			case SortMode::None:
+				throw std::logic_error("can't sort with None sorting mode");
 		}
 	}
 	else

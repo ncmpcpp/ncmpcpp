@@ -25,6 +25,7 @@ ncmpcpp_SOURCES = \
 	utility/comparators.cpp \
 	utility/html.cpp \
 	utility/option_parser.cpp \
+	utility/sample_buffer.cpp \
 	utility/string.cpp \
 	utility/type_conversions.cpp \
 	utility/wide_string.cpp \
@@ -90,6 +91,7 @@ noinst_HEADERS = \
 	utility/html.h \
 	utility/option_parser.h \
 	utility/readline.h \
+	utility/sample_buffer.h \
 	utility/scoped_value.h \
 	utility/storage_kind.h \
 	utility/shared_resource.h \

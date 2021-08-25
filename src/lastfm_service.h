@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -57,6 +57,8 @@ struct ArtistInfo : public Service
 {
 	ArtistInfo(std::string artist, std::string lang)
 	: Service({{"artist", artist}, {"lang", lang}}) { }
+
+	virtual ~ArtistInfo() { }
 	
 	virtual const char *name() { return "Artist info"; }
 	

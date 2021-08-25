@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -194,7 +194,7 @@ void SortPlaylistDialog::sort() const
 		std::iter_swap(a, b);
 		Mpd.Swap(start_pos+a-playlist.begin(), start_pos+b-playlist.begin());
 	};
-	quick_sort = [this, &song_cmp, &quick_sort, &iter_swap](Iterator first, Iterator last) {
+	quick_sort = [&song_cmp, &quick_sort, &iter_swap](Iterator first, Iterator last) {
 		if (last-first > 1)
 		{
 			Iterator pivot = first+Global::RNG()%(last-first);

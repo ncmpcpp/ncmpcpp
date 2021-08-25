@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -95,6 +95,7 @@ struct Browser: Screen<BrowserWindow>, Filterable, HasSongs, Searchable, Tabbabl
 	static void fetchSupportedExtensions();
 
 private:
+	bool m_redraw_header;
 	bool m_update_request;
 	bool m_local_browser;
 	size_t m_scroll_beginning;

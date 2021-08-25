@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -66,10 +66,14 @@ PlaylistEditor::PlaylistEditor()
 , m_window_timeout(Config.data_fetching_delay ? 250 : BaseScreen::defaultWindowTimeout)
 , m_fetching_delay(boost::posix_time::milliseconds(Config.data_fetching_delay ? 250 : -1))
 {
-	LeftColumnWidth = COLS/3-1;
+	size_t ra = Config.playlist_editor_column_width_ratio[0];
+	size_t rb = Config.playlist_editor_column_width_ratio[1];
+
+	LeftColumnWidth = COLS*ra/(ra+rb)-1;
 	RightColumnStartX = LeftColumnWidth+1;
 	RightColumnWidth = COLS-LeftColumnWidth-1;
-	
+
+
 	Playlists = NC::Menu<MPD::Playlist>(0, MainStartY, LeftColumnWidth, MainHeight, Config.titles_visibility ? "Playlists" : "", Config.main_color, NC::Border());
 	setHighlightFixes(Playlists);
 	Playlists.cyclicScrolling(Config.use_cyclic_scrolling);
@@ -108,11 +112,14 @@ void PlaylistEditor::resize()
 	size_t x_offset, width;
 	getWindowResizeParams(x_offset, width);
 	
+	size_t ra = Config.playlist_editor_column_width_ratio[0];
+	size_t rb = Config.playlist_editor_column_width_ratio[1];
+
 	LeftColumnStartX = x_offset;
-	LeftColumnWidth = width/3-1;
+	LeftColumnWidth = width*ra/(ra+rb)-1;
 	RightColumnStartX = LeftColumnStartX+LeftColumnWidth+1;
 	RightColumnWidth = width-LeftColumnWidth-1;
-	
+
 	Playlists.resize(LeftColumnWidth, MainHeight);
 	Content.resize(RightColumnWidth, MainHeight);
 	
@@ -374,17 +381,34 @@ bool PlaylistEditor::itemAvailable()
 
 bool PlaylistEditor::addItemToPlaylist(bool play)
 {
-	bool result = false;
+	bool success = false;
 	if (isActiveWindow(Playlists))
 	{
-		ScopedUnfilteredMenu<MPD::Song> sunfilter_content(ReapplyFilter::No, Content);
-		result = addSongsToPlaylist(Content.beginV(), Content.endV(), play, -1);
-		Statusbar::printf("Playlist \"%1%\" loaded%2%",
-		                  Playlists.current()->value().path(), withErrors(result));
+		const auto &playlist = Playlists.current()->value();
+		success = Mpd.LoadPlaylist(playlist.path());
+		if (play)
+		{
+			// Cheap trick that might fail in presence of multiple clients modifying the
+			// playlist at the same time, but oh well, this approach correctly loads cue
+			// playlists and is much faster in general as it doesn't require fetching
+			// song data.
+			try
+			{
+				Mpd.Play(Status::State::playlistLength());
+			}
+			catch (MPD::ServerError &e)
+			{
+				// If not bad index, rethrow.
+				if (e.code() != MPD_SERVER_ERROR_ARG)
+					throw;
+			}
+		}
+		if (success)
+			Statusbar::printf("Playlist \"%1%\" loaded", playlist.path());
 	}
 	else if (isActiveWindow(Content))
-		result = addSongToPlaylist(Content.current()->value(), play);
-	return result;
+		success = addSongToPlaylist(Content.current()->value(), play);
+	return success;
 }
 
 std::vector<MPD::Song> PlaylistEditor::getSelectedSongs()

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -200,6 +200,15 @@ std::shared_ptr<Actions::BaseAction> parseActionLine(const std::string &line, F 
 					std::make_shared<Actions::RunExternalCommand>(std::move(command)));
 			else
 				error() << "empty command passed to run_external_command\n";
+		}
+		else if (action_name == "run_external_console_command")
+		{
+			std::string command = getEnclosedString(line, '"', '"', 0);
+			if (!command.empty())
+				result = std::static_pointer_cast<Actions::BaseAction>(
+					std::make_shared<Actions::RunExternalConsoleCommand>(std::move(command)));
+			else
+				error() << "empty command passed to run_external_console_command\n";
 		}
 	}
 	return result;
@@ -601,6 +610,7 @@ void BindingsConfiguration::generateDefaults()
 	{
 		bind(k, Actions::Type::JumpToParentDirectory);
 		bind(k, Actions::Type::ReplaySong);
+		bind(k, Actions::Type::Play);
 	}
 	if (notBound(k = stringToKey("f")))
 		bind(k, Actions::Type::SeekForward);

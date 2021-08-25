@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -730,7 +730,7 @@ void TagEditor::runAction()
 	{
 		MPD::Song::GetFunction get = SongInfo::Tags[id].Get;
 		MPD::MutableSong::SetFunction set = SongInfo::Tags[id].Set;
-		if (id > 0 && w == TagTypes)
+		if (w == TagTypes)
 		{
 			Statusbar::ScopedLock slock;
 			Statusbar::put() << NC::Format::Bold << TagTypes->current()->value() << NC::Format::NoBold << ": ";

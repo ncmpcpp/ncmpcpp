@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -224,7 +224,7 @@ bool TinyTagEditor::getTags()
 	
 	w.highlight(8);
 
-	auto print_key_value = [this](NC::Buffer &buf, const char *key, const auto &value) {
+	auto print_key_value = [](NC::Buffer &buf, const char *key, const auto &value) {
 		buf << NC::Format::Bold
 		    << Config.color1
 		    << key

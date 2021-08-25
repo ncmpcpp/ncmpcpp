@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -500,7 +500,7 @@ void SearchEngine::Search()
 	input_song_iterator s, end;
 	if (Config.search_in_db)
 	{
-		s = input_song_iterator(getDatabaseIterator(Mpd));
+		s = input_song_iterator(Mpd.GetDirectoryRecursive("/"));
 		end = input_song_iterator(MPD::SongIterator());
 	}
 	else

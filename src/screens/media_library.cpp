@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -79,10 +79,8 @@ MPD::SongIterator getSongsFromAlbum(const AlbumEntry &album)
 	if (!album.isAllTracksEntry())
 	{
 		Mpd.AddSearch(MPD_TAG_ALBUM, album.entry().album());
-		if(!isAlbumOnly) {
-			if (Config.media_library_albums_split_by_date)
-				Mpd.AddSearch(MPD_TAG_DATE, album.entry().date());
-		}
+		if (Config.media_library_albums_split_by_date)
+			Mpd.AddSearch(MPD_TAG_DATE, album.entry().date());
 	}
 	return Mpd.CommitSearchSongs();
 }
@@ -95,7 +93,7 @@ bool AlbumEntryMatcher(const Regex::Regex &rx, const NC::Menu<AlbumEntry>::Item 
 bool SongEntryMatcher(const Regex::Regex &rx, const MPD::Song &s);
 
 bool MoveToTag(NC::Menu<PrimaryTag> &tags, const std::string &primary_tag);
-bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, const MPD::Song &s);
+bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, const MPD::Song &s, bool consider_date);
 
 struct SortSongs {
 	typedef NC::Menu<MPD::Song>::Item SongItem;
@@ -193,11 +191,16 @@ MediaLibrary::MediaLibrary()
 {
 	hasTwoColumns = 0;
 	isAlbumOnly = 0;
-	itsLeftColWidth = COLS/3-1;
-	itsMiddleColWidth = COLS/3;
+
+	size_t ra = Config.media_library_column_width_ratio_three[0];
+	size_t rb = Config.media_library_column_width_ratio_three[1];
+	size_t rc = Config.media_library_column_width_ratio_three[2];
+
+	itsLeftColWidth = COLS*ra/(ra+rb+rc)-1;
 	itsMiddleColStartX = itsLeftColWidth+1;
-	itsRightColWidth = COLS-COLS/3*2-1;
-	itsRightColStartX = itsLeftColWidth+itsMiddleColWidth+2;
+	itsMiddleColWidth = COLS*rb/(ra+rb+rc);
+	itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
+	itsRightColWidth = COLS-itsLeftColWidth-itsMiddleColWidth-2;
 	
 	Tags = NC::Menu<PrimaryTag>(0, MainStartY, itsLeftColWidth, MainHeight, Config.titles_visibility ? tagTypeToString(Config.media_lib_primary_tag) + "s" : "", Config.main_color, NC::Border());
 	setHighlightFixes(Tags);
@@ -242,18 +245,25 @@ void MediaLibrary::resize()
 	getWindowResizeParams(x_offset, width);
 	if (!hasTwoColumns)
 	{
+		size_t ra = Config.media_library_column_width_ratio_three[0];
+		size_t rb = Config.media_library_column_width_ratio_three[1];
+		size_t rc = Config.media_library_column_width_ratio_three[2];
+
 		itsLeftColStartX = x_offset;
-		itsLeftColWidth = width/3-1;
+		itsLeftColWidth = width*ra/(ra+rb+rc)-1;
 		itsMiddleColStartX = itsLeftColStartX+itsLeftColWidth+1;
-		itsMiddleColWidth = width/3;
+		itsMiddleColWidth = width*rb/(ra+rb+rc);
 		itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
-		itsRightColWidth = width-width/3*2-1;
+		itsRightColWidth = width-itsLeftColWidth-itsMiddleColWidth-2;
 	}
 	else
 	{
+		size_t ra = Config.media_library_column_width_ratio_two[0];
+		size_t rb = Config.media_library_column_width_ratio_two[1];
+
 		itsMiddleColStartX = x_offset;
-		itsMiddleColWidth = width/2;
-		itsRightColStartX = x_offset+itsMiddleColWidth+1;
+		itsMiddleColWidth = width*ra/(ra+rb);
+		itsRightColStartX = itsMiddleColStartX+itsMiddleColWidth+1;
 		itsRightColWidth = width-itsMiddleColWidth-1;
 	}
 	
@@ -304,34 +314,32 @@ void MediaLibrary::update()
 			m_albums_update_request = false;
 			sunfilter_albums.set(ReapplyFilter::Yes, true);
 			std::map<std::tuple<std::string, std::string, std::string>, time_t> albums;
-			for (MPD::SongIterator s = getDatabaseIterator(Mpd), end; s != end; ++s)
+			MPD::SongIterator s, end;
+			try
+			{
+				s = Mpd.GetDirectoryRecursive("/");
+			}
+			catch (MPD::Error &e)
+			{
+				// If there was a problem, fall back to a different column mode.
+				toggleColumnsMode();
+				throw;
+			}
+			for (; s != end; ++s)
 			{
 				std::string tag;
 				unsigned idx = 0;
 				while (!(tag = s->get(Config.media_lib_primary_tag, idx++)).empty())
 				{
-					if (isAlbumOnly) {
-						auto key = std::make_tuple(
-							"",
-							s->getAlbum(),
-							"");
-						auto it = albums.find(key);
-						if (it == albums.end())
-							albums[std::move(key)] = s->getMTime();
-						else
-							it->second = s->getMTime();
-					}
-					else {
-						auto key = std::make_tuple(
-							std::move(tag),
-							s->getAlbum(),
-							Date_(s->getDate()));
-						auto it = albums.find(key);
-						if (it == albums.end())
-							albums[std::move(key)] = s->getMTime();
-						else
-							it->second = s->getMTime();
-					}
+					auto key = std::make_tuple(
+						isAlbumOnly ? "" : std::move(tag),
+						s->getAlbum(),
+						Date_(s->getDate()));
+					auto it = albums.find(key);
+					if (it == albums.end())
+						albums[std::move(key)] = s->getMTime();
+					else
+						it->second = s->getMTime();
 				}
 			}
 			size_t idx = 0;
@@ -364,7 +372,18 @@ void MediaLibrary::update()
 				std::map<std::string, time_t> tags;
 				if (Config.media_library_sort_by_mtime)
 				{
-					for (MPD::SongIterator s = getDatabaseIterator(Mpd), end; s != end; ++s)
+					MPD::SongIterator s, end;
+					try
+					{
+						s = Mpd.GetDirectoryRecursive("/");
+					}
+					catch (MPD::Error &e)
+					{
+						// If there was a problem, fall back to a different sorting mode.
+						toggleSortMode();
+						throw;
+					}
+					for (; s != end; ++s)
 					{
 						std::string tag;
 						unsigned idx = 0;
@@ -897,7 +916,8 @@ void MediaLibrary::updateTimer()
 
 void MediaLibrary::toggleColumnsMode()
 {
-	if (isAlbumOnly) {
+	if (isAlbumOnly)
+	{
 		hasTwoColumns = 0;
 		isAlbumOnly = 0;
 	}
@@ -918,13 +938,15 @@ void MediaLibrary::toggleColumnsMode()
 		{
 			std::string item_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));
-			if(!isAlbumOnly) {
-				std::string and_mtime = Config.media_library_sort_by_mtime ? " and mtime" : "";
-				Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
-			}
-			else {
+			if (isAlbumOnly)
+			{
 				std::string and_mtime = Config.media_library_sort_by_mtime ? " (sorted by mtime)" : "";
 				Albums.setTitle("Albums" + and_mtime);
+			}
+			else
+			{
+				std::string and_mtime = Config.media_library_sort_by_mtime ? " and mtime" : "";
+				Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
 			}
 		}
 	}
@@ -956,13 +978,15 @@ void MediaLibrary::toggleSortMode()
 		{
 			std::string item_type = boost::locale::to_lower(
 				tagTypeToString(Config.media_lib_primary_tag));
-			if(!isAlbumOnly) {
-				std::string and_mtime = Config.media_library_sort_by_mtime ? (" " "and mtime") : "";
-				Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
-			}
-			else {
+			if (isAlbumOnly)
+			{
 				std::string and_mtime = Config.media_library_sort_by_mtime ? " (sorted by mtime)" : "";
 				Albums.setTitle("Albums" + and_mtime);
+			}
+			else
+			{
+				std::string and_mtime = Config.media_library_sort_by_mtime ? (" " "and mtime") : "";
+				Albums.setTitle("Albums (sorted by " + item_type + and_mtime + ")");
 			}
 		}
 	}
@@ -1059,7 +1083,7 @@ void MediaLibrary::locateSong(const MPD::Song &s)
 	// they are not found.
 	if (hasTwoColumns || !Albums.empty())
 	{
-		if (!MoveToAlbum(Albums, primary_tag, s))
+		if (!MoveToAlbum(Albums, primary_tag, s, true))
 		{
 			// The album could not be found, insert it if in two column mode.
 			// See comment about tags not found above. This is the equivalent
@@ -1070,7 +1094,7 @@ void MediaLibrary::locateSong(const MPD::Song &s)
 			                                s.getMTime())));
 			std::sort(Albums.beginV(), Albums.endV(), SortAlbumEntries());
 			Albums.refresh();
-			MoveToAlbum(Albums, primary_tag, s);
+			MoveToAlbum(Albums, primary_tag, s, true);
 		}
 
 		Songs.clearFilter();
@@ -1106,17 +1130,16 @@ std::string AlbumToString(const AlbumEntry &ae)
 		result = "All tracks";
 	else
 	{
-		if (hasTwoColumns)
+		if (!isAlbumOnly && hasTwoColumns)
 		{
-			if(!isAlbumOnly) {
-				if (ae.entry().tag().empty())
-					result += Config.empty_tag;
-				else
-					result += ae.entry().tag();
-				result += " - ";
-			}
+			if (ae.entry().tag().empty())
+				result += Config.empty_tag;
+			else
+				result += ae.entry().tag();
+			result += " - ";
 		}
-		if (Config.media_lib_primary_tag != MPD_TAG_DATE && !ae.entry().date().empty() && !isAlbumOnly)
+
+		if (Config.media_lib_primary_tag != MPD_TAG_DATE && !Config.media_lib_hide_album_dates && !ae.entry().date().empty())
 			result += "(" + ae.entry().date() + ") ";
 		result += ae.entry().album().empty() ? "<no album>" : ae.entry().album();
 	}
@@ -1170,7 +1193,8 @@ bool MoveToTag(NC::Menu<PrimaryTag> &tags, const std::string &primary_tag)
 	return false;
 }
 
-bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, const MPD::Song &s)
+bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag,
+                 const MPD::Song &s, bool consider_date)
 {
 	if (albums.empty())
 		return false;
@@ -1179,9 +1203,9 @@ bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, c
 	std::string date = s.getDate();
 
 	auto equals_fun_argument = [&](AlbumEntry &e) {
-		return (!hasTwoColumns || e.entry().tag() == primary_tag)
+		return (isAlbumOnly || !hasTwoColumns || e.entry().tag() == primary_tag)
 		&& e.entry().album() == album
-		&& (!Config.media_library_albums_split_by_date || e.entry().date() == date);
+		&& (!consider_date || !Config.media_library_albums_split_by_date || e.entry().date() == date);
 	};
 
 	if (equals_fun_argument(*albums.currentV()))
@@ -1194,8 +1218,15 @@ bool MoveToAlbum(NC::Menu<AlbumEntry> &albums, const std::string &primary_tag, c
 		albums.highlight(it-begin);
 		return true;
 	}
-
-	return false;
+	else if (consider_date)
+	{
+		// When trying to locate songs from Spotify the song usually has a date tag,
+		// but the entry in the library doesn't. So if that happens, try again and
+		// ignore the date.
+		return MoveToAlbum(albums, primary_tag, s, false);
+	}
+	else
+		return false;
 }
 
 }

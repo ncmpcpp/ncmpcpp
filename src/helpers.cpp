@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008-2017 by Andrzej Rybczak                            *
- *   electricityispower@gmail.com                                          *
+ *   Copyright (C) 2008-2021 by Andrzej Rybczak                            *
+ *   andrzej@rybczak.net                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -42,38 +42,28 @@ const MPD::Song *currentSong(const BaseScreen *screen)
 	return ptr;
 }
 
-MPD::SongIterator getDatabaseIterator(MPD::Connection &mpd)
+void deleteSelectedSongsFromPlaylist(NC::Menu<MPD::Song> &playlist)
 {
-	MPD::SongIterator result;
-	try
+	selectCurrentIfNoneSelected(playlist);
+	boost::optional<int> range_end;
+	Mpd.StartCommandsList();
+	for (auto &s : boost::adaptors::reverse(playlist))
 	{
-		result = mpd.GetDirectoryRecursive("/");
-	}
-	catch (MPD::ClientError &e)
-	{
-		if (e.code() == MPD_ERROR_CLOSED)
+		if (s.isSelected())
 		{
-			// If we can't get the database, display appropriate
-			// error message and reconnect with the MPD server.
-			Statusbar::print("Unable to fetch the data, increase max_output_buffer_size in your MPD configuration file");
-			mpd.Disconnect();
-			mpd.Connect();
+			s.setSelected(false);
+			if (range_end == boost::none)
+				range_end = s.value().getPosition() + 1;
 		}
-		else
-			throw;
+		else if (range_end != boost::none)
+		{
+			Mpd.DeleteRange(s.value().getPosition() + 1, *range_end);
+			range_end.reset();
+		}
 	}
-	catch (MPD::ServerError &e)
-	{
-		// mopidy blacklists 'listallinfo' command by default and throws server
-		// error when it receives it. Work around that to prevent ncmpcpp from
-		// continuously retrying to send the command and looping.
-		if (strstr(e.what(), "listallinfo") != nullptr
-		    && strstr(e.what(), "disabled") != nullptr)
-			Statusbar::print("Unable to fetch the data, server refused to process 'listallinfo' command");
-		else
-			throw;
-	}
-	return result;
+	if (range_end != boost::none)
+		Mpd.DeleteRange(0, *range_end);
+	Mpd.CommitCommandsList();
 }
 
 void removeSongFromPlaylist(const SongMenu &playlist, const MPD::Song &s)

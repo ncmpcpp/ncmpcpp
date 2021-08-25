@@ -1,7 +1,7 @@
 ##############################################################
 ## This is the example bindings file. Copy it to            ##
-## ~/.ncmpcpp/bindings or $XDG_CONFIG_HOME/ncmpcpp/bindings ##
-## and set up your preferences                              ##
+## $XDG_CONFIG_HOME/ncmpcpp/bindings or ~/.ncmpcpp/bindings ##
+## and set up your preferences.                             ##
 ##############################################################
 ##
 ##### General rules #####
@@ -97,6 +97,10 @@
 ##    - run_external_command "command" - runs given command using
 ##      system() function.
 ##
+##    - run_external_console_command "command" - runs given console
+##      command using system() function.
+##
+##
 ## 5) In addition to binding to a key, you can also bind actions
 ##    or chains of actions to a command. If it comes to commands,
 ##    syntax is very similar to defining keys. Here goes example
@@ -147,6 +151,7 @@
 ## The following actions are not bound to any key/command:
 ##
 ##  - set_volume
+##  - load
 ##
 #
 #def_key "mouse"
@@ -321,6 +326,9 @@
 #
 #def_key "backspace"
 #  replay_song
+#
+#def_key "backspace"
+#  play
 #
 #def_key "f"
 #  seek_forward

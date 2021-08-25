@@ -18,30 +18,30 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
-#ifndef NCMPCPP_UTILITY_WIDE_STRING_H
-#define NCMPCPP_UTILITY_WIDE_STRING_H
+#ifndef NCMPCPP_SAMPLE_BUFFER_H
+#define NCMPCPP_SAMPLE_BUFFER_H
 
-#include <string> // include before boost to compile on MACOSX
-#include <boost/locale/encoding_utf.hpp>
+#include <cstdint>
+#include <vector>
 
-template <typename StringT>
-std::string ToString(StringT &&s)
+struct SampleBuffer
 {
-	return boost::locale::conv::utf_to_utf<char>(std::forward<StringT>(s));
-}
-template <typename StringT>
-std::wstring ToWString(StringT &&s)
-{
-	return boost::locale::conv::utf_to_utf<wchar_t>(std::forward<StringT>(s));
-}
+	typedef std::vector<int16_t>::iterator Iterator;
 
-size_t wideLength(const std::wstring &ws);
-void wideCut(std::wstring &ws, size_t max_length);
+	SampleBuffer() : m_offset(0) { }
 
-std::wstring wideShorten(const std::wstring &ws, size_t max_length);
-inline std::string wideShorten(const std::string &s, size_t max_length)
-{
-	return ToString(wideShorten(ToWString(s), max_length));
-}
+	void put(Iterator begin, Iterator end);
+	size_t get(size_t elems, std::vector<int16_t> &dest);
 
-#endif // NCMPCPP_UTILITY_WIDE_STRING_h
+	void resize(size_t n);
+	void clear();
+
+	size_t size() const;
+	const std::vector<int16_t> &buffer() const;
+
+private:
+	size_t m_offset;
+	std::vector<int16_t> m_buffer;
+};
+
+#endif // NCMPCPP_SAMPLE_BUFFER_H
