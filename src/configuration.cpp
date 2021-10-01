@@ -239,7 +239,7 @@ bool configure(int argc, char **argv)
 			if (!s.empty())
 			{
 				auto format = Format::parse(vm["current-song"].as<std::string>(), Format::Flags::Tag);
-				std::cout << Format::stringify<char>(format, &s);
+				std::cout << Format::stringify<char>(format, &s) << '\n';
 			}
 			return false;
 		}
