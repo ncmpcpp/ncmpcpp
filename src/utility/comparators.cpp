@@ -38,6 +38,15 @@ bool hasTheWord(const std::string &s)
 
 int LocaleStringComparison::compare(const char *a, size_t a_len, const char *b, size_t b_len) const
 {
+	if (a_len != b_len && std::all_of(a, a + a_len, ::isdigit) && std::all_of(b, b + b_len, ::isdigit))
+	{
+			std::string string_to_pad = (std::max(a_len, b_len) == a_len) ? b : a;
+			string_to_pad.insert(string_to_pad.begin(), 
+			(std::max(a_len, b_len) - std::min(a_len, b_len)), '0');
+			((std::max(a_len, b_len) == a_len) ? b : a) = strdup(string_to_pad.c_str());
+			a_len = b_len = std::max(a_len, b_len);
+	}
+
 	size_t ac_off = 0, bc_off = 0;
 	if (m_ignore_the)
 	{
