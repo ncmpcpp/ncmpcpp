@@ -215,6 +215,7 @@
 ## - 9 - end of current color
 ## - b - bold text
 ## - u - underline text
+## - i - italic text
 ## - r - reverse colors
 ## - a - use alternative character set
 ##
