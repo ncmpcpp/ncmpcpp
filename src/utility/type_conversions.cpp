@@ -168,6 +168,8 @@ MPD::Song::GetFunction charToGetFunction(char c)
 			return &MPD::Song::getDirectory;
 		case 'f':
 			return &MPD::Song::getName;
+		case 'F':
+			return &MPD::Song::getURI;
 		case 'a':
 			return &MPD::Song::getArtist;
 		case 'A':
