@@ -248,7 +248,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("visualizer_fps", &visualizer_fps,
 			"60", [](std::string v) {
 			uint32_t result = verbose_lexical_cast<uint32_t>(v);
-			boundsCheck<uint32_t>(result, 30, 144);
+			boundsCheck<uint32_t>(result, 30, 1000);
 			return result;
 			});
 	p.add("visualizer_autoscale", &visualizer_autoscale, "no", yes_no);
