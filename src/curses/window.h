@@ -200,7 +200,8 @@ enum class Format {
 	Bold, NoBold,
 	Underline, NoUnderline,
 	Reverse, NoReverse,
-	AltCharset, NoAltCharset
+	AltCharset, NoAltCharset,
+	Italic, NoItalic
 };
 
 NC::Format reverseFormat(NC::Format fmt);
@@ -531,6 +532,11 @@ private:
 	/// @param altcharset_state state of altcharset attribute
 	///
 	void altCharset(bool altcharset_state) const;
+
+	/// Sets state of italic attribute (internal use only)
+	/// @param italic_state state of italic attribute
+	///
+	void italic(bool italic_state) const;
 	
 	/// pointer to helper function used by getString()
 	/// @see getString()
@@ -562,6 +568,7 @@ private:
 	int m_underline_counter;
 	int m_reverse_counter;
 	int m_alt_charset_counter;
+	int m_italic_counter;
 };
 
 }

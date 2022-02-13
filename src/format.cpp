@@ -192,6 +192,8 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 				result.push_back(NC::Format::AltCharset);
 			else if (flags & Format::Flags::Format && *it == 'r')
 				result.push_back(NC::Format::Reverse);
+			else if (flags & Format::Flags::Format && *it == 'i')
+				result.push_back(NC::Format::Italic);
 			else if (flags & Format::Flags::Format && *it == '/')
 			{
 				++it;
@@ -204,6 +206,8 @@ expressions<CharT> parseBracket(const string<CharT> &s,
 					result.push_back(NC::Format::NoAltCharset);
 				else if (*it == 'r')
 					result.push_back(NC::Format::NoReverse);
+				else if (*it == 'i')
+					result.push_back(NC::Format::NoItalic);
 				else
 					throwError(s, it, invalidCharacter(*it));
 			}

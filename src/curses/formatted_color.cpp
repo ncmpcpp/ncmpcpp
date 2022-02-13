@@ -30,7 +30,8 @@ void verifyFormats(const NC::FormattedColor::Formats &formats)
 		if (fmt == NC::Format::NoBold
 		    || fmt == NC::Format::NoUnderline
 		    || fmt == NC::Format::NoReverse
-		    || fmt == NC::Format::NoAltCharset)
+		    || fmt == NC::Format::NoAltCharset
+		    || fmt == NC::Format::NoItalic)
 			throw std::logic_error("FormattedColor can't hold disabling formats");
 	}
 }
@@ -70,6 +71,9 @@ std::istream &NC::operator>>(std::istream &is, NC::FormattedColor &fc)
 				break;
 			case 'a':
 				formats.push_back(NC::Format::AltCharset);
+				break;
+			case 'i':
+				formats.push_back(NC::Format::Italic);
 				break;
 			default:
 				is.setstate(std::ios::failbit);
