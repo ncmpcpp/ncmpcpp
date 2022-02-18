@@ -169,7 +169,7 @@ void PlaylistEditor::update()
 			}
 			catch (MPD::ServerError &e)
 			{
-				if (e.code() == MPD_SERVER_ERROR_SYSTEM) // no playlists directory
+				if (e.code() == MPD_SERVER_ERROR_SYSTEM || e.code() == MPD_SERVER_ERROR_UNKNOWN_CMD) // no playlists directory || commented line with playlist_directory in mpd.conf
 					Statusbar::print(e.what());
 				else
 					throw;
