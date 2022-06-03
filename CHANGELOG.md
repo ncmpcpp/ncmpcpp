@@ -3,6 +3,7 @@
 * Separate chunks of lyrics with a double newline.
 * Fix separator between albums with the same name, to check for album artist
   instead of artist.
+* Implement the oneshot state of single mode.
 
 # ncmpcpp-0.9.2 (2021-01-24)
 * Revert suppression of output of all external commands as that makes e.g album

@@ -351,6 +351,9 @@
 #def_key "y"
 #  toggle_single
 #
+#def_key "'"
+#  set_single_oneshot
+#
 #def_key "R"
 #  toggle_consume
 #

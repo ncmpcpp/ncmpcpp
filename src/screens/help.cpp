@@ -202,6 +202,7 @@ void write_bindings(NC::Scrollpad &w)
 	key(w, Type::ToggleRepeat, "Toggle repeat mode");
 	key(w, Type::ToggleRandom, "Toggle random mode");
 	key(w, Type::ToggleSingle, "Toggle single mode");
+	key(w, Type::SetOneshot, "Activate oneshot single mode");
 	key(w, Type::ToggleConsume, "Toggle consume mode");
 	key(w, Type::ToggleReplayGainMode, "Toggle replay gain mode");
 	key(w, Type::ToggleBitrateVisibility, "Toggle bitrate visibility");

@@ -540,6 +540,7 @@ struct Connection
 	void SetRepeat(bool);
 	void SetRandom(bool);
 	void SetSingle(bool);
+	void SetOneshot();
 	void SetConsume(bool);
 	void SetCrossfade(unsigned);
 	void SetVolume(unsigned int vol);
