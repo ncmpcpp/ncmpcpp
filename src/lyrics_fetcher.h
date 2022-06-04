@@ -110,7 +110,7 @@ struct AzLyricsFetcher : public GoogleLyricsFetcher
 	virtual const char *name() const override { return "azlyrics.com"; }
 	
 protected:
-	virtual const char *regex() const override { return "<div class=\"lyricsh\">.*?</h2>.*<div>(.*?)</div>"; }
+	virtual const char *regex() const override { return "<!-- Usage of azlyrics.com content by any third-party lyrics provider is prohibited by our licensing agreement. Sorry about that. -->(.*?)</div>"; }
 };
 
 struct GeniusFetcher : public GoogleLyricsFetcher
