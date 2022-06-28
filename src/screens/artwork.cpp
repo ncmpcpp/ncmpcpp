@@ -31,6 +31,7 @@
 #include <sstream>
 
 #include "macro_utilities.h"
+#include "mpdpp.h"
 #include "screens/screen_switcher.h"
 #include "status.h"
 #include "statusbar.h"
@@ -130,7 +131,9 @@ Artwork::Artwork()
 	// ncurses doesn't play well with writing concurrently, set up a self-pipe
 	// so the worker thread can signal the main select() loop to print
 	int pipefd[2];
-	pipe(pipefd);
+	if (-1 == pipe(pipefd)) {
+		throw MPD::Error("Can't create to artwork pipe", false);
+	}
 	pipefd_read = pipefd[0];
 
 	// Initialize the selected albumart backend
@@ -166,7 +169,9 @@ void Artwork::drawToScreen()
 	// consume data in self-pipe
 	const size_t BUF_SIZE = 100;
 	char buf[BUF_SIZE];
-	read(pipefd_read, buf, BUF_SIZE);
+	if (-1 == read(pipefd_read, buf, BUF_SIZE)) {
+		throw MPD::Error("Can't read from artwork pipe", false);
+	}
 
 	std::vector<uint8_t> output;
 	int x_offset, y_offset;
@@ -692,7 +697,9 @@ std::vector<uint8_t> KittyBackend::writeChunked(std::map<std::string, std::strin
 
 	if (0 != data.length())
 	{
-		std::string b64_data_str = data.base64();
+		// Create reference-counted copy to bypasee IM6 or earlier Blob::base64() being non-const
+		Blob data_copy(data);
+		std::string b64_data_str = data_copy.base64();
 		std::vector<uint8_t> b64_data(b64_data_str.begin(), b64_data_str.end());
 
 		const size_t CHUNK_SIZE = 4096;
@@ -728,8 +735,10 @@ void KittyBackend::setOutput(std::vector<uint8_t> buffer, int x_offset, int y_of
 	}
 
 	// write dummy character to self-pipe, wakes up main thread to write output
-	const char dummy[2] = "x";
-	write(pipefd_write, dummy, 1);
+	const char dummy = 'x';
+	if (-1 == write(pipefd_write, &dummy, 1)) {
+		throw MPD::Error("Can't write to artwork pipe", false);
+	}
 }
 
 #endif // ENABLE_ARTWORK
