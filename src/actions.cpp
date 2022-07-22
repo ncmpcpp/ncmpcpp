@@ -1746,7 +1746,7 @@ void JumpToPositionInSong::run()
 	std::string spos;
 	{
 		Statusbar::ScopedLock slock;
-		Statusbar::put() << "Position to go (in %/m:ss/seconds(s)): ";
+		Statusbar::put() << "Position to go (in %/h:m:ss/m:ss/seconds(s)): ";
 		spos = wFooter->prompt();
 	}
 	
