@@ -250,7 +250,7 @@ void SelectedItemsAdder::populatePlaylistSelector(BaseScreen *old_screen)
 		for (MPD::PlaylistIterator it = Mpd.GetPlaylists(), end; it != end; ++it)
 		{
 			m_playlist_selector.addItem(Entry(it->path(),
-				std::bind(&Self::addToExistingPlaylist, this, it->path())
+				std::bind(&Self::addToExistingPlaylist, this, it->path(), false)
 			));
 		};
 		std::sort(m_playlist_selector.beginV()+begin, m_playlist_selector.endV(),
@@ -277,16 +277,32 @@ void SelectedItemsAdder::addToNewPlaylist() const
 		Statusbar::put() << "Save playlist as: ";
 		playlist = Global::wFooter->prompt();
 	}
-	addToExistingPlaylist(playlist);
+	addToExistingPlaylist(MPD::Playlist(playlist), true);
 }
 
-void SelectedItemsAdder::addToExistingPlaylist(const std::string &playlist) const
+void SelectedItemsAdder::addToExistingPlaylist(const MPD::Playlist &playlist, bool new_playlist) const
 {
+    std::vector<MPD::Song> filtered_songs;
+    bool filter = !Config.allow_playlist_duplicates && !new_playlist;
+    if (filter) 
+    {
+        std::remove_copy_if(
+          m_selected_items.begin(), 
+          m_selected_items.end(), 
+          std::back_inserter(filtered_songs),
+          [playlist](const MPD::Song s) { return GetSongIndexInPlaylist(playlist, s) != boost::none; });
+    }
+
 	Mpd.StartCommandsList();
-	for (auto s = m_selected_items.begin(); s != m_selected_items.end(); ++s)
-		Mpd.AddToPlaylist(playlist, *s);
+
+    auto songs = filter ? filtered_songs : m_selected_items;
+
+    for (auto s = songs.begin(); s != songs.end(); ++s)
+        Mpd.AddToPlaylist(playlist.path(), *s);
+
 	Mpd.CommitCommandsList();
-	Statusbar::printf("Selected item(s) added to playlist \"%1%\"", playlist);
+    if (!songs.empty())
+        Statusbar::printf("Selected item(s) added to playlist \"%1%\"", playlist.path());
 	switchToPreviousScreen();
 }
 
