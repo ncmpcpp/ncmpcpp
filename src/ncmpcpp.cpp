@@ -228,6 +228,9 @@ int main(int argc, char **argv)
 			{
 				auto k = Bindings.get(input);
 				std::any_of(k.first, k.second, std::bind(&Binding::execute, ph::_1));
+#	ifdef ENABLE_ARTWORK
+				myArtwork->resetArtworkPosition();
+#	endif
 			}
 			catch (ConversionError &e)
 			{
