@@ -61,6 +61,9 @@ std::chrono::time_point<std::chrono::steady_clock> Artwork::update_time;
 bool Artwork::worker_exit = false;
 std::vector<std::pair<Artwork::WorkerOp, std::function<void()>>> Artwork::worker_queue;
 
+std::condition_variable terminal_draw_cv;
+bool terminal_drawn = true;
+
 namespace {
 	std::mutex worker_output_mtx;
 }
@@ -191,6 +194,12 @@ void Artwork::drawToScreen()
 	std::cout << "\0338";
 	std::cout.flush();
 
+	{
+		std::unique_lock<std::mutex> lck(worker_output_mtx);
+		terminal_drawn = true;
+		terminal_draw_cv.notify_all();
+	}
+
 	// redraw active window
 	Global::myScreen->activeWindow()->display();
 }
@@ -281,6 +290,18 @@ void Artwork::updateArtwork(std::string uri)
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
 		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE_URI, [=] { worker_updateArtwork(uri); }));
+	}
+	worker_cv.notify_all();
+}
+
+void Artwork::resetArtworkPosition()
+{
+	if (!Config.albumart)
+		return;
+
+	{
+		std::lock_guard<std::mutex> lck(worker_mtx);
+		worker_queue.emplace_back(std::make_pair(WorkerOp::MOVE, [] { worker_resetArtworkPosition(); }));
 	}
 	worker_cv.notify_all();
 }
@@ -474,6 +495,12 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 	worker_drawArtwork(x_offset, MainStartY, width, MainHeight);
 }
 
+void Artwork::worker_resetArtworkPosition()
+{
+	if (drawn)
+		backend->resetArtworkPosition();
+}
+
 void Artwork::worker_updatedVisibility()
 {
 	if (!isVisible(myArtwork) && drawn)
@@ -646,8 +673,21 @@ void KittyBackend::updateArtwork(const Magick::Blob& buffer, int x_offset, int y
 	cmd["i"] = "1";   // image ID
 	cmd["p"] = "1";   // placement ID
 	cmd["q"] = "1";   // suppress output
+	cmd["C"] = "1";   // don't move cursor after placing image
 
 	setOutput(writeChunked(cmd, buffer), x_offset, y_offset);
+}
+
+void KittyBackend::resetArtworkPosition()
+{
+	std::map<std::string, std::string> cmd;
+	cmd["a"] = "p";   // put
+	cmd["i"] = "1";   // image ID
+	cmd["p"] = "1";   // placement ID
+	cmd["q"] = "1";   // suppress output
+	cmd["C"] = "1";   // don't move cursor after placing image
+
+	setOutput(writeChunked(cmd, {}), output_x_offset, output_y_offset);
 }
 
 void KittyBackend::removeArtwork()
@@ -718,7 +758,6 @@ std::vector<uint8_t> KittyBackend::writeChunked(std::map<std::string, std::strin
 
 std::tuple<std::vector<uint8_t>, int, int> KittyBackend::takeOutput()
 {
-	std::lock_guard<std::mutex> lck(worker_output_mtx);
 	std::tuple<std::vector<uint8_t>, int, int> ret;
 	ret = {output, output_x_offset, output_y_offset};
 	output.clear();
@@ -728,7 +767,9 @@ std::tuple<std::vector<uint8_t>, int, int> KittyBackend::takeOutput()
 void KittyBackend::setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset)
 {
 	{
-		std::lock_guard<std::mutex> lck(worker_output_mtx);
+		std::unique_lock<std::mutex> lck(worker_output_mtx);
+		terminal_draw_cv.wait(lck, [] { return terminal_drawn; });
+		terminal_drawn = false;
 		output = buffer;
 		output_x_offset = x_offset;
 		output_y_offset = y_offset;

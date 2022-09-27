@@ -231,6 +231,9 @@ int main(int argc, char **argv)
 					k.first,
 					k.second,
 					std::bind(&Binding::execute, ph::_1));
+#	ifdef ENABLE_ARTWORK
+				myArtwork->resetArtworkPosition();
+#	endif
 			}
 			catch (ConversionError &e)
 			{

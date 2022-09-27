@@ -28,6 +28,7 @@
 #include <Magick++.h>
 
 #include <boost/process.hpp>
+#include <boost/thread/barrier.hpp>
 
 #include "curses/window.h"
 #include "interfaces.h"
@@ -62,6 +63,7 @@ struct Artwork: Screen<NC::Window>, Tabbable
 	void removeArtwork(bool reset_artwork = false);
 	void updateArtwork();
 	void updateArtwork(std::string uri);
+	void resetArtworkPosition();
 	void updatedVisibility();
 
 	static winsize getWinSize();
@@ -82,6 +84,7 @@ private:
 	static void worker_removeArtwork(bool reset_artwork = false);
 	static void worker_updateArtwork();
 	static void worker_updateArtwork(const std::string &uri);
+	static void worker_resetArtworkPosition();
 	static void worker_updatedVisibility();
 	static int worker_calcXOffset(int width, int img_width, int char_xpixel);
 	static int worker_calcYOffset(int height, int img_height, int char_ypixel);
@@ -136,6 +139,7 @@ private:
 	enum struct WorkerOp {
 		UPDATE,
 		UPDATE_URI,
+		MOVE,
 		REMOVE,
 		REMOVE_RESET,
 		UPDATED_VIS,
@@ -153,6 +157,7 @@ class ArtworkBackend
 public:
 	// draw artwork, path relative to mpd_music_dir, units in terminal characters
 	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) = 0;
+	virtual void resetArtworkPosition() {}
 
 	// clear artwork from screen
 	virtual void removeArtwork() = 0;
@@ -183,6 +188,7 @@ class KittyBackend : public ArtworkBackend
 public:
 	KittyBackend(int fd) : pipefd_write(fd) {}
 	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) override;
+	virtual void resetArtworkPosition() override;
 	virtual void removeArtwork() override;
 	virtual std::tuple<std::vector<uint8_t>, int, int> takeOutput() override;
 
