@@ -169,10 +169,7 @@ void PlaylistEditor::update()
 			}
 			catch (MPD::ServerError &e)
 			{
-				if (e.code() == MPD_SERVER_ERROR_SYSTEM) // no playlists directory
-					Statusbar::print(e.what());
-				else
-					throw;
+				Status::handleServerError(e);
 			}
 			if (idx < Playlists.size())
 				Playlists.resizeList(idx);
