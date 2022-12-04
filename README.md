@@ -1,4 +1,8 @@
-# NCurses Music Player Client (Plus Plus)
+# My fork of NCurses Music Player Client (Plus Plus)
+
+The main ncmpcpp project merges things very slowly, so this fork implements a few things I want to use:
+* my fix for [crashes when playing long filenames like streams](https://github.com/ncmpcpp/ncmpcpp/issues/380)
+* [lyrics fetcher from tags](https://github.com/ncmpcpp/ncmpcpp/pull/482)
 
 Project page - https://rybczak.net/ncmpcpp/
 
