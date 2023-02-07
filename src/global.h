@@ -22,6 +22,7 @@
 #define NCMPCPP_GLOBAL_H
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <mutex>
 #include <random>
 
 #include "mpdpp.h"
@@ -62,6 +63,9 @@ extern boost::posix_time::ptime Timer;
 
 // global RNG
 extern std::mt19937 RNG;
+
+// screen mutex
+extern std::recursive_mutex screenMtx;
 
 }
 
