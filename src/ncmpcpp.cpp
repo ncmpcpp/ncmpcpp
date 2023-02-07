@@ -79,6 +79,9 @@ void do_at_exit()
 	Mpd.Disconnect();
 	NC::destroyScreen();
 	windowTitle("");
+#	ifdef ENABLE_ARTWORK
+	delete myArtwork;
+#	endif
 }
 
 }
