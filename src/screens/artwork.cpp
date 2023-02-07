@@ -42,32 +42,6 @@ using Global::MainStartY;
 
 Artwork* myArtwork;
 
-Magick::Blob Artwork::art_buffer;
-std::vector<uint8_t> Artwork::orig_art_buffer;
-std::thread Artwork::t;
-ArtworkBackend* Artwork::backend;
-std::string Artwork::prev_uri = "";
-bool Artwork::drawn = false;
-bool Artwork::before_inital_draw = true;
-const std::map<Artwork::ArtSource, std::string> Artwork::art_source_cmd_map = {
-	{ ArtSource::MPD_ALBUMART, "albumart" },
-	{ ArtSource::MPD_READPICTURE, "readpicture" },
-};
-
-// For signaling worker thread
-std::condition_variable Artwork::worker_cv;
-std::mutex Artwork::worker_mtx;
-std::chrono::time_point<std::chrono::steady_clock> Artwork::update_time;
-bool Artwork::worker_exit = false;
-std::vector<std::pair<Artwork::WorkerOp, std::function<void()>>> Artwork::worker_queue;
-
-std::condition_variable terminal_draw_cv;
-bool terminal_drawn = true;
-
-namespace {
-	std::mutex worker_output_mtx;
-}
-
 std::istream &operator>>(std::istream &is, Artwork::ArtSource &source)
 {
 	std::string s;
@@ -125,8 +99,8 @@ std::istream &operator>>(std::istream &is, Artwork::ArtAlign &align)
 }
 
 Artwork::Artwork()
-: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
-, prev_winsize({})
+	: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
+		, prev_winsize({})
 {
 	if (!Config.albumart)
 		return;
@@ -146,13 +120,23 @@ Artwork::Artwork()
 			backend = new UeberzugBackend;
 			break;
 		case ArtBackend::KITTY:
-			backend = new KittyBackend(pipefd[1]);
+			backend = new KittyBackend(terminal_drawn_mtx, terminal_drawn_cv, terminal_drawn, pipefd[1]);
 			break;
 	}
 
 	// Spawn worker thread
-	t = std::thread(worker);
-	std::atexit(stop);
+	t = std::thread(&Artwork::worker, this);
+}
+
+Artwork::~Artwork()
+{
+	{
+		std::lock_guard<std::mutex> lck(worker_mtx);
+		worker_exit = true;
+	}
+	worker_cv.notify_all();
+	t.join();
+	delete backend;
 }
 
 // callback for the main select() loop, draws artwork on screen
@@ -195,9 +179,10 @@ void Artwork::drawToScreen()
 	std::cout.flush();
 
 	{
-		std::unique_lock<std::mutex> lck(worker_output_mtx);
+		// unblock worker thread so it can send the next command
+		std::unique_lock<std::mutex> lck(terminal_drawn_mtx);
 		terminal_drawn = true;
-		terminal_draw_cv.notify_all();
+		terminal_drawn_cv.notify_all();
 	}
 
 	// redraw active window
@@ -244,16 +229,6 @@ winsize Artwork::getWinSize()
 	return sz;
 }
 
-void Artwork::stop()
-{
-	{
-		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_exit = true;
-	}
-	worker_cv.notify_all();
-	t.join();
-}
-
 void Artwork::removeArtwork(bool reset_artwork)
 {
 	if (!Config.albumart)
@@ -277,7 +252,7 @@ void Artwork::updateArtwork()
 
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE, [] { worker_updateArtwork(); }));
+		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE, [=] { worker_updateArtwork(); }));
 	}
 	worker_cv.notify_all();
 }
@@ -301,7 +276,7 @@ void Artwork::resetArtworkPosition()
 
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace_back(std::make_pair(WorkerOp::MOVE, [] { worker_resetArtworkPosition(); }));
+		worker_queue.emplace_back(std::make_pair(WorkerOp::MOVE, [=] { worker_resetArtworkPosition(); }));
 	}
 	worker_cv.notify_all();
 }
@@ -335,11 +310,11 @@ void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int heig
 	// retrieve and calculate terminal character size
 	const auto sz = getWinSize();
 	const auto char_xpixel = Config.font_width == 0
-			? sz.ws_xpixel / sz.ws_col
-			: Config.font_width;
+		? sz.ws_xpixel / sz.ws_col
+		: Config.font_width;
 	const auto char_ypixel = Config.font_height == 0
-			? sz.ws_ypixel / sz.ws_row
-			: Config.font_height;
+		? sz.ws_ypixel / sz.ws_row
+		: Config.font_height;
 	const auto pixel_width = char_xpixel * width;
 	const auto pixel_height = char_ypixel * height;
 	const auto out_geom = Geometry(pixel_width, pixel_height);
@@ -542,7 +517,7 @@ void Artwork::worker()
 		{
 			// Wait for work
 			std::unique_lock<std::mutex> lck(worker_mtx);
-			worker_cv.wait(lck, [] { return worker_exit || !worker_queue.empty(); });
+			worker_cv.wait(lck, [=] { return worker_exit || !worker_queue.empty(); });
 
 			if (worker_exit)
 			{
@@ -564,7 +539,7 @@ void Artwork::worker()
 			// Avoid updating artwork too often
 			if (found_set.end() != found_set.find(WorkerOp::UPDATE_URI))
 			{
-				if (worker_cv.wait_until(lck, update_time + std::chrono::milliseconds(500), [] { return worker_exit; }))
+				if (worker_cv.wait_until(lck, update_time + std::chrono::milliseconds(500), [=] { return worker_exit; }))
 				{
 					worker_exit = false;
 					return;
@@ -599,10 +574,6 @@ void Artwork::worker()
 // UeberzugBackend
 // https://github.com/seebye/ueberzug
 
-boost::process::child UeberzugBackend::process;
-boost::process::opstream UeberzugBackend::stream;
-std::string UeberzugBackend::temp_file_name;
-
 UeberzugBackend::UeberzugBackend()
 {
 	namespace bp = boost::process;
@@ -614,9 +585,16 @@ UeberzugBackend::UeberzugBackend()
 	try
 	{
 		process = bp::child(bp::search_path("ueberzug"), bp::args(args), bp::std_in < stream);
-		std::atexit(stop);
 	}
 	catch (const bp::process_error &e) {}
+}
+
+UeberzugBackend::~UeberzugBackend()
+{
+	std::remove(temp_file_name.c_str());
+	// close the underlying pipe, which causes ueberzug to exit
+	stream.pipe().close();
+	process.wait();
 }
 
 void UeberzugBackend::updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset)
@@ -653,14 +631,6 @@ void UeberzugBackend::removeArtwork()
 	stream << std::endl;
 }
 
-void UeberzugBackend::stop()
-{
-	std::remove(temp_file_name.c_str());
-	// close the underlying pipe, which causes ueberzug to exit
-	stream.pipe().close();
-	process.wait();
-}
-
 
 // KittyBackend
 // https://sw.kovidgoyal.net/kitty/graphics-protocol.html
@@ -668,7 +638,7 @@ void UeberzugBackend::stop()
 void KittyBackend::updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset)
 {
 	std::map<std::string, std::string> cmd;
-	cmd["a"] = "T";   // transfer and display
+	cmd["a"] = "T";   // transmit and display
 	cmd["f"] = "100"; // PNG
 	cmd["i"] = "1";   // image ID
 	cmd["p"] = "1";   // placement ID
@@ -767,8 +737,9 @@ std::tuple<std::vector<uint8_t>, int, int> KittyBackend::takeOutput()
 void KittyBackend::setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset)
 {
 	{
-		std::unique_lock<std::mutex> lck(worker_output_mtx);
-		terminal_draw_cv.wait(lck, [] { return terminal_drawn; });
+		// wait until main thread has written previous command
+		std::unique_lock<std::mutex> lck(terminal_drawn_mtx);
+		terminal_drawn_cv.wait(lck, [=] { return terminal_drawn; });
 		terminal_drawn = false;
 		output = buffer;
 		output_x_offset = x_offset;

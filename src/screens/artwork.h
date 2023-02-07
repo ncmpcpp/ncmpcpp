@@ -43,6 +43,7 @@ namespace ArtworkHelper {
 struct Artwork: Screen<NC::Window>, Tabbable
 {
 	Artwork();
+	~Artwork();
 
 	virtual void resize() override;
 	virtual void switchTo() override;
@@ -66,41 +67,68 @@ struct Artwork: Screen<NC::Window>, Tabbable
 	void resetArtworkPosition();
 	void updatedVisibility();
 
-	static winsize getWinSize();
-
 	enum struct ArtBackend { UEBERZUG, KITTY };
 	enum struct ArtSource { LOCAL, MPD_ALBUMART, MPD_READPICTURE };
 	enum struct ArtAlign { N, NE, E, SE, S, SW, W, NW, CENTER };
 
+	// fd to signal main thread to print image
 	int pipefd_read;
 
 private:
-	static void stop();
+	void stop();
 
 	// worker thread methods
-	static void worker();
-	static void worker_updateArtBuffer(std::string path);
-	static void worker_drawArtwork(int x_offset, int y_offset, int width, int height);
-	static void worker_removeArtwork(bool reset_artwork = false);
-	static void worker_updateArtwork();
-	static void worker_updateArtwork(const std::string &uri);
-	static void worker_resetArtworkPosition();
-	static void worker_updatedVisibility();
-	static int worker_calcXOffset(int width, int img_width, int char_xpixel);
-	static int worker_calcYOffset(int height, int img_height, int char_ypixel);
-	static std::vector<uint8_t> worker_fetchArtwork(const std::string &uri, const std::string &cmd);
-	static std::string worker_fetchLocalArtwork(const std::string &uri);
+	void worker();
+	void worker_updateArtBuffer(std::string path);
+	void worker_drawArtwork(int x_offset, int y_offset, int width, int height);
+	void worker_removeArtwork(bool reset_artwork = false);
+	void worker_updateArtwork();
+	void worker_updateArtwork(const std::string &uri);
+	void worker_resetArtworkPosition();
+	void worker_updatedVisibility();
+	int worker_calcXOffset(int width, int img_width, int char_xpixel);
+	int worker_calcYOffset(int height, int img_height, int char_ypixel);
+	std::vector<uint8_t> worker_fetchArtwork(const std::string &uri, const std::string &cmd);
+	std::string worker_fetchLocalArtwork(const std::string &uri);
 
-	static std::thread t;  // worker thread
-	static Magick::Blob art_buffer;
-	static std::vector<uint8_t> orig_art_buffer;
-	static ArtworkBackend *backend;
-	static std::string prev_uri;
-	static bool drawn;
-	static bool before_inital_draw;
+	static winsize getWinSize();
+
+	// worker thread variables
+	std::thread t;
+	std::vector<uint8_t> orig_art_buffer;
+	Magick::Blob art_buffer;
+	ArtworkBackend* backend;
+	std::string prev_uri = "";
+	bool drawn = false;
+	bool before_inital_draw = true;
+	const std::map<Artwork::ArtSource, std::string> art_source_cmd_map = {
+		{ Artwork::ArtSource::MPD_ALBUMART, "albumart" },
+		{ Artwork::ArtSource::MPD_READPICTURE, "readpicture" },
+	};
+
+	// For giving tasks to worker thread
+	// Types of operations the worker thread can do
+	enum struct WorkerOp {
+		UPDATE,
+		UPDATE_URI,
+		MOVE,
+		REMOVE,
+		REMOVE_RESET,
+		UPDATED_VIS,
+	};
+	std::condition_variable worker_cv;
+	std::mutex worker_mtx;
+	std::chrono::time_point<std::chrono::steady_clock> update_time;
+	bool worker_exit = false;
+	std::vector<std::pair<WorkerOp, std::function<void()>>> worker_queue;
+
+	// For main thread signaling it has finished writing output to terminal
+	std::mutex terminal_drawn_mtx;
+	std::condition_variable terminal_drawn_cv;
+	bool terminal_drawn = true;
 
 	// store window dimensions
-	struct winsize_s {
+	typedef struct winsize_s {
 		size_t x_offset;
 		size_t y_offset;
 		size_t width;
@@ -118,34 +146,8 @@ private:
 		{
 			return !(*this == rhs);
 		}
-	};
-	typedef winsize_s winsize_t;
+	} winsize_t;
 	winsize_t prev_winsize;
-
-	const static std::map<ArtSource, std::string> art_source_cmd_map;
-
-	// For signaling worker thread
-	static std::condition_variable worker_cv;
-	static std::mutex worker_mtx;
-
-	// last time worker thread updated artwork
-	static std::chrono::time_point<std::chrono::steady_clock> update_time;
-
-	// worker thread should exit
-	static bool worker_exit;
-
-	// Types of operations the worker thread can do. Worker thread will only
-	// run the latest of each operation per iteration
-	enum struct WorkerOp {
-		UPDATE,
-		UPDATE_URI,
-		MOVE,
-		REMOVE,
-		REMOVE_RESET,
-		UPDATED_VIS,
-	};
-
-	static std::vector<std::pair<WorkerOp, std::function<void()>>> worker_queue;
 };
 
 std::istream &operator>>(std::istream &is, Artwork::ArtSource &source);
@@ -155,6 +157,8 @@ std::istream &operator>>(std::istream &is, Artwork::ArtAlign &align);
 class ArtworkBackend
 {
 public:
+	virtual ~ArtworkBackend() {}
+
 	// draw artwork, path relative to mpd_music_dir, units in terminal characters
 	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) = 0;
 	virtual void resetArtworkPosition() {}
@@ -171,22 +175,27 @@ class UeberzugBackend : public ArtworkBackend
 {
 public:
 	UeberzugBackend();
+	~UeberzugBackend() override;
 	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) override;
 	virtual void removeArtwork() override;
 
 private:
-	static void stop();
-	static boost::process::child process;
-	static boost::process::opstream stream;
-	static std::string temp_file_name;
+	void stop();
+	boost::process::child process;
+	boost::process::opstream stream;
+	std::string temp_file_name;
 };
 
 class KittyBackend : public ArtworkBackend
 {
-	// Kitty backend has an issue when in slave screen mode, the image scrolls
-	// when scrolling the other screen
+// Kitty backend has an issue when in slave screen mode, the image scrolls
+// when scrolling the other screen
 public:
-	KittyBackend(int fd) : pipefd_write(fd) {}
+	KittyBackend(std::mutex &terminal_drawn_mtx, std::condition_variable &terminal_drawn_cv, bool &terminal_drawn, int fd)
+		: pipefd_write(fd),
+		terminal_drawn_mtx(terminal_drawn_mtx),
+		terminal_drawn_cv(terminal_drawn_cv),
+		terminal_drawn(terminal_drawn) {}
 	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) override;
 	virtual void resetArtworkPosition() override;
 	virtual void removeArtwork() override;
@@ -204,6 +213,9 @@ private:
 	int output_x_offset;
 	int output_y_offset;
 	int pipefd_write;
+	std::mutex &terminal_drawn_mtx;
+	std::condition_variable &terminal_drawn_cv;
+	bool &terminal_drawn;
 };
 
 extern Artwork *myArtwork;
