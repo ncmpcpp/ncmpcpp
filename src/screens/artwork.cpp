@@ -23,6 +23,7 @@
 #ifdef ENABLE_ARTWORK
 
 #include <Magick++.h>
+#include <glob.h>
 #include <unistd.h>
 
 #include <boost/filesystem.hpp>
@@ -443,8 +444,9 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 					std::string art_path;
 					for (const auto &file : Config.albumart_filenames)
 					{
-						const std::string path = Config.mpd_music_dir + dir + file;
-						if (0 == access(path.c_str(), R_OK))
+						const std::string path_glob = Config.mpd_music_dir + dir + file;
+						const std::string path = worker_checkFileAccess(path_glob);
+						if (!path.empty())
 						{
 							art_path = path;
 							break;
@@ -480,6 +482,27 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 	// Draw default artwork if MPD doesn't return anything
 	worker_updateArtBuffer(Config.albumart_default_path);
 	worker_drawArtwork(x_offset, MainStartY, width, MainHeight);
+}
+
+// Expand glob and return first file that exists, otherwise return empty string
+std::string Artwork::worker_checkFileAccess(const std::string &path_glob)
+{
+	glob_t globbuf;
+	glob(path_glob.c_str(), 0, nullptr, &globbuf);
+
+	std::string path;
+	for (size_t i = 0; i < globbuf.gl_pathc; ++i)
+	{
+		std::string tmp_path = globbuf.gl_pathv[i];
+		if (0 == access(tmp_path.c_str(), R_OK))
+		{
+			path = tmp_path;
+			break;
+		}
+	}
+
+	globfree(&globbuf);
+	return path;
 }
 
 void Artwork::worker_resetArtworkPosition()
