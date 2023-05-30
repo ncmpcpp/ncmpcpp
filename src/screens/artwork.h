@@ -90,6 +90,7 @@ private:
 	int worker_calcYOffset(int height, int img_height, int char_ypixel);
 	std::vector<uint8_t> worker_fetchArtwork(const std::string &uri, const std::string &cmd);
 	std::string worker_fetchLocalArtwork(const std::string &uri);
+	std::string worker_checkFileAccess(const std::string &path_glob);
 
 	static winsize getWinSize();
 

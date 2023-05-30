@@ -140,6 +140,12 @@ Enable album art display
 List of sources of album art, highest priority sources first. "local" scans mpd_music_dir on the local machine and attempt to display an image named "cover.png", "cover.jpg", "cover.tiff", or "cover.bmp". "mpd_albumart" and "mpd_readpicture" query MPD with the albumart and readpicture commands respectively. May be empty, in which case the albumart_default_path fallback will be used.
 .TP
 .B albumart_backend = BACKEND
+Method to display artwork image. One of "ueberzug", "kitty".
+.TP
+.B albumart_filenames = PATHS
+List of file names of artwork to display when using "local" source in order of priority. Globs are allowed.
+.TP
+.B albumart_default_path = PATH
 Fallback to this image if no album cover art is found in the music library.
 .TP
 .B albumart_align = ALIGN
