@@ -231,6 +231,7 @@ struct Configuration
 	bool albumart;
 	Artwork::ArtBackend albumart_backend;
 	Artwork::ArtAlign albumart_align;
+	std::vector<std::string> albumart_filenames;
 	std::string albumart_default_path;
 	std::vector<Artwork::ArtSource> albumart_sources;
 	size_t font_width, font_height;

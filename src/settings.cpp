@@ -618,6 +618,8 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("albumart", &albumart, "no", yes_no);
 	p.add("albumart_backend", &albumart_backend, "ueberzug");
 	p.add("albumart_align", &albumart_align, "center");
+	p.add("albumart_filenames", &albumart_filenames,
+	      "cover.png, cover.jpg, cover.tiff, cover.bmp", list_of<std::string>);
 	p.add("albumart_default_path", &albumart_default_path, "", adjust_path);
 	p.add("albumart_sources", &albumart_sources,
 	      "local, mpd_albumart, mpd_readpicture", list_of<Artwork::ArtSource>);

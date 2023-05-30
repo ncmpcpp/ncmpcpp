@@ -298,14 +298,23 @@ void Artwork::updatedVisibility()
 
 void Artwork::worker_updateArtBuffer(std::string path)
 {
-	std::ifstream s(path, std::ios::in | std::ios::binary);
-	std::vector<uint8_t> tmp_buf((std::istreambuf_iterator<char>(s)), std::istreambuf_iterator<char>());
-	orig_art_buffer = std::move(tmp_buf);
+	try {
+		std::ifstream s(path, std::ios::in | std::ios::binary);
+		std::vector<uint8_t> tmp_buf((std::istreambuf_iterator<char>(s)), std::istreambuf_iterator<char>());
+		orig_art_buffer = std::move(tmp_buf);
+	} catch (const std::exception&) {
+		orig_art_buffer.clear();
+	}
 }
 
 void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int height)
 {
 	using namespace Magick;
+
+	if (orig_art_buffer.empty())
+	{
+		return;
+	}
 
 	// retrieve and calculate terminal character size
 	const auto sz = getWinSize();
@@ -430,21 +439,24 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 			case ArtSource::LOCAL:
 				{
 					// find the first suitable image to draw
-					std::string dir = uri.substr(0, uri.find_last_of('/'));
-					std::vector<std::string> candidate_paths = {
-						Config.mpd_music_dir + dir + "/cover.png",
-						Config.mpd_music_dir + dir + "/cover.jpg",
-						Config.mpd_music_dir + dir + "/cover.tiff",
-						Config.mpd_music_dir + dir + "/cover.bmp",
-					};
-					const auto it = std::find_if(
-							candidate_paths.begin(), candidate_paths.end(),
-							[](const std::string &s) { return 0 == access(s.c_str(), R_OK); });
-					if (it == candidate_paths.end())
+					std::string dir = uri.substr(0, uri.find_last_of('/')) + '/';
+					std::string art_path;
+					for (const auto &file : Config.albumart_filenames)
+					{
+						const std::string path = Config.mpd_music_dir + dir + file;
+						if (0 == access(path.c_str(), R_OK))
+						{
+							art_path = path;
+							break;
+						}
+					}
+					if (art_path.empty())
+					{
 						continue;
+					}
 
 					// draw the image
-					worker_updateArtBuffer(*it);
+					worker_updateArtBuffer(art_path);
 					worker_drawArtwork(x_offset, MainStartY, width, MainHeight);
 					return;
 				}
@@ -642,7 +654,7 @@ void KittyBackend::updateArtwork(const Magick::Blob& buffer, int x_offset, int y
 	cmd["f"] = "100"; // PNG
 	cmd["i"] = "1";   // image ID
 	cmd["p"] = "1";   // placement ID
-	cmd["q"] = "1";   // suppress output
+	cmd["q"] = "2";   // suppress output
 	cmd["C"] = "1";   // don't move cursor after placing image
 
 	setOutput(writeChunked(cmd, buffer), x_offset, y_offset);
@@ -654,7 +666,7 @@ void KittyBackend::resetArtworkPosition()
 	cmd["a"] = "p";   // put
 	cmd["i"] = "1";   // image ID
 	cmd["p"] = "1";   // placement ID
-	cmd["q"] = "1";   // suppress output
+	cmd["q"] = "2";   // suppress output
 	cmd["C"] = "1";   // don't move cursor after placing image
 
 	setOutput(writeChunked(cmd, {}), output_x_offset, output_y_offset);
@@ -665,7 +677,7 @@ void KittyBackend::removeArtwork()
 	std::map<std::string, std::string> cmd;
 	cmd["a"] = "d";   // delete
 	cmd["i"] = "1";   // image ID
-	cmd["q"] = "1";   // suppress output
+	cmd["q"] = "2";   // suppress output
 
 	setOutput(writeChunked(cmd, {}), 0, 0);
 }
