@@ -77,6 +77,7 @@ private:
 	void ApplyWindow(double *, const int16_t *, ssize_t);
 	void GenLogspace();
 	double Bin2Hz(size_t);
+	size_t Hz2Bin(double);
 	double Interpolate(size_t, size_t);
 #	endif // HAVE_FFTW3_H
 

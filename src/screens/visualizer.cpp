@@ -453,9 +453,7 @@ void Visualizer::DrawFrequencySpectrum(const int16_t *buf, ssize_t samples, size
 
 	const size_t win_width = w.getWidth();
 
-	size_t cur_bin = 0;
-	while (cur_bin < m_fftw_results && Bin2Hz(cur_bin) < m_dft_logspace[0])
-		++cur_bin;
+	size_t cur_bin = Hz2Bin(HZ_MIN);
 	for (size_t x = 0; x < win_width; ++x)
 	{
 		double bar_height = 0;
@@ -556,13 +554,8 @@ double Visualizer::Interpolate(size_t x, size_t h_idx)
 
 	double dh = 0;
 	if (h_idx == 0) {
-		// no data points on left, linear extrap
-		if (h_idx < m_bar_heights.size()-1) {
-			const double x_next2 = m_bar_heights[h_idx+1].first;
-			const double h_next2 = m_bar_heights[h_idx+1].second;
-			dh = (h_next2 - h_next) / (x_next2 - x_next);
-		}
-		return h_next - dh*(x_next-x);
+		// no data points on left
+		return h_next;
 	} else if (h_idx == 1) {
 		// one data point on left, linear interp
 		const double x_prev = m_bar_heights[h_idx-1].first;
@@ -612,20 +605,25 @@ void Visualizer::ApplyWindow(double *output, const int16_t *input, ssize_t sampl
 
 double Visualizer::Bin2Hz(size_t bin)
 {
-	return bin*44100/DFT_TOTAL_SIZE;
+	return bin*44100.0/DFT_TOTAL_SIZE;
+}
+
+size_t Visualizer::Hz2Bin(double hz)
+{
+	return hz*DFT_TOTAL_SIZE/44100.0;
 }
 
 // Generate log-scaled vector of frequencies from HZ_MIN to HZ_MAX
 void Visualizer::GenLogspace()
 {
-	// Calculate number of extra bins needed between 0 HZ and HZ_MIN
+	const double log_min = log2(HZ_MIN);
+	const double log_max = log2(HZ_MAX);
 	const size_t win_width = w.getWidth();
-	const size_t left_bins = (log10(HZ_MIN) - win_width*log10(HZ_MIN)) / (log10(HZ_MIN) - log10(HZ_MAX));
+	const double log_step = (log_max - log_min) / (win_width - 1);
 	// Generate logspaced frequencies
 	m_dft_logspace.resize(win_width);
-	const double log_scale = log10(HZ_MAX) / (left_bins + m_dft_logspace.size() - 1);
-	for (size_t i = left_bins; i < m_dft_logspace.size() + left_bins; ++i) {
-		m_dft_logspace[i - left_bins] = pow(10, i * log_scale);
+	for (size_t i = 0; i < m_dft_logspace.size(); ++i) {
+		m_dft_logspace[i] = pow(2, (log_min + i * log_step));
 	}
 }
 #endif // HAVE_FFTW3_H
