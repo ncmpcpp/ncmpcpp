@@ -25,10 +25,9 @@
 
 #ifdef ENABLE_ARTWORK
 
-#include <Magick++.h>
-
 #include <boost/process.hpp>
 #include <boost/thread/barrier.hpp>
+#include <Magick++.h>
 
 #include "curses/window.h"
 #include "interfaces.h"
