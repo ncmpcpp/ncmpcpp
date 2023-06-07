@@ -102,6 +102,8 @@ std::istream &operator>>(std::istream &is, Artwork::ArtAlign &align)
 Artwork::Artwork()
 	: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
 		, prev_winsize({})
+		, cache(4) // keep last few recently rendered artworks in cache for faster rendering
+		           // 4 is chosen mostly to speed up switching between split and full windows
 {
 	if (!Config.albumart)
 		return;
@@ -297,14 +299,15 @@ void Artwork::updatedVisibility()
 
 // Worker thread methods
 
-void Artwork::worker_updateArtBuffer(std::string path)
+void Artwork::worker_updateArtBuffer(const std::string &uri, const std::string &path)
 {
+	orig_art.uri = uri;
 	try {
 		std::ifstream s(path, std::ios::in | std::ios::binary);
 		std::vector<uint8_t> tmp_buf((std::istreambuf_iterator<char>(s)), std::istreambuf_iterator<char>());
-		orig_art_buffer = std::move(tmp_buf);
+		orig_art.buffer = std::move(tmp_buf);
 	} catch (const std::exception&) {
-		orig_art_buffer.clear();
+		orig_art.buffer.clear();
 	}
 }
 
@@ -312,7 +315,7 @@ void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int heig
 {
 	using namespace Magick;
 
-	if (orig_art_buffer.empty())
+	if (orig_art.buffer.empty())
 	{
 		return;
 	}
@@ -336,19 +339,39 @@ void Artwork::worker_drawArtwork(int x_offset, int y_offset, int width, int heig
 
 	try
 	{
-		// read and process artwork
-		const Blob in_blob(orig_art_buffer.data(), orig_art_buffer.size() * sizeof(orig_art_buffer[0]));
-		Image img(in_blob);
-		img.resize(out_geom);
+		cache_key_t k = { orig_art.uri, pixel_width, pixel_height, x_offset, y_offset };
+		if (boost::optional<cache_value_t> v = cache.get(k))
+		{
+			// cache hit
+			art_buffer = v->blob;
+			x_offset = v->adj_x_offset;
+			y_offset = v->adj_y_offset;
+		}
+		else
+		{
+			// cache miss
+			// read and process artwork
+			const Blob in_blob(orig_art.buffer.data(), orig_art.buffer.size() * sizeof(orig_art.buffer[0]));
+			Image img(in_blob);
+			img.resize(out_geom);
 
-		// write output to buffer
-		img.write(&art_buffer, "PNG");
+			// write output to buffer
+			img.write(&art_buffer, "PNG");
 
-		// center image
-		x_offset += worker_calcXOffset(width, img.columns(), char_xpixel);
-		x_offset += Config.albumart_xoffset;
-		y_offset += worker_calcYOffset(height, img.rows(), char_ypixel);
-		y_offset += Config.albumart_yoffset;
+			// center image
+			x_offset += worker_calcXOffset(width, img.columns(), char_xpixel);
+			x_offset += Config.albumart_xoffset;
+			y_offset += worker_calcYOffset(height, img.rows(), char_ypixel);
+			y_offset += Config.albumart_yoffset;
+
+			// save in cache
+			cache_value_t new_v = {
+				art_buffer,
+				x_offset,
+				y_offset,
+			};
+			cache.insert(k, new_v);
+		}
 	}
 	catch (Magick::Exception& e)
 	{
@@ -458,7 +481,7 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 					}
 
 					// draw the image
-					worker_updateArtBuffer(art_path);
+					worker_updateArtBuffer(uri, art_path);
 					worker_drawArtwork(x_offset, MainStartY, width, MainHeight);
 					return;
 				}
@@ -466,9 +489,12 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 			case ArtSource::MPD_READPICTURE:
 				{
 					const std::string &cmd = art_source_cmd_map.at(source);
-					orig_art_buffer = worker_fetchArtwork(uri, cmd);
+					orig_art = {
+						uri,
+						worker_fetchArtwork(uri, cmd),
+					};
 
-					if (orig_art_buffer.empty())
+					if (orig_art.buffer.empty())
 						continue;
 
 					// Write artwork to a temporary file and draw
@@ -480,7 +506,7 @@ void Artwork::worker_updateArtwork(const std::string &uri)
 	}
 
 	// Draw default artwork if MPD doesn't return anything
-	worker_updateArtBuffer(Config.albumart_default_path);
+	worker_updateArtBuffer(uri, Config.albumart_default_path);
 	worker_drawArtwork(x_offset, MainStartY, width, MainHeight);
 }
 

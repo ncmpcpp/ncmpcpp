@@ -32,6 +32,7 @@
 #include "curses/window.h"
 #include "interfaces.h"
 #include "screens/screen.h"
+#include "utility/lru_cache.h"
 
 class ArtworkBackend;
 
@@ -78,7 +79,7 @@ private:
 
 	// worker thread methods
 	void worker();
-	void worker_updateArtBuffer(std::string path);
+	void worker_updateArtBuffer(const std::string &uri, const std::string &path);
 	void worker_drawArtwork(int x_offset, int y_offset, int width, int height);
 	void worker_removeArtwork(bool reset_artwork = false);
 	void worker_updateArtwork();
@@ -95,7 +96,11 @@ private:
 
 	// worker thread variables
 	std::thread t;
-	std::vector<uint8_t> orig_art_buffer;
+	typedef struct art_s {
+		std::string uri;
+		std::vector<uint8_t> buffer;
+	} art_t;
+	art_t orig_art;
 	Magick::Blob art_buffer;
 	ArtworkBackend* backend;
 	std::string prev_uri = "";
@@ -105,6 +110,26 @@ private:
 		{ Artwork::ArtSource::MPD_ALBUMART, "albumart" },
 		{ Artwork::ArtSource::MPD_READPICTURE, "readpicture" },
 	};
+
+	// Cache for recently displayed artworks
+	typedef struct cache_key_s {
+		std::string uri;
+		size_t pixel_width;
+		size_t pixel_height;
+		int x_offset;
+		int y_offset;
+		friend bool operator<(const cache_key_s& l, const cache_key_s& r)
+		{
+			return std::tie(l.uri, l.pixel_width, l.pixel_height, l.x_offset, l.y_offset)
+			< std::tie(r.uri, r.pixel_width, r.pixel_height, r.x_offset, r.y_offset);
+		}
+	} cache_key_t;
+	typedef struct cache_value_s {
+		Magick::Blob blob;
+		int adj_x_offset;
+		int adj_y_offset;
+	} cache_value_t;
+	boost::compute::detail::lru_cache<cache_key_t, cache_value_t> cache;
 
 	// For giving tasks to worker thread
 	// Types of operations the worker thread can do
