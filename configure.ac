@@ -1,13 +1,13 @@
-AC_INIT([ncmpcpp], [0.10_dev])
+AC_INIT([ncmpcpp],[0.10_dev])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE([subdir-objects])
 
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_PREREQ(2.59)
+AC_PREREQ([2.71])
 
-AC_LANG_CPLUSPLUS
+AC_LANG([C++])
 AC_PROG_CXX
 AC_PROG_LIBTOOL
 
