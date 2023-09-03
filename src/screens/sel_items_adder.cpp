@@ -303,6 +303,18 @@ void SelectedItemsAdder::addToExistingPlaylist(const MPD::Playlist &playlist, bo
 	Mpd.CommitCommandsList();
     if (!songs.empty())
         Statusbar::printf("Selected item(s) added to playlist \"%1%\"", playlist.path());
+	for (auto s = m_selected_items.begin(); s != m_selected_items.end(); ++s){
+		for (MPD::SongIterator s2 = Mpd.GetPlaylistContent(playlist), end; s2 != end; ++s2)
+			if(s2->getURI() == s->getURI()){
+				goto next_song;
+			}
+		Mpd.StartCommandsList();
+		Mpd.AddToPlaylist(playlist, *s);
+		Mpd.CommitCommandsList();
+		next_song:;
+	}
+
+	Statusbar::printf("Selected item(s) added to playlist \"%1%\"", playlist);
 	switchToPreviousScreen();
 }
 
