@@ -34,6 +34,7 @@
 #include <textidentificationframe.h>
 #include <commentsframe.h>
 #include <xiphcomment.h>
+#include <taglib/taglib.h>
 
 #include <boost/filesystem.hpp>
 #include "global.h"
@@ -123,12 +124,20 @@ void writeCommonTags(const MPD::MutableSong &s, TagLib::Tag *tag)
 	tag->setArtist(ToWString(s.getArtist()));
 	tag->setAlbum(ToWString(s.getAlbum()));
 	try {
+#if (TAGLIB_MAJOR_VERSION >= 2)
+		tag->setYear(boost::lexical_cast<unsigned int>(s.getDate()));
+#else
 		tag->setYear(boost::lexical_cast<TagLib::uint>(s.getDate()));
+#endif
 	} catch (boost::bad_lexical_cast &) {
 		std::cerr << "writeCommonTags: couldn't write 'year' tag to '" << s.getURI() << "' as it's not a positive integer\n";
 	}
 	try {
+#if (TAGLIB_MAJOR_VERSION >= 2)
+		tag->setTrack(boost::lexical_cast<unsigned int>(s.getTrack()));
+#else
 		tag->setTrack(boost::lexical_cast<TagLib::uint>(s.getTrack()));
+#endif
 	} catch (boost::bad_lexical_cast &) {
 		std::cerr << "writeCommonTags: couldn't write 'track' tag to '" << s.getURI() << "' as it's not a positive integer\n";
 	}
@@ -306,7 +315,11 @@ bool write(MPD::MutableSong &s)
 	{
 		writeID3v2Tags(s, mpeg_file->ID3v2Tag(true));
 		// write id3v2.4 tags only
+#if (TAGLIB_MAJOR_VERSION >= 2)
+		if (!mpeg_file->save(TagLib::MPEG::File::ID3v2, TagLib::File::StripNone, TagLib::ID3v2::Version::v4, TagLib::File::DuplicateTags::DoNotDuplicate))
+#else
 		if (!mpeg_file->save(TagLib::MPEG::File::ID3v2, true, 4, false))
+#endif
 			return false;
 		// do not call generic save() as it will duplicate tags
 		saved = true;
