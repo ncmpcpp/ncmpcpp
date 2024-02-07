@@ -257,19 +257,30 @@ PKG_CHECK_MODULES([libcurl], [libcurl], [
 
 # taglib
 if test "$taglib" != "no" ; then
-	AC_PATH_PROG(TAGLIB_CONFIG, taglib-config)
-	if test "$TAGLIB_CONFIG" != "" ; then
-		CPPFLAGS="$CPPFLAGS `$TAGLIB_CONFIG --cflags`"
-		LIBS="$LIBS `$TAGLIB_CONFIG --libs`"
+	PKG_CHECK_MODULES([taglib], [taglib], [
+		AC_SUBST(taglib_CFLAGS)
+		AC_SUBST(taglib_LIBS)
+	], [
+		AC_PATH_PROG([TAGLIB_CONFIG], [taglib-config])
+		if test "$TAGLIB_CONFIG" != ""; then
+			taglib_CFLAGS=`$TAGLIB_CONFIG --cflags`
+			taglib_LIBS=`$TAGLIB_CONFIG --libs`
+		else
+			if test "$taglib" = "yes" ; then
+				AC_MSG_ERROR([could not find taglib.pc or taglib-config executable])
+			fi
+		fi
+	])
+
+	if test "$TAGLIB_CONFIG$taglib_LIBS" != "" ; then
+		CPPFLAGS="$CPPFLAGS $taglib_CFLAGS"
+		LIBS="$LIBS $taglib_LIBS"
+
 		AC_CHECK_HEADERS([taglib.h], ,
 			if test "$taglib" = "yes" ; then
 				AC_MSG_ERROR([missing taglib.h header])
 			fi
 		)
-	else
-		if test "$taglib" = "yes" ; then
-			AC_MSG_ERROR([taglib-config executable is missing])
-		fi
 	fi
 fi
 
