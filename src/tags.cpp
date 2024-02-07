@@ -123,12 +123,12 @@ void writeCommonTags(const MPD::MutableSong &s, TagLib::Tag *tag)
 	tag->setArtist(ToWString(s.getArtist()));
 	tag->setAlbum(ToWString(s.getAlbum()));
 	try {
-		tag->setYear(boost::lexical_cast<TagLib::uint>(s.getDate()));
+		tag->setYear(boost::lexical_cast<unsigned>(s.getDate()));
 	} catch (boost::bad_lexical_cast &) {
 		std::cerr << "writeCommonTags: couldn't write 'year' tag to '" << s.getURI() << "' as it's not a positive integer\n";
 	}
 	try {
-		tag->setTrack(boost::lexical_cast<TagLib::uint>(s.getTrack()));
+		tag->setTrack(boost::lexical_cast<unsigned>(s.getTrack()));
 	} catch (boost::bad_lexical_cast &) {
 		std::cerr << "writeCommonTags: couldn't write 'track' tag to '" << s.getURI() << "' as it's not a positive integer\n";
 	}
@@ -261,7 +261,7 @@ void read(mpd_song *s)
 	if (f.isNull())
 		return;
 	
-	setAttribute(s, "Time", boost::lexical_cast<std::string>(f.audioProperties()->length()));
+	setAttribute(s, "Time", boost::lexical_cast<std::string>(f.audioProperties()->lengthInSeconds()));
 	
 	if (auto mpeg_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
 	{
@@ -306,7 +306,10 @@ bool write(MPD::MutableSong &s)
 	{
 		writeID3v2Tags(s, mpeg_file->ID3v2Tag(true));
 		// write id3v2.4 tags only
-		if (!mpeg_file->save(TagLib::MPEG::File::ID3v2, true, 4, false))
+		if (!mpeg_file->save(TagLib::MPEG::File::ID3v2,
+		                     TagLib::File::StripOthers,
+		                     TagLib::ID3v2::v4,
+		                     TagLib::File::DoNotDuplicate))
 			return false;
 		// do not call generic save() as it will duplicate tags
 		saved = true;
