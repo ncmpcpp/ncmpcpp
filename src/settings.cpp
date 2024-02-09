@@ -459,7 +459,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("header_text_scrolling", &header_text_scrolling, "yes", yes_no);
 	p.add("cyclic_scrolling", &use_cyclic_scrolling, "no", yes_no);
 	p.add("lyrics_fetchers", &lyrics_fetchers,
-	      "azlyrics, genius, musixmatch, sing365, metrolyrics, justsomelyrics, jahlyrics, plyrics, tekstowo, zeneszoveg, internet",
+	      "azlyrics, genius, musixmatch, sing365, metrolyrics, justsomelyrics, jahlyrics, plyrics, tekstowo, zeneszoveg, letras, internet",
 	      list_of<LyricsFetcher_>);
 	p.add("follow_now_playing_lyrics", &now_playing_lyrics, "no", yes_no);
 	p.add("fetch_lyrics_for_current_song_in_background", &fetch_lyrics_in_background,
