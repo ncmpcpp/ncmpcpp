@@ -20,6 +20,7 @@
 
 #include "config.h"
 #include "curl_handle.h"
+#include "settings.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -28,6 +29,15 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
+#include <boost/range/algorithm_ext/erase.hpp>
+
+#include <mpd/song.h>
+#include <song.h>
+
+#ifdef HAVE_TAGLIB_H
+#include <fileref.h>
+#include <tpropertymap.h>
+#endif // HAVE_TAGLIB_H
 
 #include "charset.h"
 #include "lyrics_fetcher.h"
@@ -60,6 +70,10 @@ std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher)
 		fetcher = std::make_unique<ZeneszovegFetcher>();
 	else if (s == "internet")
 		fetcher = std::make_unique<InternetLyricsFetcher>();
+#ifdef HAVE_TAGLIB_H
+	else if (s == "tags")
+		fetcher = std::make_unique<TagsLyricsFetcher>();
+#endif // HAVE_TAGLIB_H
 	else
 		is.setstate(std::ios::failbit);
 	return is;
@@ -68,7 +82,8 @@ std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher)
 const char LyricsFetcher::msgNotFound[] = "Not found";
 
 LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist,
-                                           const std::string &title)
+                                           const std::string &title,
+										   const MPD::Song &song)
 {
 	Result result;
 	result.first = false;
@@ -150,7 +165,8 @@ void LyricsFetcher::postProcess(std::string &data) const
 /**********************************************************************/
 
 LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist,
-                                                 const std::string &title)
+                                                 const std::string &title,
+												 const MPD::Song &song)
 {
 	Result result;
 	result.first = false;
@@ -192,7 +208,7 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist,
 	data = unescapeHtmlUtf8(urls[0]);
 
 	URL = data.c_str();
-	return LyricsFetcher::fetch("", "");
+	return LyricsFetcher::fetch("", "", song);
 }
 
 bool GoogleLyricsFetcher::isURLOk(const std::string &url)
@@ -211,9 +227,10 @@ bool MetrolyricsFetcher::isURLOk(const std::string &url)
 /**********************************************************************/
 
 LyricsFetcher::Result InternetLyricsFetcher::fetch(const std::string &artist,
-                                                   const std::string &title)
+                                                   const std::string &title,
+											       const MPD::Song &song)
 {
-	GoogleLyricsFetcher::fetch(artist, title);
+	GoogleLyricsFetcher::fetch(artist, title, song);
 	LyricsFetcher::Result result;
 	result.first = false;
 	result.second = "The following site may contain lyrics for this song: ";
@@ -226,3 +243,36 @@ bool InternetLyricsFetcher::isURLOk(const std::string &url)
 	URL = url;
 	return false;
 }
+
+#ifdef HAVE_TAGLIB_H
+LyricsFetcher::Result TagsLyricsFetcher::fetch(const std::string &artist,
+                                               const std::string &title,
+											   const MPD::Song &song)
+{
+	LyricsFetcher::Result result;
+	result.first = false;
+
+	TagLib::FileRef f((Config.mpd_music_dir + "/" + song.getURI()).data());
+	if (f.isNull()) {
+		result.second = "Only works for local files.";
+		return result;
+	}
+
+	TagLib::PropertyMap properties = f.file()->properties();
+
+	if (properties.contains("LYRICS")) {
+		result.first = true;
+		result.second = properties["LYRICS"].toString("\n\n").to8Bit(true);
+	} else if (properties.contains("UNSYNCEDLYRICS")) {
+		result.first = true;
+		result.second = properties["UNSYNCEDLYRICS"].toString("\n\n").to8Bit(true);
+	} else {
+		result.second = "No lyrics in the tags found, only found:\n"
+			+ properties.toString().to8Bit(true);
+	}
+
+	boost::remove_erase(result.second, '\r');
+
+	return result;
+}
+#endif // HAVE_TAGLIB_H
