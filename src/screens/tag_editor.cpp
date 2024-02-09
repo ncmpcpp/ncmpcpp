@@ -798,13 +798,16 @@ void TagEditor::runAction()
 			Statusbar::print("Writing changes...");
 			for (auto it = EditedSongs.begin(); it != EditedSongs.end(); ++it)
 			{
-				Statusbar::printf("Writing tags in \"%1%\"...", (*it)->getName());
-				if (!Tags::write(**it))
+				if ((*it)->isModified())
 				{
-					Statusbar::printf("Error while writing tags to \"%1%\": %2%",
-					                  (*it)->getName(), strerror(errno));
-					success = 0;
-					break;
+					Statusbar::printf("Writing tags in \"%1%\"...", (*it)->getName());
+					if (!Tags::write(**it))
+					{
+						Statusbar::printf("Error while writing tags to \"%1%\": %2%",
+						                  (*it)->getName(), strerror(errno));
+						success = 0;
+						break;
+					}
 				}
 			}
 			if (success)
