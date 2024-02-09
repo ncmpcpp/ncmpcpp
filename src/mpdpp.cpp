@@ -21,6 +21,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <algorithm>
+#include <iostream>
 #include <map>
 #include <boost/regex.hpp>
 
@@ -28,6 +29,7 @@
 #include "mpdpp.h"
 
 MPD::Connection Mpd;
+MPD::Connection Mpd_artwork;
 
 namespace {
 
@@ -872,6 +874,67 @@ StringIterator Connection::GetTagTypes()
 		else
 			return false;
 	});
+}
+
+void Connection::setBinaryLimit(size_t limit)
+{
+	prechecksNoCommandsList();
+	mpd_send_command(m_connection.get(), "binarylimit", std::to_string(limit).c_str(), nullptr);
+	mpd_response_finish(m_connection.get());
+	checkErrors();
+}
+
+std::vector<uint8_t> Connection::GetArtwork(const std::string &uri, const std::string &cmd)
+{
+	// Raise binarylimit for faster transfer if supported
+	try
+	{
+		setBinaryLimit(1 * (1 << 20)); // set binarylimit to 1 MiB
+	}
+	catch (const std::exception &e) {}
+
+	prechecksNoCommandsList();
+	bool ret;
+	size_t offset = 0;
+	size_t size = std::numeric_limits<size_t>::max();
+	std::vector<uint8_t> buffer;
+
+	size_t count = 0;
+
+	while (offset < size)
+	{
+		size_t binary = 0;
+		ret = mpd_send_command(m_connection.get(), cmd.c_str(), uri.c_str(), std::to_string(offset).c_str(), nullptr);
+		if (!ret)
+		{
+			return {};
+		}
+
+		checkErrors();
+		if (mpd_pair *pair = mpd_recv_pair_named(m_connection.get(), "size"))
+		{
+			size = std::stoi(pair->value);
+			buffer.resize(size);
+			mpd_enqueue_pair(m_connection.get(), pair);
+		}
+		if (mpd_pair *pair = mpd_recv_pair_named(m_connection.get(), "binary"))
+		{
+			binary = std::stoi(pair->value);
+			mpd_enqueue_pair(m_connection.get(), pair);
+		}
+		ret = mpd_recv_binary(m_connection.get(), buffer.data() + offset, binary);
+		mpd_response_finish(m_connection.get());
+		if (!ret)
+		{
+			return {};
+		}
+		offset += binary;
+		++count;
+	}
+	// std::cerr << cmd.c_str() << ": " << uri
+		// << ", roundtrips: " << count
+		// << ", size: " << buffer.size() << std::endl;
+	return buffer;
 }
 
 void Connection::checkConnection() const

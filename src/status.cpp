@@ -23,6 +23,7 @@
 #include <netinet/in.h>
 
 #include "curses/menu_impl.h"
+#include "screens/artwork.h"
 #include "screens/browser.h"
 #include "charset.h"
 #include "format_impl.h"
@@ -491,7 +492,7 @@ void Status::Changes::database()
 	myLibrary->requestSongsUpdate();
 }
 
-void Status::Changes::playerState()
+void Status::Changes::playerState(bool drawArtwork)
 {
 	if (!Config.execute_on_player_state_change.empty())
 	{
@@ -517,7 +518,15 @@ void Status::Changes::playerState()
 		{
 			auto np = myPlaylist->nowPlayingSong();
 			if (!np.empty())
+			{
 				drawTitle(np);
+#	ifdef ENABLE_ARTWORK
+				if (drawArtwork)
+				{
+					myArtwork->updateArtwork(np.getURI());
+				}
+#	endif // ENABLE_ARTWORK
+      }
 			myPlaylist->reloadRemaining();
 			break;
 		}
@@ -537,6 +546,9 @@ void Status::Changes::playerState()
 			if (isVisible(myVisualizer))
 				myVisualizer->Clear();
 #			endif // ENABLE_VISUALIZER
+#	ifdef ENABLE_ARTWORK
+			myArtwork->removeArtwork(/* reset_artwork */ true);
+#	endif // ENABLE_ARTWORK
 			break;
 		default:
 			break;
