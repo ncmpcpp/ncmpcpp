@@ -219,6 +219,7 @@ struct Configuration
 	std::vector<ScreenType> screen_sequence;
 
 	std::string random_exclude_pattern;
+	std::string db_exclude_pattern;
 	SortMode browser_sort_mode;
 
 	LyricsFetchers lyrics_fetchers;
