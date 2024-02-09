@@ -47,6 +47,8 @@ const wchar_t *toColumnName(char c)
 			return L"Filename";
 		case 'D':
 			return L"Directory";
+		case 'F':
+			return L"Filepath";
 		case 'a':
 			return L"Artist";
 		case 'A':
