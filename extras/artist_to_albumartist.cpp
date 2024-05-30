@@ -34,7 +34,7 @@ enum class CopyResult { Success, NoArtist, AlbumArtistAlreadyInPlace };
 bool is_framelist_empty(const TagLib::ID3v2::FrameList &list)
 {
 	for (auto it = list.begin(); it != list.end(); ++it)
-		if ((*it)->toString() != TagLib::String::null)
+		if (!(*it)->toString().isEmpty())
 			return false;
 	return true;
 }
