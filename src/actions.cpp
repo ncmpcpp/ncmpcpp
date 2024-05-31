@@ -1746,7 +1746,7 @@ void JumpToPositionInSong::run()
 	std::string spos;
 	{
 		Statusbar::ScopedLock slock;
-		Statusbar::put() << "Position to go (in %/m:ss/seconds(s)): ";
+		Statusbar::put() << "Position to go (in %/h:m:ss/m:ss/seconds(s)): ";
 		spos = wFooter->prompt();
 	}
 	
@@ -1771,8 +1771,17 @@ void JumpToPositionInSong::run()
 		int secs = (percent * s.getDuration()) / 100.0;
 		Mpd.Seek(s.getPosition(), secs);
 	}
+	else if (boost::regex_match(spos, what, rx.assign("([0-9]+):([0-9]{1,2}):([0-9]{2})"))) // position in hh:mm:ss 
+    {
+		auto hours = fromString<unsigned>(what[1]);
+		auto mins  = fromString<unsigned>(what[2]);
+		auto secs  = fromString<unsigned>(what[3]);
+		boundsCheck(mins, 0u, 60u);
+		boundsCheck(secs, 0u, 60u);
+		Mpd.Seek(s.getPosition(), hours * 3600 + mins * 60 + secs);
+	}
 	else
-		Statusbar::print("Invalid format ([m]:[ss], [s]s, [%]%, [%] accepted)");
+		Statusbar::print("Invalid format ([h]:[m]:[ss], [m]:[ss], [s]s, [%]%, [%] accepted)");
 }
 
 bool SelectItem::canBeRun()
