@@ -293,7 +293,9 @@ bool Song::isFromDatabase() const
 bool Song::isStream() const
 {
 	assert(m_song);
-	return !strncmp(mpd_song_get_uri(m_song.get()), "http://", 7);
+	const char *song_uri = mpd_song_get_uri(m_song.get());
+	// Stream schemas: http, https
+	return !strncmp(song_uri, "http://", 7) || !strncmp(song_uri, "https://", 8);
 }
 
 bool Song::empty() const
@@ -308,7 +310,7 @@ std::string Song::ShowTime(unsigned length)
 	int minutes = length/60;
 	length -= minutes*60;
 	int seconds = length;
-	
+
 	std::string result;
 	if (hours > 0)
 		result = (boost::format("%d:%02d:%02d") % hours % minutes % seconds).str();
