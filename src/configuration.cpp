@@ -32,6 +32,7 @@
 #include "mpdpp.h"
 #include "format_impl.h"
 #include "settings.h"
+#include "song.h"
 #include "utility/string.h"
 
 namespace po = boost::program_options;
@@ -175,7 +176,8 @@ bool configure(int argc, char **argv)
 				          << fetcher->name()
 				          << " : "
 				          << std::flush;
-				auto result = fetcher->fetch(std::get<1>(data), std::get<2>(data));
+				// The nullptr is a bit hacky, but that argument is only used by the tags fetchers and it is not being tested
+				auto result = fetcher->fetch(std::get<1>(data), std::get<2>(data), nullptr);
 				std::cout << (result.first ? "ok" : "failed")
 				          << "\n";
 			}
