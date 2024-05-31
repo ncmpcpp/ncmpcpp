@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <sys/select.h>
+#include <termios.h>
 #include <unistd.h>
 
 #include "utility/readline.h"
@@ -216,6 +217,8 @@ Color Color::Cyan(COLOR_CYAN, Color::current);
 Color Color::White(COLOR_WHITE, Color::current);
 Color Color::End(0, 0, false, true);
 
+struct termios orig_termios;
+
 int Color::pairNumber() const
 {
 	// If colors are disabled, return default pair value.
@@ -400,6 +403,7 @@ int colorCount()
 
 void initScreen(bool enable_colors, bool enable_mouse)
 {
+	tcgetattr(STDIN_FILENO, &orig_termios);
 	initscr();
 	if (has_colors() && enable_colors)
 	{
@@ -481,6 +485,7 @@ void destroyScreen()
 	Mouse::disable();
 	curs_set(1);
 	endwin();
+	tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
 }
 
 Window::Window(size_t startx, size_t starty, size_t width, size_t height,
