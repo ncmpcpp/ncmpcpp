@@ -113,6 +113,7 @@ private:
 	const double HZ_MAX;
 	const double GAIN;
 	const std::wstring SMOOTH_CHARS;
+	const std::wstring SMOOTH_CHARS_FLIPPED;
 	std::vector<double> m_dft_logspace;
 	std::vector<std::pair<size_t, double>> m_bar_heights;
 
