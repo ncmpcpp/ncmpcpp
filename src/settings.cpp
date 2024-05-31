@@ -389,6 +389,21 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 		      columns = generate_columns(v);
 		      return columns_to_format(columns);
 	      });
+	p.add("song_columns_list_now_playing_format", &song_columns_mode_now_playing_format,
+		  // Default will just use song_columns_mode_format
+		  "default",
+		  [this](std::string v) {
+			  if (v != "default")
+			  {
+				now_playing_columns = generate_columns(v);
+				return columns_to_format(now_playing_columns);
+			  }
+			  else
+			  {
+				now_playing_columns = columns;
+				return song_columns_mode_format;
+			  }
+		  });
 	p.add("execute_on_song_change", &execute_on_song_change, "", adjust_path);
 	p.add("execute_on_player_state_change", &execute_on_player_state_change,
 	      "", adjust_path);

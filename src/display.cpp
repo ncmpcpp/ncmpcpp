@@ -204,8 +204,9 @@ void showSongsInColumns(NC::Menu<T> &menu, const MPD::Song &s, const SongList &l
 	int y = menu.getY();
 	int remained_width = menu_width;
 
-	std::vector<Column>::const_iterator it, last = Config.columns.end() - 1;
-	for (it = Config.columns.begin(); it != Config.columns.end(); ++it)
+	std::vector<Column> columns = is_now_playing ? Config.now_playing_columns : Config.columns;
+	std::vector<Column>::const_iterator it, last = columns.end() - 1;
+	for (it = columns.begin(); it != columns.end(); ++it)
 	{
 		// check current X coordinate
 		int x = menu.getX();
