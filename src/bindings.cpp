@@ -620,6 +620,8 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::ToggleRepeat);
 	if (notBound(k = stringToKey("z")))
 		bind(k, Actions::Type::ToggleRandom);
+	if (notBound(k = stringToKey("'")))
+		bind(k, Actions::Type::SetOneshot);
 	if (notBound(k = stringToKey("y")))
 	{
 		bind(k, Actions::Type::SaveTagChanges);
