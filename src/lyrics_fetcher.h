@@ -69,48 +69,12 @@ private:
 	const char *URL;
 };
 
-struct MusixmatchFetcher : public GoogleLyricsFetcher
-{
-	virtual const char *name() const override { return "musixmatch.com"; }
-
-protected:
-	virtual const char *regex() const override { return "<span class=\"lyrics__content__.*?>(.*?)</span>"; }
-
-	virtual void postProcess(std::string &) const override { }
-};
-
-struct MetrolyricsFetcher : public GoogleLyricsFetcher
-{
-	virtual const char *name() const override { return "metrolyrics.com"; }
-	
-protected:
-	virtual const char *regex() const override { return "<div class=\"lyrics-body\">(.*?)<!--WIDGET.*?<!-- Second Section -->(.*?)<!--WIDGET.*?<!-- Third Section -->(.*?)</div>"; }
-	
-	virtual bool isURLOk(const std::string &url) override;
-};
-
-struct Sing365Fetcher : public GoogleLyricsFetcher
-{
-	virtual const char *name() const override { return "lyrics007.com"; }
-	
-protected:
-	virtual const char *regex() const override { return "<div class=\"lyrics\">(.*?)</div>"; }
-};
-
 struct JustSomeLyricsFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const override { return "justsomelyrics.com"; }
 	
 protected:
 	virtual const char *regex() const override { return "<div class=\"content.*?</div>(.*?)See also"; }
-};
-
-struct AzLyricsFetcher : public GoogleLyricsFetcher
-{
-	virtual const char *name() const override { return "azlyrics.com"; }
-	
-protected:
-	virtual const char *regex() const override { return "<div class=\"lyricsh\">.*?</h2>.*<div>(.*?)</div>"; }
 };
 
 struct GeniusFetcher : public GoogleLyricsFetcher
@@ -142,7 +106,7 @@ struct TekstowoFetcher : public GoogleLyricsFetcher
 	virtual const char *name() const override { return "tekstowo.pl"; }
 
 protected:
-	virtual const char *regex() const override { return "<div class=\"song-text\".*?>.*?</h2>(.*?)<a"; }
+	virtual const char *regex() const override { return "<div class=\"inner-text\">(.*?)</div>"; }
 };
 
 struct ZeneszovegFetcher : public GoogleLyricsFetcher
@@ -150,7 +114,7 @@ struct ZeneszovegFetcher : public GoogleLyricsFetcher
 	virtual const char *name() const override { return "zeneszoveg.hu"; }
 
 protected:
-	virtual const char *regex() const override { return "<div class=\"lyrics-plain-text.*?\">(.*?)</div>"; }
+	virtual const char *regex() const override { return "<div id=\"tartalom_slide_content\"> (.*?)<style>"; }
 };
 
 struct InternetLyricsFetcher : public GoogleLyricsFetcher
