@@ -361,6 +361,25 @@ void Lyrics::toggleFetcher()
 		Statusbar::print("Using all lyrics fetchers");
 }
 
+/* For HTTP(S) streams, fetchInBackground makes ncmpcpp crash: the lyrics_file
+ * gets set to the stream URL, which is too long, hence
+ * boost::filesystem::exists() fails.
+ * Possible solutions:
+ * - truncate the URL and use that as a filename. Problem: resulting filename
+ *   might not be unique.
+ * - generate filenames in a different way for streams. Problem: what is a good
+ *   method for this? Perhaps hashing -- but then the lyrics filenames are not
+ *   informative.
+ * - skip fetching lyrics for streams with URLs that are too long. Problem:
+ *   this leads to inconsistent behavior since lyrics will be fetched for some
+ *   streams but not others.
+ * - avoid fetching lyrics for streams altogether.
+ *
+ * We choose the last solution, and ignore streams when fetching lyrics. This
+ * is because fetching lyrics for a stream may not be accurate (streams do not
+ * always provide the necessary metadata to look up lyrics reliably).
+ * Furthermore, fetching lyrics for streams is not necessarily desirable.
+ */
 void Lyrics::fetchInBackground(const MPD::Song &s, bool notify_)
 {
 	auto consumer_impl = [this] {
@@ -377,7 +396,10 @@ void Lyrics::fetchInBackground(const MPD::Song &s, bool notify_)
 					break;
 				}
 				lyrics_file = lyricsFilename(consumer->songs.front().song());
-				if (!boost::filesystem::exists(lyrics_file))
+
+				// For long filenames (e.g. http(s) stream URLs), boost::filesystem::exists() fails.
+				// This if condition is fine, because evaluation order is guaranteed.
+				if (!consumer->songs.front().song().isStream() && !boost::filesystem::exists(lyrics_file))
 				{
 					cs = consumer->songs.front();
 					if (cs.notify())
@@ -389,7 +411,7 @@ void Lyrics::fetchInBackground(const MPD::Song &s, bool notify_)
 				}
 				consumer->songs.pop();
 			}
-			if (!cs.song().empty())
+			if (!cs.song().empty() && !cs.song().isStream())
 			{
 				auto lyrics = downloadLyrics(cs.song(), nullptr, nullptr, m_fetcher);
 				if (lyrics)
