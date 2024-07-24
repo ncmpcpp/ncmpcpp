@@ -1752,27 +1752,31 @@ void JumpToPositionInSong::run()
 	
 	boost::regex rx;
 	boost::smatch what;
-	if (boost::regex_match(spos, what, rx.assign("([0-9]+):([0-9]{2})"))) // mm:ss
+	// mm:ss
+	if (boost::regex_match(spos, what, rx.assign("([0-9]+):([0-9]{2})")))
 	{
 		auto mins = fromString<unsigned>(what[1]);
 		auto secs = fromString<unsigned>(what[2]);
 		boundsCheck(secs, 0u, 60u);
 		Mpd.Seek(s.getPosition(), mins * 60 + secs);
 	}
-	else if (boost::regex_match(spos, what, rx.assign("([0-9]+)s"))) // position in seconds
+	// position in seconds
+	else if (boost::regex_match(spos, what, rx.assign("([0-9]+)s")))
 	{
 		auto secs = fromString<unsigned>(what[1]);
 		Mpd.Seek(s.getPosition(), secs);
 	}
-	else if (boost::regex_match(spos, what, rx.assign("([0-9]+)[%]{0,1}"))) // position in %
+	// position in%
+	else if (boost::regex_match(spos, what, rx.assign("([0-9]+)[%]{0,1}")))
 	{
 		auto percent = fromString<unsigned>(what[1]);
 		boundsCheck(percent, 0u, 100u);
 		int secs = (percent * s.getDuration()) / 100.0;
 		Mpd.Seek(s.getPosition(), secs);
 	}
-	else if (boost::regex_match(spos, what, rx.assign("([0-9]+):([0-9]{1,2}):([0-9]{2})"))) // position in hh:mm:ss 
-    {
+	// position in hh:mm:ss
+	else if (boost::regex_match(spos, what, rx.assign("([0-9]+):([0-9]{2}):([0-9]{2})")))
+	{
 		auto hours = fromString<unsigned>(what[1]);
 		auto mins  = fromString<unsigned>(what[2]);
 		auto secs  = fromString<unsigned>(what[3]);
@@ -1781,7 +1785,7 @@ void JumpToPositionInSong::run()
 		Mpd.Seek(s.getPosition(), hours * 3600 + mins * 60 + secs);
 	}
 	else
-		Statusbar::print("Invalid format ([h]:[m]:[ss], [m]:[ss], [s]s, [%]%, [%] accepted)");
+		Statusbar::print("Invalid format ([h]:[mm]:[ss], [m]:[ss], [s]s, [%]%, [%] accepted)");
 }
 
 bool SelectItem::canBeRun()
