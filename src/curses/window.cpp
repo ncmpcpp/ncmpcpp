@@ -199,6 +199,8 @@ int add_base()
 int color_pair_counter;
 std::vector<int> color_pair_map;
 
+termios orig_termios;
+
 }
 
 namespace NC {
@@ -216,8 +218,6 @@ Color Color::Magenta(COLOR_MAGENTA, Color::current);
 Color Color::Cyan(COLOR_CYAN, Color::current);
 Color Color::White(COLOR_WHITE, Color::current);
 Color Color::End(0, 0, false, true);
-
-struct termios orig_termios;
 
 int Color::pairNumber() const
 {
