@@ -174,6 +174,7 @@ void writeID3v2Tags(const MPD::MutableSong &s, TagLib::ID3v2::Tag *tag)
 void writeXiphComments(const MPD::MutableSong &s, TagLib::Ogg::XiphComment *tag)
 {
 	auto writeXiph = [&](const TagLib::String &type, const TagLib::StringList &list) {
+		tag->removeFields(type);
 		for (auto it = list.begin(); it != list.end(); ++it)
 			tag->addField(type, *it, it == list.begin());
 	};
