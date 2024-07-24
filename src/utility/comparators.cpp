@@ -34,10 +34,22 @@ bool hasTheWord(const std::string &s)
 	&&     (s[3] == ' ');
 }
 
+long long strToLL(const char *s, size_t len)
+{
+	long long n = 0;
+	while (len--)
+		n = 10*n + *s++ - '0';
+	return n;
+}
+
 }
 
 int LocaleStringComparison::compare(const char *a, size_t a_len, const char *b, size_t b_len) const
 {
+	// If both strings are numbers, compare them as such.
+	if (std::all_of(a, a + a_len, isdigit) && std::all_of(b, b + b_len, isdigit))
+		return strToLL(a, a_len) - strToLL(b, b_len);
+
 	size_t ac_off = 0, bc_off = 0;
 	if (m_ignore_the)
 	{
