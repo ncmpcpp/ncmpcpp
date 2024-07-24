@@ -47,7 +47,8 @@ long long strToLL(const char *s, size_t len)
 int LocaleStringComparison::compare(const char *a, size_t a_len, const char *b, size_t b_len) const
 {
 	// If both strings are numbers, compare them as such.
-	if (std::all_of(a, a + a_len, isdigit) && std::all_of(b, b + b_len, isdigit))
+	if (   a_len > 0 && std::all_of(a, a + a_len, isdigit)
+	    && b_len > 0 && std::all_of(b, b + b_len, isdigit))
 		return strToLL(a, a_len) - strToLL(b, b_len);
 
 	size_t ac_off = 0, bc_off = 0;
