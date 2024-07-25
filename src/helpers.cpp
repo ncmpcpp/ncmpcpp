@@ -208,3 +208,19 @@ void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,
 	else
 		w << buf;
 }
+
+boost::optional<size_t> GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song)
+{
+	size_t index = 0;
+	MPD::SongIterator it = Mpd.GetPlaylistContentNoInfo(playlist.path()), end;
+
+	for (;;)
+	{
+		if (it == end)
+			return boost::none;
+		if (*it == song)
+			return index;
+
+		++it, ++index;
+	}
+}
