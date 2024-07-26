@@ -160,7 +160,7 @@ void Artwork::drawToScreen()
 		throw MPD::Error("Can't read from artwork pipe", false);
 	}
 
-	std::vector<uint8_t> output;
+	std::string output;
 	int x_offset, y_offset;
 	std::tie(output, x_offset, y_offset) = backend->takeOutput();
 	if (output.empty())
@@ -691,15 +691,15 @@ void UeberzugBackend::removeArtwork()
 
 // EscapedArtworkBackend
 
-std::tuple<std::vector<uint8_t>, int, int> EscapedArtworkBackend::takeOutput()
+std::tuple<std::string, int, int> EscapedArtworkBackend::takeOutput()
 {
-	std::tuple<std::vector<uint8_t>, int, int> ret;
+	std::tuple<std::string, int, int> ret;
 	ret = {output, output_x_offset, output_y_offset};
 	output.clear();
 	return ret;
 }
 
-void EscapedArtworkBackend::setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset)
+void EscapedArtworkBackend::setOutput(std::string buffer, int x_offset, int y_offset)
 {
 	{
 		// wait until main thread has written previous command
@@ -756,8 +756,8 @@ void KittyBackend::removeArtwork()
 	setOutput(writeChunked(cmd, {}), 0, 0);
 }
 
-std::vector<uint8_t> KittyBackend::serializeGrCmd(std::map<std::string, std::string> cmd,
-		const std::vector<uint8_t> &payload,
+std::string KittyBackend::serializeGrCmd(std::map<std::string, std::string> cmd,
+		const std::string &payload,
 		size_t chunk_begin, size_t chunk_end)
 {
 	std::string cmd_str;
@@ -770,33 +770,32 @@ std::vector<uint8_t> KittyBackend::serializeGrCmd(std::map<std::string, std::str
 		cmd_str.resize(cmd_str.size() - 1);
 	}
 
-	std::vector<uint8_t> ret;
-	const std::string prefix = "\033_G" + cmd_str;
-	const std::string suffix = "\033\\";
+	std::string ret;
+	static const std::string prefix = "\033_G";
+	static const std::string suffix = "\033\\";
 
-	ret.insert(ret.end(), prefix.begin(), prefix.end());
+	ret += prefix + cmd_str;
 	if (chunk_begin != chunk_end) {
-		ret.emplace_back(';');
+		ret += ';';
 		const auto it_beg = payload.begin() + chunk_begin;
 		const auto it_end = chunk_end > payload.size() ? payload.end() : payload.begin() + chunk_end;
 		ret.insert(ret.end(), it_beg, it_end);
 	}
-	ret.insert(ret.end(), suffix.begin(), suffix.end());
+	ret += suffix;
 	return ret;
 }
 
-std::vector<uint8_t> KittyBackend::writeChunked(std::map<std::string, std::string> cmd, const Magick::Blob& data)
+std::string KittyBackend::writeChunked(std::map<std::string, std::string> cmd, const Magick::Blob& data)
 {
 	using namespace Magick;
 
-	std::vector<uint8_t> output;
+	std::string output;
 
 	if (0 != data.length())
 	{
 		// Create reference-counted copy to bypass IM6 or earlier Blob::base64() being non-const
 		Blob data_copy(data);
-		std::string b64_data_str = data_copy.base64();
-		std::vector<uint8_t> b64_data(b64_data_str.begin(), b64_data_str.end());
+		std::string b64_data = data_copy.base64();
 
 		const size_t CHUNK_SIZE = 4096;
 		for (size_t i = 0; i < b64_data.size(); i += CHUNK_SIZE)
