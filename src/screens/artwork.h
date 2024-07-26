@@ -192,10 +192,10 @@ public:
 	virtual void removeArtwork() = 0;
 
 	// get output data, returns (output, x_offset, y_offset)
-	virtual std::tuple<std::vector<uint8_t>, int, int> takeOutput() { return {{}, 0, 0}; }
+	virtual std::tuple<std::string, int, int> takeOutput() { return {{}, 0, 0}; }
 
 protected:
-	virtual void setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset) {}
+	virtual void setOutput(std::string buffer, int x_offset, int y_offset) {}
 };
 
 
@@ -237,12 +237,12 @@ public:
 	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) override = 0;
 	virtual void removeArtwork() override = 0;
 
-	virtual std::tuple<std::vector<uint8_t>, int, int> takeOutput() override;
+	virtual std::tuple<std::string, int, int> takeOutput() override;
 
 protected:
-	virtual void setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset) override;
+	virtual void setOutput(std::string buffer, int x_offset, int y_offset) override;
 
-	std::vector<uint8_t> output;
+	std::string output;
 	int output_x_offset;
 	int output_y_offset;
 	int pipefd_write;
@@ -271,10 +271,10 @@ public:
 	virtual void removeArtwork() override;
 
 private:
-	std::vector<uint8_t> serializeGrCmd(std::map<std::string, std::string> cmd,
-			const std::vector<uint8_t> &payload, size_t chunk_begin,
+	std::string serializeGrCmd(std::map<std::string, std::string> cmd,
+			const std::string &payload, size_t chunk_begin,
 			size_t chunk_end);
-	std::vector<uint8_t> writeChunked(std::map<std::string, std::string> cmd,
+	std::string writeChunked(std::map<std::string, std::string> cmd,
 			const Magick::Blob &data);
 };
 
