@@ -29,12 +29,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
-#include <sstream>
 
-#include "macro_utilities.h"
 #include "mpdpp.h"
 #include "screens/screen_switcher.h"
-#include "status.h"
 #include "statusbar.h"
 #include "title.h"
 
@@ -768,7 +765,7 @@ std::vector<uint8_t> KittyBackend::writeChunked(std::map<std::string, std::strin
 
 	if (0 != data.length())
 	{
-		// Create reference-counted copy to bypasee IM6 or earlier Blob::base64() being non-const
+		// Create reference-counted copy to bypass IM6 or earlier Blob::base64() being non-const
 		Blob data_copy(data);
 		std::string b64_data_str = data_copy.base64();
 		std::vector<uint8_t> b64_data(b64_data_str.begin(), b64_data_str.end());
