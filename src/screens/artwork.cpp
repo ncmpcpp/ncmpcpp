@@ -630,7 +630,6 @@ void Artwork::worker()
 
 
 // UeberzugBackend
-// https://github.com/seebye/ueberzug
 
 UeberzugBackend::UeberzugBackend()
 {
@@ -690,8 +689,37 @@ void UeberzugBackend::removeArtwork()
 }
 
 
+// EscapedArtworkBackend
+
+std::tuple<std::vector<uint8_t>, int, int> EscapedArtworkBackend::takeOutput()
+{
+	std::tuple<std::vector<uint8_t>, int, int> ret;
+	ret = {output, output_x_offset, output_y_offset};
+	output.clear();
+	return ret;
+}
+
+void EscapedArtworkBackend::setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset)
+{
+	{
+		// wait until main thread has written previous command
+		std::unique_lock<std::mutex> lck(terminal_drawn_mtx);
+		terminal_drawn_cv.wait(lck, [=] { return terminal_drawn; });
+		terminal_drawn = false;
+		output = buffer;
+		output_x_offset = x_offset;
+		output_y_offset = y_offset;
+	}
+
+	// write dummy character to self-pipe, wakes up main thread to write output
+	const char dummy = 'x';
+	if (-1 == write(pipefd_write, &dummy, 1)) {
+		throw MPD::Error("Can't write to artwork pipe", false);
+	}
+}
+
+
 // KittyBackend
-// https://sw.kovidgoyal.net/kitty/graphics-protocol.html
 
 void KittyBackend::updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset)
 {
@@ -782,33 +810,6 @@ std::vector<uint8_t> KittyBackend::writeChunked(std::map<std::string, std::strin
 	const auto final_chunk = serializeGrCmd(cmd, {}, 0, 0);
 	output.insert(output.end(), final_chunk.begin(), final_chunk.end());
 	return output;
-}
-
-std::tuple<std::vector<uint8_t>, int, int> KittyBackend::takeOutput()
-{
-	std::tuple<std::vector<uint8_t>, int, int> ret;
-	ret = {output, output_x_offset, output_y_offset};
-	output.clear();
-	return ret;
-}
-
-void KittyBackend::setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset)
-{
-	{
-		// wait until main thread has written previous command
-		std::unique_lock<std::mutex> lck(terminal_drawn_mtx);
-		terminal_drawn_cv.wait(lck, [=] { return terminal_drawn; });
-		terminal_drawn = false;
-		output = buffer;
-		output_x_offset = x_offset;
-		output_y_offset = y_offset;
-	}
-
-	// write dummy character to self-pipe, wakes up main thread to write output
-	const char dummy = 'x';
-	if (-1 == write(pipefd_write, &dummy, 1)) {
-		throw MPD::Error("Can't write to artwork pipe", false);
-	}
 }
 
 #endif // ENABLE_ARTWORK
