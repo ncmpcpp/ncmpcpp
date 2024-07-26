@@ -191,16 +191,23 @@ public:
 	// clear artwork from screen
 	virtual void removeArtwork() = 0;
 
-	virtual void setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset) {}
 	// get output data, returns (output, x_offset, y_offset)
 	virtual std::tuple<std::vector<uint8_t>, int, int> takeOutput() { return {{}, 0, 0}; }
+
+protected:
+	virtual void setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset) {}
 };
 
+
+// Ueberzug
+// https://github.com/seebye/ueberzug
+// https://github.com/jstkdng/ueberzugpp
 class UeberzugBackend : public ArtworkBackend
 {
 public:
 	UeberzugBackend();
 	~UeberzugBackend() override;
+
 	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) override;
 	virtual void removeArtwork() override;
 
@@ -211,27 +218,28 @@ private:
 	std::string temp_file_name;
 };
 
-class KittyBackend : public ArtworkBackend
+
+// Base class used for backends which write terminal escape sequences
+class EscapedArtworkBackend : public ArtworkBackend
 {
-// Kitty backend has an issue when in slave screen mode, the image scrolls
-// when scrolling the other screen
 public:
-	KittyBackend(std::mutex &terminal_drawn_mtx, std::condition_variable &terminal_drawn_cv, bool &terminal_drawn, int fd)
+	EscapedArtworkBackend(
+		std::mutex &terminal_drawn_mtx,
+		std::condition_variable &terminal_drawn_cv,
+		bool &terminal_drawn,
+		int fd
+	)
 		: pipefd_write(fd),
 		terminal_drawn_mtx(terminal_drawn_mtx),
 		terminal_drawn_cv(terminal_drawn_cv),
 		terminal_drawn(terminal_drawn) {}
-	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) override;
-	virtual void resetArtworkPosition() override;
-	virtual void removeArtwork() override;
+
+	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) override = 0;
+	virtual void removeArtwork() override = 0;
+
 	virtual std::tuple<std::vector<uint8_t>, int, int> takeOutput() override;
 
-private:
-	std::vector<uint8_t> serializeGrCmd(std::map<std::string, std::string> cmd,
-			const std::vector<uint8_t> &payload, size_t chunk_begin,
-			size_t chunk_end);
-	std::vector<uint8_t> writeChunked(std::map<std::string, std::string> cmd,
-			const Magick::Blob &data);
+protected:
 	virtual void setOutput(std::vector<uint8_t> buffer, int x_offset, int y_offset) override;
 
 	std::vector<uint8_t> output;
@@ -242,6 +250,34 @@ private:
 	std::condition_variable &terminal_drawn_cv;
 	bool &terminal_drawn;
 };
+
+
+// Kitty terminal graphics protocol
+// https://sw.kovidgoyal.net/kitty/graphics-protocol.html
+class KittyBackend : public EscapedArtworkBackend
+{
+// Kitty backend has an issue when in slave screen mode, the image scrolls
+// when scrolling the other screen
+public:
+	KittyBackend(
+		std::mutex &terminal_drawn_mtx,
+		std::condition_variable &terminal_drawn_cv,
+		bool &terminal_drawn,
+		int fd
+	) : EscapedArtworkBackend(terminal_drawn_mtx, terminal_drawn_cv, terminal_drawn, fd) {}
+
+	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) override;
+	virtual void resetArtworkPosition() override;
+	virtual void removeArtwork() override;
+
+private:
+	std::vector<uint8_t> serializeGrCmd(std::map<std::string, std::string> cmd,
+			const std::vector<uint8_t> &payload, size_t chunk_begin,
+			size_t chunk_end);
+	std::vector<uint8_t> writeChunked(std::map<std::string, std::string> cmd,
+			const Magick::Blob &data);
+};
+
 
 extern Artwork *myArtwork;
 
