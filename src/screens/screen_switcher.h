@@ -43,6 +43,8 @@ public:
 	{
 		using Global::myScreen;
 		using Global::myLockedScreen;
+
+		std::unique_lock<std::recursive_mutex> lck(Global::screenMtx);
 		
 		const bool isScreenMergable = screen->isMergable() && myLockedScreen;
 		const bool isScreenTabbable = std::is_base_of<Tabbable, ScreenT>::value;
