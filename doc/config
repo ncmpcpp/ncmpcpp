@@ -125,6 +125,15 @@
 #
 #visualizer_spectrum_smooth_look = yes
 #
+## Use unicode block characters from "symbols for legacy computing", this
+## improves the smooth look on transparent terminals by using special unicode
+## chars instead of reversing the background and foreground color on the bottom
+## edge of the spectrum. This may lead to a glitchy mess on the bottom edge of
+## the spectrum, this can eighter be fixed by changing the font or disabeling
+## this.
+#
+#visualizer_spectrum_use_legacy_chars = yes
+#
 ## A value between 1 and 5 inclusive. Specifying a larger value makes the
 ## visualizer look at a larger slice of time, which results in less jumpy
 ## visualizer output.
