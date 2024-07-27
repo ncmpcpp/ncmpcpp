@@ -57,9 +57,11 @@ SelectedItemsAdder::SelectedItemsAdder()
 	using Global::MainHeight;
 	using Global::MainStartY;
 	setDimensions();
-	
+
+	size_t x_col_offset = std::floor((Config.selected_item_x_offset/100.0f)*(COLS-m_playlist_selector_width));
+
 	m_playlist_selector = Component(
-		(COLS-m_playlist_selector_width)/2,
+		((COLS-m_playlist_selector_width)+x_col_offset)/2,
 		MainStartY+(MainHeight-m_playlist_selector_height)/2,
 		m_playlist_selector_width,
 		m_playlist_selector_height,
@@ -73,7 +75,7 @@ SelectedItemsAdder::SelectedItemsAdder()
 	m_playlist_selector.setItemDisplayer(DisplayComponent);
 	
 	m_position_selector = Component(
-		(COLS-m_position_selector_width)/2,
+		((COLS-m_playlist_selector_width)+x_col_offset)/2,
 		MainStartY+(MainHeight-m_position_selector_height)/2,
 		m_position_selector_width,
 		m_position_selector_height,
@@ -135,14 +137,17 @@ void SelectedItemsAdder::resize()
 	using Global::MainHeight;
 	using Global::MainStartY;
 	setDimensions();
+
+	size_t x_col_offset = std::floor((Config.selected_item_x_offset/100.0f)*(COLS-m_playlist_selector_width));
+
 	m_playlist_selector.resize(m_playlist_selector_width, m_playlist_selector_height);
 	m_playlist_selector.moveTo(
-		(COLS-m_playlist_selector_width)/2,
+		((COLS-m_playlist_selector_width)+x_col_offset)/2,
 		MainStartY+(MainHeight-m_playlist_selector_height)/2
 	);
 	m_position_selector.resize(m_position_selector_width, m_position_selector_height);
 	m_position_selector.moveTo(
-		(COLS-m_position_selector_width)/2,
+		((COLS-m_playlist_selector_width)+x_col_offset)/2,
 		MainStartY+(MainHeight-m_position_selector_height)/2
 	);
 	if (previousScreen() && previousScreen()->hasToBeResized) // resize background window
@@ -353,7 +358,7 @@ void SelectedItemsAdder::setDimensions()
 	
 	m_playlist_selector_width = COLS*0.6;
 	m_playlist_selector_height = std::min(MainHeight, size_t(LINES*0.66));
-	
+
 	m_position_selector_width = std::min(size_t(35), size_t(COLS));
 	m_position_selector_height = std::min(size_t(11), MainHeight);
 }
