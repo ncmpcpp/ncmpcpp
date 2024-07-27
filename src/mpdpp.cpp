@@ -463,6 +463,13 @@ void Connection::SetSingle(bool mode)
 	checkErrors();
 }
 
+void Connection::SetOneshot()
+{
+	prechecksNoCommandsList();
+	mpd_run_single_state(m_connection.get(), MPD_SINGLE_ONESHOT);
+	checkErrors();
+}
+
 void Connection::SetConsume(bool mode)
 {
 	prechecksNoCommandsList();

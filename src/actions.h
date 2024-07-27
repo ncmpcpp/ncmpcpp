@@ -94,6 +94,7 @@ enum class Type
 	StartSearching,
 	SaveTagChanges,
 	ToggleSingle,
+	SetOneshot,
 	ToggleConsume,
 	ToggleCrossfade,
 	SetCrossfade,
@@ -761,6 +762,14 @@ struct ToggleSingle: BaseAction
 {
 	ToggleSingle(): BaseAction(Type::ToggleSingle, "toggle_single") { }
 	
+private:
+	virtual void run() override;
+};
+
+struct SetOneshot: BaseAction
+{
+	SetOneshot(): BaseAction(Type::SetOneshot, "set_single_oneshot") { }
+
 private:
 	virtual void run() override;
 };

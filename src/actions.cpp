@@ -1333,6 +1333,11 @@ void ToggleSingle::run()
 	Mpd.SetSingle(!Status::State::single());
 }
 
+void SetOneshot::run()
+{
+	Mpd.SetOneshot();
+}
+
 void ToggleConsume::run()
 {
 	Mpd.SetConsume(!Status::State::consume());
@@ -2815,6 +2820,7 @@ void populateActions()
 	insert_action(new Actions::StartSearching());
 	insert_action(new Actions::SaveTagChanges());
 	insert_action(new Actions::ToggleSingle());
+	insert_action(new Actions::SetOneshot());
 	insert_action(new Actions::ToggleConsume());
 	insert_action(new Actions::ToggleCrossfade());
 	insert_action(new Actions::SetCrossfade());
