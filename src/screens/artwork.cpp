@@ -691,12 +691,9 @@ void UeberzugBackend::removeArtwork()
 
 // EscapedArtworkBackend
 
-std::tuple<std::string, int, int> EscapedArtworkBackend::takeOutput()
+std::tuple<std::string &, int, int> EscapedArtworkBackend::takeOutput()
 {
-	std::tuple<std::string, int, int> ret;
-	ret = {output, output_x_offset, output_y_offset};
-	output.clear();
-	return ret;
+	return {output, output_x_offset, output_y_offset};
 }
 
 void EscapedArtworkBackend::setOutput(std::string buffer, int x_offset, int y_offset)

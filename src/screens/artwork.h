@@ -192,7 +192,11 @@ public:
 	virtual void removeArtwork() = 0;
 
 	// get output data, returns (output, x_offset, y_offset)
-	virtual std::tuple<std::string, int, int> takeOutput() { return {{}, 0, 0}; }
+	virtual std::tuple<std::string &, int, int> takeOutput()
+	{
+		static std::string s;
+		return {s, 0, 0};
+	}
 
 protected:
 	virtual void setOutput(std::string buffer, int x_offset, int y_offset) {}
@@ -237,7 +241,7 @@ public:
 	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) override = 0;
 	virtual void removeArtwork() override = 0;
 
-	virtual std::tuple<std::string, int, int> takeOutput() override;
+	virtual std::tuple<std::string &, int, int> takeOutput() override;
 
 protected:
 	virtual void setOutput(std::string buffer, int x_offset, int y_offset) override;
@@ -256,8 +260,6 @@ protected:
 // https://sw.kovidgoyal.net/kitty/graphics-protocol.html
 class KittyBackend : public EscapedArtworkBackend
 {
-// Kitty backend has an issue when in slave screen mode, the image scrolls
-// when scrolling the other screen
 public:
 	KittyBackend(
 		std::mutex &terminal_drawn_mtx,
