@@ -667,12 +667,13 @@ void UeberzugBackend::updateArtwork(const Magick::Blob& buffer, int x_offset, in
 	pt.put("action", "add");
 	pt.put("identifier", "albumart");
 	pt.put("synchronously_draw", true);
+	pt.put("max_height", 0);
+	pt.put("max_width", 0);
 	pt.put("path", temp_file_name);
 	pt.put("x", x_offset);
 	pt.put("y", y_offset);
 
 	boost::property_tree::write_json(stream, pt, /* pretty */ false);
-	stream << std::endl;
 }
 
 void UeberzugBackend::removeArtwork()
@@ -685,7 +686,6 @@ void UeberzugBackend::removeArtwork()
 	pt.put("identifier", "albumart");
 
 	boost::property_tree::write_json(stream, pt, /* pretty */ false);
-	stream << std::endl;
 }
 
 
