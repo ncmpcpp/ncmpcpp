@@ -149,7 +149,7 @@ void Visualizer::update()
 	// PCM in format 44100:16:1 (for mono visualization) and
 	// 44100:16:2 (for stereo visualization) is supported.
 	ssize_t bytes_read = read(m_source_fd, m_incoming_samples.data(),
-							  sizeof(int16_t) * m_incoming_samples.size());
+	                          sizeof(int16_t) * m_incoming_samples.size());
 	if (bytes_read > 0)
 	{
 		const auto begin = m_incoming_samples.begin();
@@ -188,7 +188,7 @@ void Visualizer::update()
 		requested_samples *= 2;
 
 	//Statusbar::printf("Samples: %1%, %2%, %3%", m_buffered_samples.size(),
-	//				  requested_samples, m_sample_consumption_rate);
+	//                  requested_samples, m_sample_consumption_rate);
 
 	size_t new_samples = m_buffered_samples.get(requested_samples, m_rendered_samples);
 	if (new_samples == 0)
@@ -775,7 +775,7 @@ void Visualizer::Clear()
 		ssize_t bytes_read;
 		do
 			bytes_read = read(m_source_fd, m_incoming_samples.data(),
-							  sizeof(int16_t) * m_incoming_samples.size());
+			                  sizeof(int16_t) * m_incoming_samples.size());
 		while (bytes_read > 0);
 	}
 
@@ -822,11 +822,11 @@ void Visualizer::OpenDataSource()
 		hints.ai_protocol = IPPROTO_UDP;
 
 		int errcode = getaddrinfo(m_source_location.c_str(), m_source_port.c_str(),
-								  &hints, &res);
+		                          &hints, &res);
 		if (errcode != 0)
 		{
 			Statusbar::printf("Couldn't resolve \"%1%:%2%\": %3%",
-							  m_source_location, m_source_port, gai_strerror(errcode));
+			                  m_source_location, m_source_port, gai_strerror(errcode));
 			return;
 		}
 
@@ -859,7 +859,7 @@ void Visualizer::OpenDataSource()
 		m_source_fd = open(m_source_location.c_str(), O_RDONLY | O_NONBLOCK);
 		if (m_source_fd < 0)
 			Statusbar::printf("Couldn't open \"%1%\" for reading PCM data: %2%",
-							  m_source_location, strerror(errno));
+			                  m_source_location, strerror(errno));
 	}
 }
 
