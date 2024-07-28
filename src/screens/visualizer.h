@@ -76,8 +76,11 @@ private:
 	void DrawFrequencySpectrumStereo(const int16_t *, const int16_t *, ssize_t, size_t);
 	void ApplyWindow(double *, const int16_t *, ssize_t);
 	void GenLogspace();
+	void GenLinspace();
+	void GenFreqSpace();
 	double Bin2Hz(size_t);
-	double Interpolate(size_t, size_t);
+	double InterpolateCubic(size_t, size_t);
+	double InterpolateLinear(size_t, size_t);
 #	endif // HAVE_FFTW3_H
 
 	void InitDataSource();
@@ -113,7 +116,7 @@ private:
 	const double HZ_MAX;
 	const double GAIN;
 	const std::wstring SMOOTH_CHARS;
-	std::vector<double> m_dft_logspace;
+	std::vector<double> m_dft_freqspace;
 	std::vector<std::pair<size_t, double>> m_bar_heights;
 
 	std::vector<double> m_freq_magnitudes;
