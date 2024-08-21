@@ -149,6 +149,11 @@
 #
 #visualizer_spectrum_hz_max = 20000
 #
+## Use log scaling for the frequency spectrum axes
+#
+#visualizer_spectrum_log_scale_x = yes
+#visualizer_spectrum_log_scale_y = yes
+#
 ##### system encoding #####
 ##
 ## ncmpcpp should detect your charset encoding but if it failed to do so, you
