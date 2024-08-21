@@ -506,12 +506,6 @@ Window::Window(size_t startx, size_t starty, size_t width, size_t height,
 	  m_alt_charset_counter(0),
 	  m_italic_counter(0)
 {
-	if (m_start_x > size_t(COLS)
-	    ||  m_start_y > size_t(LINES)
-	    ||  m_width+m_start_x > size_t(COLS)
-	    ||  m_height+m_start_y > size_t(LINES))
-		throw std::logic_error("constructed window doesn't fit into the terminal");
-
 	if (m_border)
 	{
 		++m_start_x;
