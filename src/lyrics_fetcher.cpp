@@ -134,9 +134,11 @@ void LyricsFetcher::postProcess(std::string &data) const
 	boost::split(lines, data, boost::is_any_of("\n"));
 	for (auto &line : lines)
 		boost::trim(line);
-	std::unique(lines.begin(), lines.end(), [](std::string &a, std::string &b) {
-		return a.empty() && b.empty();
-	});
+	auto last = std::unique(
+		lines.begin(),
+		lines.end(),
+		[](std::string &a, std::string &b) { return a.empty() && b.empty(); });
+	lines.erase(last, lines.end());
 	data = boost::algorithm::join(lines, "\n");
 	boost::trim(data);
 }

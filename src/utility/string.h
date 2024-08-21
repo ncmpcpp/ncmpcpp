@@ -25,7 +25,6 @@
 #include <locale>
 #include <string>
 #include <vector>
-#include "gcc.h"
 
 template <size_t N> size_t const_strlen(const char (&)[N]) {
 	return N-1;

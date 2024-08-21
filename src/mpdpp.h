@@ -353,8 +353,14 @@ private:
 };
 
 template <typename ObjectT>
-struct Iterator: std::iterator<std::input_iterator_tag, ObjectT>
+struct Iterator
 {
+	using iterator_category = std::input_iterator_tag;
+	using value_type = ObjectT;
+	using difference_type = std::ptrdiff_t;
+	using pointer = ObjectT *;
+	using reference = ObjectT &;
+
 	// shared state of the iterator
 	struct State
 	{

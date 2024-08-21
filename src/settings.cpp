@@ -472,10 +472,10 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			      }
 			      return fetcher;
 		      });
-		      auto it = std::remove_if(
+		      auto last = std::remove_if(
 			      lyrics_fetchers.begin(), lyrics_fetchers.end(),
 			      [](const auto &f) { return f.get() == nullptr; });
-		      lyrics_fetchers.resize(it - lyrics_fetchers.begin());
+		      lyrics_fetchers.erase(last, lyrics_fetchers.end());
 		      if (lyrics_fetchers.empty())
 			      invalid_value(v);
 	      });

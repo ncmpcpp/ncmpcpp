@@ -70,15 +70,15 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])],
 )
 CXXFLAGS="$old_CXXFLAGS $fast_math"
 
-# -std=c++14
-AC_MSG_CHECKING([whether compiler supports -std=c++14])
+# -std=c++20
+AC_MSG_CHECKING([whether compiler supports -std=c++20])
 old_CXXFLAGS="$CXXFLAGS"
-CXXFLAGS="-std=c++14"
+CXXFLAGS="-std=c++20"
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])],
 	AC_MSG_RESULT([yes])
-		std_cpp14="-std=c++14",
+		std_cpp14="-std=c++20",
 	AC_MSG_RESULT([no])
-		AC_MSG_ERROR([[Your compiler doesn't seem to support C++14, please upgrade (GCC >= 5)]])
+		AC_MSG_ERROR([[Your compiler doesn't seem to support C++20, please upgrade]])
 )
 CXXFLAGS="$old_CXXFLAGS $std_cpp14"
 

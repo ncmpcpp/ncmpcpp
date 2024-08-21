@@ -24,7 +24,6 @@
 #include <boost/format.hpp>
 #include "curses/window.h"
 #include "settings.h"
-#include "gcc.h"
 #include "interfaces.h"
 
 namespace Progressbar {

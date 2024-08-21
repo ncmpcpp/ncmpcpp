@@ -26,7 +26,6 @@
 #include "config.h"
 
 #include "curses.h"
-#include "gcc.h"
 
 #include <boost/optional.hpp>
 #include <functional>

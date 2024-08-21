@@ -93,7 +93,7 @@ inline Regex make(StringT &&s,
 template <typename CharT>
 inline bool search(const std::basic_string<CharT> &s,
                    const Regex &rx,
-                   GNUC_UNUSED bool ignore_diacritics)
+                   [[maybe_unused]] bool ignore_diacritics)
 {
 	try {
 #ifdef BOOST_REGEX_ICU

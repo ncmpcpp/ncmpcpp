@@ -25,7 +25,6 @@
 #include <boost/tuple/tuple.hpp>
 #include <string>
 #include "enums.h"
-#include "gcc.h"
 #include "screens/screen.h"
 #include "song.h"
 

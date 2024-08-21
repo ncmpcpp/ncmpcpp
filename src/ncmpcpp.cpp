@@ -219,7 +219,10 @@ int main(int argc, char **argv)
 			try
 			{
 				auto k = Bindings.get(input);
-				std::any_of(k.first, k.second, std::bind(&Binding::execute, ph::_1));
+				[[maybe_unused]] bool executed = std::any_of(
+					k.first,
+					k.second,
+					std::bind(&Binding::execute, ph::_1));
 			}
 			catch (ConversionError &e)
 			{
