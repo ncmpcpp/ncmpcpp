@@ -3,6 +3,22 @@
 * Separate chunks of lyrics with a double newline.
 * Fix separator between albums with the same name, to check for album artist
   instead of artist.
+* Column widths are now configurable via `media_library_column_width_ratio_two`,
+  `media_library_column_width_ratio_three` and
+  `playlist_editor_column_width_ratio`.
+* Removed deprecated `visualizer_fifo_path` and `visualizer_sync_interval`
+  options.
+* Added support for italic text.
+* Framerate limit for visualizer was removed.
+* Performer tag is now read from the `TPE4` frame instead of `TPE3`.
+* Potential crash when fetching lyrics for streams in the background was fixed.
+* Seeking now accepts the `hh:mm:ss` format.
+* Tag editor now only writes to files with modified tags.
+* Column view can now display full filepaths.
+* Updated the list of working lyrics fetchers.
+* Add `visualizer_spectrum_smooth_look_legacy_chars` option (enabled by default)
+  for potentially improved bottom part of the spectrum visualizer in terminals
+  with transparent background.
 
 # ncmpcpp-0.9.2 (2021-01-24)
 * Revert suppression of output of all external commands as that makes e.g album

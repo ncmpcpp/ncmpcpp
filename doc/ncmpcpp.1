@@ -114,6 +114,13 @@ Automatically scale visualizer size.
 .B visualizer_spectrum_smooth_look = yes/no
 For spectrum visualizer, use unicode block characters for a smoother, more continuous look. This will override the visualizer_look option. With transparent terminals and visualizer_in_stereo set, artifacts may be visible on the bottom half of the visualization.
 .TP
+.B visualizer_spectrum_smooth_look_legacy_chars = yes/no
+Use unicode block characters from "symbols for legacy computing". This improves
+the smooth look on transparent terminals by using special unicode chars instead
+of reversing the background and foreground color on the bottom edge of the
+spectrum. If it leads to a garbled output on the bottom edge of the spectrum,
+you can either change the font or disable this option.
+.TP
 .B visualizer_spectrum_dft_size = NUMBER
 For spectrum visualizer, a value between 1 and 5 inclusive. Specifying a larger value makes the visualizer look at a larger slice of time, which results in less jumpy visualizer output.
 .TP

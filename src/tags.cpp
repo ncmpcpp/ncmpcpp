@@ -302,18 +302,9 @@ bool write(MPD::MutableSong &s)
 	if (f.isNull())
 		return false;
 	
-	bool saved = false;
 	if (auto mpeg_file = dynamic_cast<TagLib::MPEG::File *>(f.file()))
 	{
 		writeID3v2Tags(s, mpeg_file->ID3v2Tag(true));
-		// write id3v2.4 tags only
-		if (!mpeg_file->save(TagLib::MPEG::File::ID3v2,
-		                     TagLib::File::StripOthers,
-		                     TagLib::ID3v2::v4,
-		                     TagLib::File::DoNotDuplicate))
-			return false;
-		// do not call generic save() as it will duplicate tags
-		saved = true;
 	}
 	else if (auto vorbis_file = dynamic_cast<TagLib::Ogg::Vorbis::File *>(f.file()))
 	{
@@ -330,7 +321,7 @@ bool write(MPD::MutableSong &s)
 	else
 		writeCommonTags(s, f.tag());
 	
-	if (!saved && !f.save())
+	if (!f.save())
 		return false;
 
 	// TODO: move this somewhere else
