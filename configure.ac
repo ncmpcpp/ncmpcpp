@@ -90,6 +90,9 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[auto f = [](auto n) { return n*n; }; f(
 		AC_MSG_ERROR([[Your compiler doesn't seem to support generic lambda expressions, please upgrade (GCC >= 5)]])
 )
 
+# warnings
+CXXFLAGS="$CXXFLAGS -Wall -Wextra -Wshadow -Wimplicit-fallthrough"
+
 # boost
 BOOST_REQUIRE([1.60])
 AC_SUBST(BOOST_CPPFLAGS)

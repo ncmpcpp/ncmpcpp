@@ -336,9 +336,9 @@ void MediaLibrary::update()
 			for (const auto &album : albums)
 			{
 				auto entry = AlbumEntry(
-					Album(std::move(std::get<0>(album.first)),
-					      std::move(std::get<1>(album.first)),
-					      std::move(std::get<2>(album.first)),
+					Album(std::get<0>(album.first),
+					      std::get<1>(album.first),
+					      std::get<2>(album.first),
 					      album.second));
 				if (idx < Albums.size())
 					Albums[idx].value() = std::move(entry);
@@ -435,8 +435,8 @@ void MediaLibrary::update()
 				{
 					auto entry = AlbumEntry(
 						Album(primary_tag,
-						      std::move(std::get<0>(album.first)),
-						      std::move(std::get<1>(album.first)),
+						      std::get<0>(album.first),
+						      std::get<1>(album.first),
 						      album.second));
 					if (idx < Albums.size())
 					{
