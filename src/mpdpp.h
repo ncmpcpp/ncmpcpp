@@ -502,7 +502,7 @@ struct Connection
 	void Disconnect();
 	
 	const std::string &GetHostname() { return m_host; }
-	const int GetPort() { return m_port; }
+	int GetPort() { return m_port; }
 	const std::string &GetPassword() { return m_password; }
 	
 	unsigned Version() const;

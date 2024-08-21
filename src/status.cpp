@@ -492,7 +492,7 @@ void Status::Changes::database()
 	myLibrary->requestSongsUpdate();
 }
 
-void Status::Changes::playerState(bool drawArtwork)
+void Status::Changes::playerState([[maybe_unused]] bool drawArtwork)
 {
 	if (!Config.execute_on_player_state_change.empty())
 	{

@@ -98,7 +98,6 @@ std::istream &operator>>(std::istream &is, Artwork::ArtAlign &align)
 
 Artwork::Artwork()
 	: Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
-		, prev_winsize({})
 		, cache(4) // keep last few recently rendered artworks in cache for faster rendering
 		           // 4 is chosen mostly to speed up switching between split and full windows
 {
@@ -243,7 +242,7 @@ void Artwork::removeArtwork(bool reset_artwork)
 		// guarantee that both are executed if they are called within one loop
 		// iteration of the worker thread
 		WorkerOp op = reset_artwork ? WorkerOp::REMOVE_RESET : WorkerOp::REMOVE;
-		worker_queue.emplace_back(std::make_pair(op, [=] { worker_removeArtwork(reset_artwork); }));
+		worker_queue.emplace_back(std::make_pair(op, [&, reset_artwork] { worker_removeArtwork(reset_artwork); }));
 	}
 	worker_cv.notify_all();
 }
@@ -255,7 +254,7 @@ void Artwork::updateArtwork()
 
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE, [=] { worker_updateArtwork(); }));
+		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE, [&] { worker_updateArtwork(); }));
 	}
 	worker_cv.notify_all();
 }
@@ -267,7 +266,7 @@ void Artwork::updateArtwork(std::string uri)
 
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE_URI, [=] { worker_updateArtwork(uri); }));
+		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE_URI, [&, uri] { worker_updateArtwork(uri); }));
 	}
 	worker_cv.notify_all();
 }
@@ -279,7 +278,7 @@ void Artwork::resetArtworkPosition()
 
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace_back(std::make_pair(WorkerOp::MOVE, [=] { worker_resetArtworkPosition(); }));
+		worker_queue.emplace_back(std::make_pair(WorkerOp::MOVE, [&] { worker_resetArtworkPosition(); }));
 	}
 	worker_cv.notify_all();
 }
@@ -291,7 +290,7 @@ void Artwork::updatedVisibility()
 
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATED_VIS, [=] { worker_updatedVisibility(); }));
+		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATED_VIS, [&] { worker_updatedVisibility(); }));
 	}
 	worker_cv.notify_all();
 }
@@ -578,7 +577,7 @@ void Artwork::worker()
 		{
 			// Wait for work
 			std::unique_lock<std::mutex> lck(worker_mtx);
-			worker_cv.wait(lck, [=] { return worker_exit || !worker_queue.empty(); });
+			worker_cv.wait(lck, [&] { return worker_exit || !worker_queue.empty(); });
 
 			if (worker_exit)
 			{
@@ -600,7 +599,7 @@ void Artwork::worker()
 			// Avoid updating artwork too often
 			if (found_set.end() != found_set.find(WorkerOp::UPDATE_URI))
 			{
-				if (worker_cv.wait_until(lck, update_time + std::chrono::milliseconds(500), [=] { return worker_exit; }))
+				if (worker_cv.wait_until(lck, update_time + std::chrono::milliseconds(500), [&] { return worker_exit; }))
 				{
 					worker_exit = false;
 					return;
@@ -704,7 +703,7 @@ void EscapedArtworkBackend::setOutput(std::string buffer, int x_offset, int y_of
 	{
 		// wait until main thread has written previous command
 		std::unique_lock<std::mutex> lck(terminal_drawn_mtx);
-		terminal_drawn_cv.wait(lck, [=] { return terminal_drawn; });
+		terminal_drawn_cv.wait(lck, [&] { return terminal_drawn; });
 		terminal_drawn = false;
 		output = buffer;
 		output_x_offset = x_offset;
@@ -789,7 +788,7 @@ std::string KittyBackend::writeChunked(std::map<std::string, std::string> cmd, c
 {
 	using namespace Magick;
 
-	std::string output;
+	std::string chunked_output;
 
 	if (0 != data.length())
 	{
@@ -802,13 +801,13 @@ std::string KittyBackend::writeChunked(std::map<std::string, std::string> cmd, c
 		{
 			cmd["m"] = "1";
 			auto chunk = serializeGrCmd(cmd, b64_data, i, i+CHUNK_SIZE);
-			output.insert(output.end(), chunk.begin(), chunk.end());
+			chunked_output.insert(chunked_output.end(), chunk.begin(), chunk.end());
 		}
 	}
 	cmd["m"] = "0";
 	const auto final_chunk = serializeGrCmd(cmd, {}, 0, 0);
-	output.insert(output.end(), final_chunk.begin(), final_chunk.end());
-	return output;
+	chunked_output.insert(chunked_output.end(), final_chunk.begin(), final_chunk.end());
+	return chunked_output;
 }
 
 #endif // ENABLE_ARTWORK

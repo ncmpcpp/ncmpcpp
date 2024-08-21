@@ -172,7 +172,7 @@ private:
 			return !(*this == rhs);
 		}
 	} winsize_t;
-	winsize_t prev_winsize;
+	winsize_t prev_winsize = {};
 };
 
 std::istream &operator>>(std::istream &is, Artwork::ArtSource &source);
@@ -199,7 +199,7 @@ public:
 	}
 
 protected:
-	virtual void setOutput(std::string buffer, int x_offset, int y_offset) {}
+	virtual void setOutput([[maybe_unused]] std::string buffer, [[maybe_unused]] int x_offset, [[maybe_unused]] int y_offset) {}
 };
 
 
@@ -228,15 +228,15 @@ class EscapedArtworkBackend : public ArtworkBackend
 {
 public:
 	EscapedArtworkBackend(
-		std::mutex &terminal_drawn_mtx,
-		std::condition_variable &terminal_drawn_cv,
-		bool &terminal_drawn,
+		std::mutex &terminal_drawn_mtx_,
+		std::condition_variable &terminal_drawn_cv_,
+		bool &terminal_drawn_,
 		int fd
 	)
 		: pipefd_write(fd),
-		terminal_drawn_mtx(terminal_drawn_mtx),
-		terminal_drawn_cv(terminal_drawn_cv),
-		terminal_drawn(terminal_drawn) {}
+		terminal_drawn_mtx(terminal_drawn_mtx_),
+		terminal_drawn_cv(terminal_drawn_cv_),
+		terminal_drawn(terminal_drawn_) {}
 
 	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) override = 0;
 	virtual void removeArtwork() override = 0;
@@ -262,11 +262,11 @@ class KittyBackend : public EscapedArtworkBackend
 {
 public:
 	KittyBackend(
-		std::mutex &terminal_drawn_mtx,
-		std::condition_variable &terminal_drawn_cv,
-		bool &terminal_drawn,
+		std::mutex &terminal_drawn_mtx_,
+		std::condition_variable &terminal_drawn_cv_,
+		bool &terminal_drawn_,
 		int fd
-	) : EscapedArtworkBackend(terminal_drawn_mtx, terminal_drawn_cv, terminal_drawn, fd) {}
+	) : EscapedArtworkBackend(terminal_drawn_mtx_, terminal_drawn_cv_, terminal_drawn_, fd) {}
 
 	virtual void updateArtwork(const Magick::Blob& buffer, int x_offset, int y_offset) override;
 	virtual void resetArtworkPosition() override;
