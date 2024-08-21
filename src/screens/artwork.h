@@ -102,7 +102,7 @@ private:
 	} art_t;
 	art_t orig_art;
 	Magick::Blob art_buffer;
-	ArtworkBackend* backend;
+	ArtworkBackend* backend = nullptr;
 	std::string prev_uri = "";
 	bool drawn = false;
 	bool before_inital_draw = true;

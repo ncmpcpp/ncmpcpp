@@ -135,7 +135,10 @@ Artwork::~Artwork()
 		worker_exit = true;
 	}
 	worker_cv.notify_all();
-	t.join();
+	if (t.joinable())
+	{
+		t.join();
+	}
 	delete backend;
 }
 
