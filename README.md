@@ -19,8 +19,8 @@ Project page - https://rybczak.net/ncmpcpp/
 * [boost](https://www.boost.org/)
 * [ncurses](https://invisible-island.net/ncurses/announce.html)
 * [readline](https://tiswww.case.edu/php/chet/readline/rltop.html)
-#### Optional libraries
 * [curl](https://curl.se), for fetching lyrics and last.fm data
+#### Optional libraries
 * [fftw](http://www.fftw.org), for frequency spectrum music visualization mode
 * [taglib](https://taglib.org/), for tag editing
 
