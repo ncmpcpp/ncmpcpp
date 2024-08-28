@@ -29,6 +29,8 @@
 #include "mpdpp.h"
 
 MPD::Connection Mpd;
+// MPD connection for album artwork. Album art logic runs in a thread to avoid
+// blocking the main thread, and MPD connections aren't thread safe
 MPD::Connection Mpd_artwork;
 
 namespace {

@@ -18,6 +18,41 @@
  *   51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.              *
  ***************************************************************************/
 
+/*
+ The basic idea of the architecture is:
+
+    1. (main thread) When the artwork needs to be updated, send a command to the
+worker thread. The commands include updating the artwork or removing it. The
+main thread is not blocked, continues execution.
+    2. (worker thread) Wakes up, processes the command it just received. If an
+update command is received, fetch the correct image and resize if needed, then
+call one of the backends (Ueberzug or Kitty) to display it. If remove command,
+call backend to remove the image from screen.
+    3. (worker thread) Goes to sleep until a new command is available.
+
+Artwork fetching is performed by the worker thread, which will either check the
+local filesystem, or query MPD. Once the raw image data is available,
+ImageMagick is used to resize and align the image according to the user's
+configuration.
+
+The Ueberzug backend is implemented fairly easily. On startup, Ueberzug is
+spawned as a child process with a pipe to its stdin. When the image needs to be
+displayed or updated, the worker thread writes JSON to Ueberzug's stdin, and it
+handles the rest. On shutdown, the pipe is closed, which stops Ueberzug, and the
+process is reaped.
+
+The Kitty backed is a bit more complex. For reference, the Kitty graphics
+protocol is described here: https://sw.kovidgoyal.net/kitty/graphics-protocol/.
+Since this protocol relies on writing to stdout, there can easily be race
+conditions if both the main and worker threads both try to write output at the
+same time. The solution is to only write to stdout from the main thread. On
+startup, a self pipe is created, with the write end given to the worker thread
+and the read end polled by the main select() loop. When the worker thread is
+finished processing a command, it will write some data to the pipe, which will
+wake up the main thread. The main thread can now write the needed data to stdout
+without a race.
+ */
+
 #include "screens/artwork.h"
 
 #ifdef ENABLE_ARTWORK
@@ -32,7 +67,7 @@
 
 #include "mpdpp.h"
 #include "screens/screen_switcher.h"
-#include "statusbar.h"
+#include "settings.h"
 #include "title.h"
 
 using Global::MainHeight;
@@ -116,10 +151,10 @@ Artwork::Artwork()
 	switch (Config.albumart_backend)
 	{
 		case ArtBackend::UEBERZUG:
-			backend = new UeberzugBackend;
+			backend = std::make_unique<UeberzugBackend>();
 			break;
 		case ArtBackend::KITTY:
-			backend = new KittyBackend(terminal_drawn_mtx, terminal_drawn_cv, terminal_drawn, pipefd[1]);
+			backend = std::make_unique<KittyBackend>(terminal_drawn_mtx, terminal_drawn_cv, terminal_drawn, pipefd[1]);
 			break;
 	}
 
@@ -138,7 +173,6 @@ Artwork::~Artwork()
 	{
 		t.join();
 	}
-	delete backend;
 }
 
 // callback for the main select() loop, draws artwork on screen
@@ -224,6 +258,12 @@ void Artwork::switchTo()
 
 std::wstring Artwork::title() { return L"Artwork"; }
 
+// This function is for getting the current window size in pixels. The main
+// issue here is that the terminal operates on characters, but images are
+// measured in pixels, with no direct correlation between them. By knowing the
+// width/height of the terminal window in pixels, and the number of character
+// rows/columns, we can determine the size of each character in pixels and
+// resize the output image correctly.
 winsize Artwork::getWinSize()
 {
 	struct winsize sz;
@@ -625,7 +665,7 @@ void Artwork::worker()
 		}
 		catch (std::exception &e)
 		{
-			Statusbar::printf("Unexpected error: %1%", e.what());
+			std::cerr << "Unexpected error: " << e.what() << std::endl;
 		}
 	}
 }
@@ -645,7 +685,10 @@ UeberzugBackend::UeberzugBackend()
 	{
 		process = bp::child(bp::search_path("ueberzug"), bp::args(args), bp::std_in < stream);
 	}
-	catch (const bp::process_error &e) {}
+	catch (const bp::process_error &e)
+	{
+		std::cerr << "Could not start ueberzug: " << e.what() << std::endl;
+	}
 }
 
 UeberzugBackend::~UeberzugBackend()

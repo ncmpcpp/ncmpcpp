@@ -65,6 +65,7 @@ extern boost::posix_time::ptime Timer;
 extern std::mt19937 RNG;
 
 // screen mutex
+// screen operations can be called from artwork thread
 extern std::recursive_mutex screenMtx;
 
 }
