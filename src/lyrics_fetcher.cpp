@@ -19,7 +19,6 @@
  ***************************************************************************/
 
 #include "config.h"
-#include "curl_handle.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -29,8 +28,15 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
 
+#ifdef HAVE_TAGLIB_H
+#include <fileref.h>
+#include <tpropertymap.h>
+#endif // HAVE_TAGLIB_H
+
 #include "charset.h"
+#include "curl_handle.h"
 #include "lyrics_fetcher.h"
+#include "settings.h"
 #include "utility/html.h"
 #include "utility/string.h"
 
@@ -52,6 +58,10 @@ std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher)
 		fetcher = std::make_unique<ZeneszovegFetcher>();
 	else if (s == "internet")
 		fetcher = std::make_unique<InternetLyricsFetcher>();
+#ifdef HAVE_TAGLIB_H
+	else if (s == "tags")
+		fetcher = std::make_unique<TagsLyricsFetcher>();
+#endif // HAVE_TAGLIB_H
 	else
 		is.setstate(std::ios::failbit);
 	return is;
@@ -60,7 +70,8 @@ std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher)
 const char LyricsFetcher::msgNotFound[] = "Not found";
 
 LyricsFetcher::Result LyricsFetcher::fetch(const std::string &artist,
-                                           const std::string &title)
+                                           const std::string &title,
+                                           [[maybe_unused]] const MPD::Song &song)
 {
 	Result result;
 	result.first = false;
@@ -131,7 +142,7 @@ void LyricsFetcher::postProcess(std::string &data) const
 	stripHtmlTags(data);
 	// Remove indentation from each line and collapse multiple newlines into one.
 	std::vector<std::string> lines;
-	boost::split(lines, data, boost::is_any_of("\n"));
+	boost::split(lines, data, boost::is_any_of("\r\n"));
 	for (auto &line : lines)
 		boost::trim(line);
 	auto last = std::unique(
@@ -146,7 +157,8 @@ void LyricsFetcher::postProcess(std::string &data) const
 /**********************************************************************/
 
 LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist,
-                                                 const std::string &title)
+                                                 const std::string &title,
+                                                 const MPD::Song &song)
 {
 	Result result;
 	result.first = false;
@@ -188,7 +200,7 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist,
 	data = unescapeHtmlUtf8(urls[0]);
 
 	URL = data.c_str();
-	return LyricsFetcher::fetch("", "");
+	return LyricsFetcher::fetch("", "", song);
 }
 
 bool GoogleLyricsFetcher::isURLOk(const std::string &url)
@@ -199,9 +211,10 @@ bool GoogleLyricsFetcher::isURLOk(const std::string &url)
 /**********************************************************************/
 
 LyricsFetcher::Result InternetLyricsFetcher::fetch(const std::string &artist,
-                                                   const std::string &title)
+                                                   const std::string &title,
+                                                   const MPD::Song &song)
 {
-	GoogleLyricsFetcher::fetch(artist, title);
+	GoogleLyricsFetcher::fetch(artist, title, song);
 	LyricsFetcher::Result result;
 	result.first = false;
 	result.second = "The following site may contain lyrics for this song: ";
@@ -214,3 +227,42 @@ bool InternetLyricsFetcher::isURLOk(const std::string &url)
 	URL = url;
 	return false;
 }
+
+#ifdef HAVE_TAGLIB_H
+LyricsFetcher::Result TagsLyricsFetcher::fetch([[maybe_unused]] const std::string &artist,
+                                               [[maybe_unused]] const std::string &title,
+                                               const MPD::Song &song)
+{
+	LyricsFetcher::Result result;
+	result.first = false;
+
+	std::string path;
+	if (song.isFromDatabase())
+		path += Config.mpd_music_dir;
+	path += song.getURI();
+
+	TagLib::FileRef f(path.c_str());
+	if (f.isNull())
+	{
+		result.second = "Could not open file";
+		return result;
+	}
+
+	TagLib::PropertyMap properties = f.file()->properties();
+
+	if (properties.contains("LYRICS"))
+	{
+		result.first = true;
+		result.second = properties["LYRICS"].toString("\n\n").to8Bit(true);
+	}
+	else if (properties.contains("UNSYNCEDLYRICS"))
+	{
+		result.first = true;
+		result.second = properties["UNSYNCEDLYRICS"].toString("\n\n").to8Bit(true);
+	}
+	else
+		result.second = "No lyrics in tags";
+
+	return result;
+}
+#endif // HAVE_TAGLIB_H

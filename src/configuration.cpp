@@ -171,7 +171,7 @@ bool configure(int argc, char **argv)
 				          << fetcher->name()
 				          << " : "
 				          << std::flush;
-				auto result = fetcher->fetch(std::get<1>(data), std::get<2>(data));
+				auto result = fetcher->fetch(std::get<1>(data), std::get<2>(data), {});
 				std::cout << (result.first ? "ok" : "failed")
 				          << "\n";
 			}
