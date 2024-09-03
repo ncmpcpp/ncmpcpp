@@ -1,4 +1,4 @@
-# ncmpcpp-0.10 (????-??-??)
+# ncmpcpp-0.10 (2024-09-03)
 * Add the configuration option `mpd_password`.
 * Separate chunks of lyrics with a double newline.
 * Fix separator between albums with the same name, to check for album artist
