@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        env:
+          PACKAGES: >
+            ccache
+            libboost-dev
+            libboost-filesystem-dev
+            libboost-locale-dev
+            libboost-program-options-dev
+            libboost-regex-dev
+            libboost-thread-dev
+            libcurl4-gnutls-dev
+            libfftw3-dev
+            libmpdclient-dev
+            libncurses-dev
+            libreadline-dev
+            libtag1-dev
+            zlib1g-dev
+        run: |
+          sudo apt update -qq
+          sudo apt install -y --no-install-recommends ${{ env.PACKAGES }}
+
+      - name: Set up ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: ccache-${{ matrix.os }}-${{ github.run_id }}
+          restore-keys: ccache-${{ matrix.os }}-
+
+      - name: Run autoreconf
+        run: |
+          autoreconf -fiv
+
+      - name: Build ncmpcpp (light)
+        env:
+          CCACHE_DIR: ${{ github.workspace }}/.ccache/light
+        run: |
+          CC='ccache gcc' CXX='ccache g++' ./configure \
+            --disable-outputs \
+            --disable-visualizer \
+            --disable-clock \
+            --without-fftw \
+            --without-taglib \
+            --with-lto=$(nproc)
+          make -j$(nproc) || exit 1
+
+      - name: Build ncmpcpp (full)
+        env:
+          CCACHE_DIR: ${{ github.workspace }}/.ccache/full
+        run: |
+          CC='ccache gcc' CXX='ccache g++' ./configure \
+            --enable-outputs \
+            --enable-visualizer \
+            --enable-clock \
+            --with-fftw \
+            --with-taglib \
+            --with-lto=$(nproc)
+          make -j$(nproc) || exit 1
