@@ -22,6 +22,7 @@
 #define NCMPCPP_ARTWORK_H
 
 #include "config.h"
+#include "mpdpp.h"
 
 #ifdef ENABLE_ARTWORK
 
@@ -75,6 +76,10 @@ struct Artwork: Screen<NC::Window>, Tabbable
 	int pipefd_read;
 
 private:
+	// MPD connection for album artwork. Album art logic runs in a thread to avoid
+	// blocking the main thread, and MPD connections aren't thread safe
+	MPD::Connection Mpd_artwork;
+
 	void stop();
 
 	// worker thread methods
@@ -82,10 +87,10 @@ private:
 	void worker_updateArtBuffer(const std::string &uri, const std::string &path);
 	void worker_drawArtwork(int x_offset, int y_offset, int width, int height);
 	void worker_removeArtwork(bool reset_artwork = false);
-	void worker_updateArtwork();
-	void worker_updateArtwork(const std::string &uri);
+	void worker_updateArtwork(int x_offset, int y_offset, int width, int height);
+	void worker_updateArtwork(const std::string &uri, int x_offset, int y_offset, int width, int height);
 	void worker_resetArtworkPosition();
-	void worker_updatedVisibility();
+	void worker_updatedVisibility(int x_offset, int y_offset, int width, int height);
 	int worker_calcXOffset(int width, int img_width, int char_xpixel);
 	int worker_calcYOffset(int height, int img_height, int char_ypixel);
 	std::vector<uint8_t> worker_fetchArtwork(const std::string &uri, const std::string &cmd);

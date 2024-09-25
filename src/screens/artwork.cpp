@@ -282,7 +282,7 @@ void Artwork::removeArtwork(bool reset_artwork)
 		// guarantee that both are executed if they are called within one loop
 		// iteration of the worker thread
 		WorkerOp op = reset_artwork ? WorkerOp::REMOVE_RESET : WorkerOp::REMOVE;
-		worker_queue.emplace_back(std::make_pair(op, [&, reset_artwork] { worker_removeArtwork(reset_artwork); }));
+		worker_queue.emplace_back(std::make_pair(op, [=, this] { worker_removeArtwork(reset_artwork); }));
 	}
 	worker_cv.notify_all();
 }
@@ -292,9 +292,13 @@ void Artwork::updateArtwork()
 	if (!Config.albumart)
 		return;
 
+	size_t x_offset, width;
+	myArtwork->getWindowResizeParams(x_offset, width, false);
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE, [&] { worker_updateArtwork(); }));
+		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE, [=, this] {
+			worker_updateArtwork(x_offset, MainStartY, width, MainHeight);
+		}));
 	}
 	worker_cv.notify_all();
 }
@@ -304,9 +308,13 @@ void Artwork::updateArtwork(std::string uri)
 	if (!Config.albumart)
 		return;
 
+	size_t x_offset, width;
+	myArtwork->getWindowResizeParams(x_offset, width, false);
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE_URI, [&, uri] { worker_updateArtwork(uri); }));
+		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATE_URI, [=, this] {
+			worker_updateArtwork(uri, x_offset, MainStartY, width, MainHeight);
+		}));
 	}
 	worker_cv.notify_all();
 }
@@ -318,7 +326,7 @@ void Artwork::resetArtworkPosition()
 
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace_back(std::make_pair(WorkerOp::MOVE, [&] { worker_resetArtworkPosition(); }));
+		worker_queue.emplace_back(std::make_pair(WorkerOp::MOVE, [=, this] { worker_resetArtworkPosition(); }));
 	}
 	worker_cv.notify_all();
 }
@@ -328,9 +336,13 @@ void Artwork::updatedVisibility()
 	if (!Config.albumart)
 		return;
 
+	size_t x_offset, width;
+	myArtwork->getWindowResizeParams(x_offset, width, false);
 	{
 		std::lock_guard<std::mutex> lck(worker_mtx);
-		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATED_VIS, [&] { worker_updatedVisibility(); }));
+		worker_queue.emplace_back(std::make_pair(WorkerOp::UPDATED_VIS, [=, this] {
+			worker_updatedVisibility(x_offset, MainStartY, width, MainHeight);
+		}));
 	}
 	worker_cv.notify_all();
 }
@@ -472,26 +484,21 @@ void Artwork::worker_removeArtwork(bool reset_artwork)
 	}
 }
 
-void Artwork::worker_updateArtwork()
+void Artwork::worker_updateArtwork(int x_offset, int y_offset, int width, int height)
 {
 	if (0 == art_buffer.length())
 		return;
 
-	size_t x_offset, width;
-	myArtwork->getWindowResizeParams(x_offset, width, false);
-	worker_drawArtwork(x_offset, MainStartY, width, MainHeight);
+	worker_drawArtwork(x_offset, y_offset, width, height);
 }
 
-void Artwork::worker_updateArtwork(const std::string &uri)
+void Artwork::worker_updateArtwork(const std::string &uri, int x_offset, int y_offset, int width, int height)
 {
 	update_time = std::chrono::steady_clock::now();
-	size_t x_offset, width;
-	myArtwork->getWindowResizeParams(x_offset, width, false);
-
 	// Draw same file if uri is unchanged
 	if (prev_uri == uri)
 	{
-		worker_drawArtwork(x_offset, MainStartY, width, MainHeight);
+		worker_drawArtwork(x_offset, y_offset, width, height);
 		return;
 	}
 
@@ -576,7 +583,7 @@ void Artwork::worker_resetArtworkPosition()
 		backend->resetArtworkPosition();
 }
 
-void Artwork::worker_updatedVisibility()
+void Artwork::worker_updatedVisibility(int x_offset, int y_offset, int width, int height)
 {
 	if (!isVisible(myArtwork) && drawn)
 	{
@@ -584,7 +591,7 @@ void Artwork::worker_updatedVisibility()
 	}
 	else if (isVisible(myArtwork) && !before_inital_draw && !drawn)
 	{
-		worker_updateArtwork();
+		worker_updateArtwork(x_offset, y_offset, width, height);
 	}
 }
 

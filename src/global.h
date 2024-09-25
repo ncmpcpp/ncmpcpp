@@ -63,11 +63,6 @@ extern boost::posix_time::ptime Timer;
 
 // global RNG
 extern std::mt19937 RNG;
-
-// screen mutex
-// screen operations can be called from artwork thread
-extern std::recursive_mutex screenMtx;
-
 }
 
 #endif // NCMPCPP_GLOBAL_H

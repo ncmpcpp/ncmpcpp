@@ -633,6 +633,5 @@ private:
 }
 
 extern MPD::Connection Mpd;
-extern MPD::Connection Mpd_artwork;
 
 #endif // NCMPCPP_MPDPP_H

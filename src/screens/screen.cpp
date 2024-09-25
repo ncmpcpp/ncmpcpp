@@ -137,8 +137,6 @@ void applyToVisibleWindows(std::function<void(BaseScreen *)> f)
 
 void updateInactiveScreen(BaseScreen *screen_to_be_set)
 {
-	std::unique_lock<std::recursive_mutex> lck(Global::screenMtx);
-
 	if (myInactiveScreen && myLockedScreen != myInactiveScreen && myLockedScreen == screen_to_be_set)
 	{
 		// if we're here, the following conditions are (or at least should be) met:
@@ -163,8 +161,6 @@ void updateInactiveScreen(BaseScreen *screen_to_be_set)
 
 bool isVisible(BaseScreen *screen)
 {
-	std::unique_lock<std::recursive_mutex> lck(Global::screenMtx);
-
 	assert(screen != 0);
 	if (myLockedScreen && myScreen->isMergable())
 		return screen == myScreen || screen == myInactiveScreen || screen == myLockedScreen;
