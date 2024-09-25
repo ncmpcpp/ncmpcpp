@@ -101,10 +101,10 @@ private:
 
 	// worker thread variables
 	std::thread t;
-	typedef struct art_s {
+	struct art_t {
 		std::string uri;
 		std::vector<uint8_t> buffer;
-	} art_t;
+	};
 	art_t orig_art;
 	Magick::Blob art_buffer;
 	std::unique_ptr<ArtworkBackend> backend = nullptr;
@@ -117,23 +117,23 @@ private:
 	};
 
 	// Cache for recently displayed artworks
-	typedef struct cache_key_s {
+	struct cache_key_t {
 		std::string uri;
 		size_t pixel_width;
 		size_t pixel_height;
 		int x_offset;
 		int y_offset;
-		friend bool operator<(const cache_key_s& l, const cache_key_s& r)
+		friend bool operator<(const cache_key_t& l, const cache_key_t& r)
 		{
 			return std::tie(l.uri, l.pixel_width, l.pixel_height, l.x_offset, l.y_offset)
 			< std::tie(r.uri, r.pixel_width, r.pixel_height, r.x_offset, r.y_offset);
 		}
-	} cache_key_t;
-	typedef struct cache_value_s {
+	};
+	struct cache_value_t {
 		Magick::Blob blob;
 		int adj_x_offset;
 		int adj_y_offset;
-	} cache_value_t;
+	};
 	boost::compute::detail::lru_cache<cache_key_t, cache_value_t> cache;
 
 	// For giving tasks to worker thread
@@ -158,13 +158,13 @@ private:
 	bool terminal_drawn = true;
 
 	// store window dimensions
-	typedef struct winsize_s {
+	struct winsize_t {
 		size_t x_offset;
 		size_t y_offset;
 		size_t width;
 		size_t height;
 
-		bool operator==(const winsize_s& rhs)
+		bool operator==(const winsize_t& rhs)
 		{
 			return x_offset == rhs.x_offset &&
 				y_offset == rhs.y_offset &&
@@ -172,11 +172,11 @@ private:
 				height == rhs.height;
 		}
 
-		bool operator!=(const winsize_s& rhs)
+		bool operator!=(const winsize_t& rhs)
 		{
 			return !(*this == rhs);
 		}
-	} winsize_t;
+	};
 	winsize_t prev_winsize = {};
 };
 
