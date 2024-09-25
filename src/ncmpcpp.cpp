@@ -235,6 +235,7 @@ int main(int argc, char **argv)
 					k.second,
 					std::bind(&Binding::execute, ph::_1));
 #	ifdef ENABLE_ARTWORK
+				// Reset artwork position if a window scrolls
 				myArtwork->resetArtworkPosition();
 #	endif
 			}
