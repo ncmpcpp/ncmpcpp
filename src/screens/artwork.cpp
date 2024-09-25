@@ -62,6 +62,7 @@ without a race.
 #include <unistd.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
@@ -207,7 +208,7 @@ void Artwork::drawToScreen()
 	// save current cursor position
 	std::cout << "\0337";
 	// move cursor, terminal coordinates are 1-indexed
-	std::cout << std::format("\033[{};{}H", y_offset+1, x_offset+1);
+	std::cout << boost::format("\033[%1%;%2%H") % (y_offset+1) % (x_offset+1);
 	// write image data
 	std::copy(output.begin(), output.end(), std::ostreambuf_iterator<char>(std::cout));
 	// restore cursor position
