@@ -291,18 +291,15 @@ if test "$taglib" != "no" ; then
 fi
 
 if test "$artwork" = "yes" ; then
-	PKG_CHECK_MODULES([MAGICK], [ImageMagick], [
-			AC_PATH_PROG(MAGICKPP_CONFIG, Magick++-config)
-			if test "$MAGICKPP_CONFIG" != "" ; then
-				AC_SUBST(MAGICK_CFLAGS)
-				AC_SUBST(MAGICK_LDFLAGS)
-				LDFLAGS="$LDFLAGS `$MAGICKPP_CONFIG --ldflags` $MAGICK_CFLAGS"
-				CPPFLAGS="$CPPFLAGS `$MAGICKPP_CONFIG --cxxflags` $MAGICK_LDFLAGS"
-				AC_CHECK_HEADERS([Magick++.h], , AC_MSG_ERROR([missing Magick++.h header]))
-				AC_DEFINE([ENABLE_ARTWORK], [1], [enables album artwork screen])
-			else
-				AC_MSG_ERROR([Magick++-config executable is missing])
-			fi
+	PKG_CHECK_MODULES([magick], [Magick++-7.Q16HDRI], [
+			AC_SUBST(magick_CFLAGS)
+			AC_SUBST(magick_LIBS)
+			CPPFLAGS="$CPPFLAGS $magick_CFLAGS"
+			AC_CHECK_HEADERS([Magick++.h],
+        LIBS="$LIBS $magick_LIBS",
+        AC_MSG_ERROR([missing Magick++.h header])
+      )
+			AC_DEFINE([ENABLE_ARTWORK], [1], [enables album artwork screen])
 		],
 		AC_MSG_ERROR([ImageMagick is required!])
 	)
