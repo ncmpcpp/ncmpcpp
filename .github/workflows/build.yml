@@ -60,6 +60,7 @@ jobs:
             --disable-outputs \
             --disable-visualizer \
             --disable-clock \
+            --disable-artwork \
             --without-fftw \
             --without-taglib \
             --with-lto=$(nproc)
@@ -73,6 +74,7 @@ jobs:
             --enable-outputs \
             --enable-visualizer \
             --enable-clock \
+            --enable-artwork \
             --with-fftw \
             --with-taglib \
             --with-lto=$(nproc)
