@@ -44,7 +44,7 @@ The simplest way to compile this package is:
   For the next two commands, `csh` users will need to prefix them with
   `sh `.
 
-  2. Run `./autogen.sh` to generate the `configure` script.
+  2. Run `autoreconf -fiv` to generate the `configure` script.
 
   3. Run `./configure` to configure the package for your system.  This
      will take a while.  While running, it prints some messages

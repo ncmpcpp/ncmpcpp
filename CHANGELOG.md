@@ -1,5 +1,6 @@
 # ncmpcpp-0.10.1 (2024-??-??)
 * Fix compilation with `libc++`.
+* Remove `autogen.sh` in favour of `autoreconf`.
 
 # ncmpcpp-0.10 (2024-09-03)
 * Add the configuration option `mpd_password`.
