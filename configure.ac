@@ -291,7 +291,7 @@ if test "$taglib" != "no" ; then
 fi
 
 if test "$artwork" = "yes" ; then
-	PKG_CHECK_MODULES([magick], [Magick++-7.Q16HDRI], [
+	PKG_CHECK_MODULES([magick], [Magick++ >= 6], [
 			AC_SUBST(magick_CFLAGS)
 			AC_SUBST(magick_LIBS)
 			CPPFLAGS="$CPPFLAGS $magick_CFLAGS"

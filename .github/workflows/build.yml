@@ -32,6 +32,7 @@ jobs:
             libboost-thread-dev
             libcurl4-gnutls-dev
             libfftw3-dev
+            libmagick++-dev
             libmpdclient-dev
             libncurses-dev
             libreadline-dev
