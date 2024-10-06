@@ -221,9 +221,6 @@ void Artwork::drawToScreen()
 		terminal_drawn = true;
 		terminal_drawn_cv.notify_all();
 	}
-
-	// redraw active window
-	Global::myScreen->activeWindow()->display();
 }
 
 void Artwork::resize()

@@ -234,11 +234,6 @@ void Visualizer::update()
 		(this->*draw)(m_rendered_samples.data(), m_rendered_samples.size(), 0, w.getHeight());
 	}
 	w.refresh();
-
-#	ifdef ENABLE_ARTWORK
-	// visualizer will sometimes cause artwork to scroll, reset its position
-	myArtwork->resetArtworkPosition();
-#	endif
 }
 
 int Visualizer::windowTimeout()

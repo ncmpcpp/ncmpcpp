@@ -75,6 +75,9 @@ struct Artwork: Screen<NC::Window>, Tabbable
 	// fd to signal main thread to print image
 	int pipefd_read;
 
+	// Flag can be set to keep track of deferred call to resetArtworkPosition()
+	bool requires_reset_position = false;
+
 private:
 	// MPD connection for album artwork. Album art logic runs in a thread to avoid
 	// blocking the main thread, and MPD connections aren't thread safe

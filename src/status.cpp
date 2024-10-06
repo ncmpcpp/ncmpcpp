@@ -241,6 +241,14 @@ void Status::trace(bool update_timer, bool update_window_timeout)
 		}
 
 		applyToVisibleWindows(&BaseScreen::update);
+#	ifdef ENABLE_ARTWORK
+		// After update() is called on all screens, check if we need to reset the artwork position
+		if (myArtwork != nullptr && myArtwork->requires_reset_position)
+		{
+			myArtwork->resetArtworkPosition();
+			myArtwork->requires_reset_position = false;
+		}
+#	endif
 		Statusbar::tryRedraw();
 
 		Mpd.idle();

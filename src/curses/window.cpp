@@ -749,6 +749,7 @@ void Window::refreshBorder() const
 	}
 	standend();
 	::refresh();
+	finalize_print();
 }
 
 void Window::display()
@@ -1460,6 +1461,7 @@ Window &Window::operator<<(const XY &coords)
 Window &Window::operator<<(const char *s)
 {
 	waddstr(m_window, s);
+	finalize_print();
 	return *this;
 }
 
@@ -1470,49 +1472,68 @@ Window &Window::operator<<(char c)
 	// code in the ticket supposed to be culprit was rewritten.
 	waddnstr(m_window, &c, 1);
 	//wprintw(m_window, "%c", c);
+	finalize_print();
 	return *this;
 }
 
 Window &Window::operator<<(const wchar_t *ws)
 {
 	waddwstr(m_window, ws);
+	finalize_print();
 	return *this;
 }
 
 Window &Window::operator<<(wchar_t wc)
 {
 	waddnwstr(m_window, &wc, 1);
+	finalize_print();
 	return *this;
 }
 
 Window &Window::operator<<(int i)
 {
 	wprintw(m_window, "%d", i);
+	finalize_print();
 	return *this;
 }
 
 Window &Window::operator<<(double d)
 {
 	wprintw(m_window, "%f", d);
+	finalize_print();
 	return *this;
 }
 
 Window &Window::operator<<(const std::string &s)
 {
 	waddnstr(m_window, s.c_str(), s.length());
+	finalize_print();
 	return *this;
 }
 
 Window &Window::operator<<(const std::wstring &ws)
 {
 	waddnwstr(m_window, ws.c_str(), ws.length());
+	finalize_print();
 	return *this;
 }
 
 Window &Window::operator<<(size_t s)
 {
 	wprintw(m_window, "%zu", s);
+	finalize_print();
 	return *this;
+}
+
+void Window::finalize_print() const
+{
+#	ifdef ENABLE_ARTWORK
+	// Printing to screen will sometimes cause artwork to scroll, reset its position
+	// The actual reset is deferred until after Screen::update is called on all active screens
+	if (myArtwork != nullptr) {
+		myArtwork->requires_reset_position = true;
+	}
+#	endif
 }
 
 }
