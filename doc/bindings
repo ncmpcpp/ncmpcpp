@@ -297,6 +297,9 @@
 #def_key "8"
 #  show_visualizer
 #
+#def_key "9"
+#  show_artwork
+#
 #def_key "="
 #  show_clock
 #

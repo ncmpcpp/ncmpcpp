@@ -166,6 +166,9 @@ void write_bindings(NC::Scrollpad &w)
 #	ifdef ENABLE_VISUALIZER
 	key(w, Type::ShowVisualizer, "Show music visualizer");
 #	endif // ENABLE_VISUALIZER
+#	ifdef ENABLE_ARTWORK
+	key(w, Type::ShowArtwork, "Show album artwork");
+#	endif // ENABLE_VISUALIZER
 #	ifdef ENABLE_CLOCK
 	key(w, Type::ShowClock, "Show clock");
 #	endif // ENABLE_CLOCK

@@ -59,7 +59,7 @@ namespace Changes {
 void playlist(unsigned previous_version);
 void storedPlaylists();
 void database();
-void playerState();
+void playerState(bool drawArtwork = true);
 void songID(int song_id);
 void elapsedTime(bool update_elapsed);
 void flags();

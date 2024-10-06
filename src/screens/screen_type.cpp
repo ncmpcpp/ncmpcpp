@@ -38,6 +38,7 @@
 #include "screens/tag_editor.h"
 #include "screens/tiny_tag_editor.h"
 #include "screens/visualizer.h"
+#include "screens/artwork.h"
 
 std::string screenTypeToString(ScreenType st)
 {
@@ -87,6 +88,10 @@ std::string screenTypeToString(ScreenType st)
 	case ScreenType::Visualizer:
 		return "visualizer";
 #endif // ENABLE_VISUALIZER
+#ifdef ENABLE_ARTWORK
+	case ScreenType::Artwork:
+		return "artwork";
+#endif // ENABLE_ARTWORK
 	}
 	// silence gcc warning
 	throw std::runtime_error("unreachable");
@@ -123,6 +128,10 @@ ScreenType stringtoStartupScreenType(const std::string &s)
 	else if (s == "visualizer")
 		result = ScreenType::Visualizer;
 #	endif // ENABLE_VISUALIZER
+#	ifdef ENABLE_ARTWORK
+	else if (s == "artwork")
+		result = ScreenType::Artwork;
+#	endif // ENABLE_ARTWORK
 	else if (s == "lyrics")
 		result = ScreenType::Lyrics;
 	else if (s == "last_fm")
@@ -201,6 +210,10 @@ BaseScreen *toScreen(ScreenType st)
 		case ScreenType::Visualizer:
 			return myVisualizer;
 #		endif // ENABLE_VISUALIZER
+#		ifdef ENABLE_ARTWORK
+		case ScreenType::Artwork:
+			return myArtwork;
+#		endif // ENABLE_ARTWORK
 		default:
 			return nullptr;
 	}

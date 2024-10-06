@@ -22,6 +22,7 @@
 #define NCMPCPP_MENU_IMPL_H
 
 #include "menu.h"
+#include "screens/artwork.h"
 
 namespace NC {
 

@@ -32,6 +32,7 @@ jobs:
             libboost-thread-dev
             libcurl4-gnutls-dev
             libfftw3-dev
+            libmagick++-dev
             libmpdclient-dev
             libncurses-dev
             libreadline-dev
@@ -60,6 +61,7 @@ jobs:
             --disable-outputs \
             --disable-visualizer \
             --disable-clock \
+            --disable-artwork \
             --without-fftw \
             --without-taglib \
             --with-lto=$(nproc)
@@ -73,6 +75,7 @@ jobs:
             --enable-outputs \
             --enable-visualizer \
             --enable-clock \
+            --enable-artwork \
             --with-fftw \
             --with-taglib \
             --with-lto=$(nproc)

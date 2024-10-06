@@ -34,6 +34,7 @@
 #include "format.h"
 #include "lyrics_fetcher.h"
 #include "screens/screen_type.h"
+#include "screens/artwork.h"
 
 struct Column
 {
@@ -225,6 +226,17 @@ struct Configuration
 	SortMode browser_sort_mode;
 
 	LyricsFetchers lyrics_fetchers;
+
+#	ifdef ENABLE_ARTWORK
+	bool albumart;
+	Artwork::ArtBackend albumart_backend;
+	Artwork::ArtAlign albumart_align;
+	std::vector<std::string> albumart_filenames;
+	std::string albumart_default_path;
+	std::vector<Artwork::ArtSource> albumart_sources;
+	size_t font_width, font_height;
+	int albumart_xoffset, albumart_yoffset;
+#	endif
 };
 
 extern Configuration Config;
