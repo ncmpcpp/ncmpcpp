@@ -1,4 +1,4 @@
-# ncmpcpp-0.10.1 (2024-??-??)
+# ncmpcpp-0.10.1 (2024-10-24)
 * Fix compilation with `libc++`.
 * Remove `autogen.sh` in favour of `autoreconf`.
 
