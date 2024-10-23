@@ -1998,7 +1998,10 @@ bool ReversePlaylist::canBeRun()
 		return false;
 	m_begin = myPlaylist->main().begin();
 	m_end = myPlaylist->main().end();
-	return findSelectedRangeAndPrintInfoIfNot(m_begin, m_end);
+	if (m_begin == m_end)
+		return false;
+	else
+		return findSelectedRangeAndPrintInfoIfNot(m_begin, m_end);
 }
 
 void ReversePlaylist::run()

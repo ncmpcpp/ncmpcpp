@@ -1,6 +1,7 @@
 # ncmpcpp-0.10.1 (2024-??-??)
 * Fix compilation with `libc++`.
 * Remove `autogen.sh` in favour of `autoreconf`.
+* Do not crash when trying to reverse an empty playlist.
 
 # ncmpcpp-0.10 (2024-09-03)
 * Add the configuration option `mpd_password`.
