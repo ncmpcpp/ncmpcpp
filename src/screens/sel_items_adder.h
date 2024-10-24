@@ -26,6 +26,7 @@
 #include "regex_filter.h"
 #include "screens/screen.h"
 #include "song.h"
+#include "mpdpp.h"
 
 struct SelectedItemsAdder: Screen<NC::Menu<RunnableItem<std::string, void()>> *>, HasActions, Searchable, Tabbable
 {
@@ -65,7 +66,7 @@ private:
 	
 	void addToCurrentPlaylist();
 	void addToNewPlaylist() const;
-	void addToExistingPlaylist(const std::string &playlist) const;
+	void addToExistingPlaylist(const MPD::Playlist &playlist, bool new_playlist) const;
 	void addAtTheEndOfPlaylist() const;
 	void addAtTheBeginningOfPlaylist() const;
 	void addAfterCurrentSong() const;
