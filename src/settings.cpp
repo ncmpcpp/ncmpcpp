@@ -614,6 +614,21 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("active_window_border", &active_window_border, "red",
 	      verbose_lexical_cast<NC::Color>);
 
+#	ifdef ENABLE_ARTWORK
+	p.add("albumart", &albumart, "no", yes_no);
+	p.add("albumart_backend", &albumart_backend, "ueberzug");
+	p.add("albumart_align", &albumart_align, "center");
+	p.add("albumart_filenames", &albumart_filenames,
+	      "cover.png, cover.jpg, cover.webp, cover.tiff, cover.bmp", list_of<std::string>);
+	p.add("albumart_default_path", &albumart_default_path, "", adjust_path);
+	p.add("albumart_sources", &albumart_sources,
+	      "local, mpd_albumart, mpd_readpicture", list_of<Artwork::ArtSource>);
+	p.add("font_width", &font_width, "0");
+	p.add("font_height", &font_height, "0");
+	p.add("albumart_xoffset", &albumart_xoffset, "0");
+	p.add("albumart_yoffset", &albumart_yoffset, "0");
+#	endif
+
 	return std::all_of(
 		config_paths.begin(),
 		config_paths.end(),

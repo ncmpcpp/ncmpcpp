@@ -43,7 +43,7 @@ public:
 	{
 		using Global::myScreen;
 		using Global::myLockedScreen;
-		
+
 		const bool isScreenMergable = screen->isMergable() && myLockedScreen;
 		const bool isScreenTabbable = std::is_base_of<Tabbable, ScreenT>::value;
 		

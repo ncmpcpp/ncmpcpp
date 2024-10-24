@@ -39,5 +39,4 @@ std::string VolumeState;
 boost::posix_time::ptime Timer;
 
 std::mt19937 RNG;
-
 }

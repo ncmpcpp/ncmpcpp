@@ -14,6 +14,7 @@ LT_INIT
 AC_ARG_ENABLE(outputs, AS_HELP_STRING([--enable-outputs], [Enable outputs screen @<:@default=no@:>@]), [outputs=$enableval], [outputs=no])
 AC_ARG_ENABLE(visualizer, AS_HELP_STRING([--enable-visualizer], [Enable music visualizer screen @<:@default=no@:>@]), [visualizer=$enableval], [visualizer=no])
 AC_ARG_ENABLE(clock, AS_HELP_STRING([--enable-clock], [Enable clock screen @<:@default=no@:>@]), [clock=$enableval], [clock=no])
+AC_ARG_ENABLE(artwork, AS_HELP_STRING([--enable-artwork], [Enable artwork screen @<:@default=no@:>@]), [artwork=$enableval], [artwork=no])
 
 AC_ARG_WITH(fftw, AS_HELP_STRING([--with-fftw], [Enable fftw support (required for frequency spectrum vizualization) @<:@default=auto@:>@]), [fftw=$withval], [fftw=auto])
 AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor @<:@default=auto@:>@]), [taglib=$withval], [taglib=auto])
@@ -94,7 +95,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[auto f = [](auto n) { return n*n; }; f(
 CXXFLAGS="$CXXFLAGS -Wall -Wextra -Wshadow -Wimplicit-fallthrough"
 
 # boost
-BOOST_REQUIRE([1.60])
+BOOST_REQUIRE([1.64])
 AC_SUBST(BOOST_CPPFLAGS)
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 
@@ -108,6 +109,8 @@ BOOST_RANGE
 BOOST_TOKENIZER
 BOOST_TUPLE
 BOOST_VARIANT
+BOOST_PROCESS
+BOOST_PROPERTY_TREE
 
 BOOST_DATE_TIME
 AC_SUBST(BOOST_DATE_TIME_LDFLAGS)
@@ -286,6 +289,22 @@ if test "$taglib" != "no" ; then
 		)
 	fi
 fi
+
+if test "$artwork" = "yes" ; then
+	PKG_CHECK_MODULES([magick], [Magick++ >= 6], [
+			AC_SUBST(magick_CFLAGS)
+			AC_SUBST(magick_LIBS)
+			CPPFLAGS="$CPPFLAGS $magick_CFLAGS"
+			AC_CHECK_HEADERS([Magick++.h],
+        LIBS="$LIBS $magick_LIBS",
+        AC_MSG_ERROR([missing Magick++.h header])
+      )
+			AC_DEFINE([ENABLE_ARTWORK], [1], [enables album artwork screen])
+		],
+		AC_MSG_ERROR([ImageMagick is required!])
+	)
+fi
+
 
 AC_CONFIG_FILES([Makefile src/Makefile doc/Makefile])
 AC_OUTPUT
