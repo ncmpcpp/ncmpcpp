@@ -210,6 +210,7 @@ struct Configuration
 
 	size_t selected_item_prefix_length;
 	size_t selected_item_suffix_length;
+	size_t selected_item_x_offset;
 	size_t now_playing_prefix_length;
 	size_t now_playing_suffix_length;
 	size_t current_item_prefix_length;
