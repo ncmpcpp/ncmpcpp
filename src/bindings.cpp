@@ -762,6 +762,8 @@ void BindingsConfiguration::generateDefaults()
 		bind(k, Actions::Type::SetSelectedItemsPriority);
 	if (notBound(k = stringToKey("q")))
 		bind(k, Actions::Type::Quit);
+	if (notBound(k = stringToKey("D")))
+		bind(k, Actions::Type::AddYoutubeDLItem);
 }
 
 const Command *BindingsConfiguration::findCommand(const std::string &name)
