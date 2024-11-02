@@ -2250,9 +2250,9 @@ void AddRandomItems::run()
 	{
 		bool success;
 		if (rnd_type == 's')
-			success = Mpd.AddRandomSongs(number, Config.random_exclude_pattern, Global::RNG);
+			success = Mpd.AddRandomSongs(number, Config.random_exclude_pattern, Config.exclude_pattern, Global::RNG);
 		else
-			success = Mpd.AddRandomTag(tag_type, number, Global::RNG);
+			success = Mpd.AddRandomTag(tag_type, number, Config.exclude_pattern, Global::RNG);
 		if (success)
 			Statusbar::printf("%1% random %2%%3% added to playlist", number, tag_type_str, number == 1 ? "" : "s");
 	}
