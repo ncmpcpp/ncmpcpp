@@ -2219,15 +2219,20 @@ void AddRandomItems::run()
 {
 	using Global::wFooter;
 	char rnd_type = 0;
+	if (!Config.random_default_type.empty())
 	{
-		Statusbar::ScopedLock slock;
-		Statusbar::put() << "Add random? "
-		<< "[" << NC::Format::Bold << 's' << NC::Format::NoBold << "ongs"
-		<< "/" << NC::Format::Bold << 'a' << NC::Format::NoBold << "rtists"
-		<< "/" << "album" << NC::Format::Bold << 'A' << NC::Format::NoBold << "rtists"
-		<< "/" << "al" << NC::Format::Bold << 'b' << NC::Format::NoBold << "ums"
-		<< "] ";
-		rnd_type = Statusbar::Helpers::promptReturnOneOf({'s', 'a', 'A', 'b'});
+		rnd_type = Config.random_default_type[0];
+	} else {
+		{
+			Statusbar::ScopedLock slock;
+			Statusbar::put() << "Add random? "
+				<< "[" << NC::Format::Bold << 's' << NC::Format::NoBold << "ongs"
+				<< "/" << NC::Format::Bold << 'a' << NC::Format::NoBold << "rtists"
+				<< "/" << "album" << NC::Format::Bold << 'A' << NC::Format::NoBold << "rtists"
+				<< "/" << "al" << NC::Format::Bold << 'b' << NC::Format::NoBold << "ums"
+				<< "] ";
+			rnd_type = Statusbar::Helpers::promptReturnOneOf({'s', 'a', 'A', 'b'});
+		}
 	}
 
 	mpd_tag_type tag_type = MPD_TAG_ARTIST;
@@ -2240,11 +2245,16 @@ void AddRandomItems::run()
 	else
 		tag_type_str = "song";
 	
-	unsigned number;
+	unsigned number = 0;
+	if (Config.random_default_number > 0)
 	{
-		Statusbar::ScopedLock slock;
-		Statusbar::put() << "Number of random " << tag_type_str << "s: ";
-		number = fromString<unsigned>(wFooter->prompt());
+		number = Config.random_default_number;
+	} else {
+		{
+			Statusbar::ScopedLock slock;
+			Statusbar::put() << "Number of random " << tag_type_str << "s: ";
+			number = fromString<unsigned>(wFooter->prompt());
+		}
 	}
 	if (number > 0)
 	{
