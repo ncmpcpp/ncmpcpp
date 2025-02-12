@@ -250,7 +250,7 @@ LyricsFetcher::Result TagsLyricsFetcher::fetch([[maybe_unused]] const std::strin
 
 	TagLib::PropertyMap properties = f.file()->properties();
 
-	if (properties.contains("LYRICS"))
+    if (properties.contains("LYRICS"))
 	{
 		result.first = true;
 		result.second = properties["LYRICS"].toString("\n\n").to8Bit(true);
