@@ -462,6 +462,9 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("header_text_scrolling", &header_text_scrolling, "yes", yes_no);
 	p.add("cyclic_scrolling", &use_cyclic_scrolling, "no", yes_no);
 	p.add<void>("lyrics_fetchers", nullptr,
+#ifdef HAVE_TAGLIB_H
+	      "tags, "
+#endif
 	      "genius, tekstowo, plyrics, justsomelyrics, jahlyrics, zeneszoveg, internet", [this](std::string v) {
 		      lyrics_fetchers = list_of<LyricsFetcher_>(v, [](std::string s) {
 			      LyricsFetcher_ fetcher;

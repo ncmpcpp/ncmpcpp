@@ -2,6 +2,16 @@
 
 ## ncmpcpp – featureful ncurses based MPD client inspired by ncmpc
 
+### Project status
+
+The project is officially in maintenance mode. I (Andrzej Rybczak) still use it
+daily, but it's feature complete for me and there is very limited time I have
+for tending to the issue tracker and open pull requests.
+
+No new, substantial features should be expected (at least from me). However, if
+there are any serious bugs or the project outright stops compiling because of
+new, incompatible versions of dependencies, it will be fixed.
+
 ### Main features:
 * tag editor
 * playlist editor
@@ -34,7 +44,7 @@ The simplest way to compile this package is:
   For the next two commands, `csh` users will need to prefix them with
   `sh `.
 
-  2. Run `./autogen.sh` to generate the `configure` script.
+  2. Run `autoreconf -fiv` to generate the `configure` script.
 
   3. Run `./configure` to configure the package for your system.  This
      will take a while.  While running, it prints some messages

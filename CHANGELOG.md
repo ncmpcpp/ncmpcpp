@@ -1,4 +1,9 @@
-# ncmpcpp-0.10 (????-??-??)
+# ncmpcpp-0.10.1 (2024-10-24)
+* Fix compilation with `libc++`.
+* Remove `autogen.sh` in favour of `autoreconf`.
+* Do not crash when trying to reverse an empty playlist.
+
+# ncmpcpp-0.10 (2024-09-03)
 * Add the configuration option `mpd_password`.
 * Separate chunks of lyrics with a double newline.
 * Fix separator between albums with the same name, to check for album artist
@@ -19,6 +24,7 @@
 * Add `visualizer_spectrum_smooth_look_legacy_chars` option (enabled by default)
   for potentially improved bottom part of the spectrum visualizer in terminals
   with transparent background.
+* Add support for fetching lyrics from tags.
 
 # ncmpcpp-0.9.2 (2021-01-24)
 * Revert suppression of output of all external commands as that makes e.g album

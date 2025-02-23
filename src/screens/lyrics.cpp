@@ -151,7 +151,7 @@ boost::optional<std::string> downloadLyrics(
 				     << NC::Format::NoBold << "... ";
 			}
 		}
-		auto result_ = fetcher_->fetch(s_artist, s_title);
+		auto result_ = fetcher_->fetch(s_artist, s_title, s);
 		if (result_.first == false)
 		{
 			if (shared_buffer)

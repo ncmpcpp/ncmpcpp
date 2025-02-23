@@ -46,8 +46,8 @@ SongIterator makeSongIterator(IteratorT it)
 		> Extractor;
 	static_assert(
 		std::is_convertible<
-		  typename std::result_of<Extractor(typename IteratorT::reference)>::type,
-		  SongProperties &
+		std::invoke_result_t<Extractor, typename IteratorT::reference>,
+		SongProperties &
 		>::value, "invalid result type of SongPropertiesExtractor");
 	return SongIterator(boost::make_transform_iterator(it, Extractor{}));
 }
@@ -60,8 +60,8 @@ ConstSongIterator makeConstSongIterator(ConstIteratorT it)
 		> Extractor;
 	static_assert(
 		std::is_convertible<
-		  typename std::result_of<Extractor(typename ConstIteratorT::reference)>::type,
-		  const SongProperties &
+		std::invoke_result_t<Extractor, typename ConstIteratorT::reference>,
+		const SongProperties &
 		>::value, "invalid result type of SongPropertiesExtractor");
 	return ConstSongIterator(boost::make_transform_iterator(it, Extractor{}));
 }
