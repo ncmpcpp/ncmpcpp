@@ -1,3 +1,6 @@
+# ncmpcpp-0.10.2 (2025-??-??)
+* Update lyrics fetchers.
+
 # ncmpcpp-0.10.1 (2024-10-24)
 * Fix compilation with `libc++`.
 * Remove `autogen.sh` in favour of `autoreconf`.
