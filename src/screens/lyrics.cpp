@@ -27,6 +27,17 @@
 #include <fstream>
 #include <thread>
 
+#include "tags.h"
+#ifdef HAVE_TAGLIB_H
+// #include <fileref.h>
+// #include <tag.h>
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+#include <taglib/mpegfile.h>
+#include <taglib/id3v2tag.h>
+#include <taglib/unsynchronizedlyricsframe.h>
+#endif // HAVE_TAGLIB_H
+
 #include "curses/scrollpad.h"
 #include "screens/browser.h"
 #include "charset.h"
@@ -329,6 +340,41 @@ void Lyrics::edit()
 	if (Config.use_console_editor)
 	{
 		runExternalConsoleCommand(Config.external_editor + " '" + filename + "'");
+#ifdef HAVE_TAGLIB_H
+		if (Config.sync_lyrics_to_tags) {
+			std::string song_file;
+			if (m_song.isFromDatabase())
+				song_file += Config.mpd_music_dir;
+			song_file += m_song.getURI();
+
+			TagLib::MPEG::File file(song_file.c_str());
+			std::fstream lyrics_file(filename); 
+			std::ostringstream ss;
+			ss << lyrics_file.rdbuf();
+
+			TagLib::ID3v2::Tag *id3v2Tag = file.ID3v2Tag(true);
+			if (!id3v2Tag) {
+				std::cerr << "Error: No ID3v2 tag found." << std::endl;
+				return;
+			}
+
+			TagLib::ID3v2::FrameList frames = id3v2Tag->frameList("USLT");
+			for (auto &frame : frames) {
+				id3v2Tag->removeFrame(frame, true);
+			}
+
+			TagLib::ID3v2::UnsynchronizedLyricsFrame *lyricsFrame = new TagLib::ID3v2::UnsynchronizedLyricsFrame();
+			lyricsFrame->setText(TagLib::String(ss.str(), TagLib::String::UTF8));
+
+			id3v2Tag->addFrame(lyricsFrame);
+
+			if (file.save()) {
+				std::cout << "Lyrics written successfully!" << std::endl;
+			} else {
+				std::cerr << "Error: Failed to save lyrics." << std::endl;
+			}
+		}
+#endif // HAVE_TAGLIB_H
 		fetch(m_song);
 	}
 	else

@@ -563,6 +563,10 @@
 ##
 #use_console_editor = yes
 #
+## Note: This requires use_console_editor to be set to yes
+##
+#sync_lyrics_to_tags = no
+#
 ##### colors definitions #####
 ##
 ## It is possible to set a background color by setting a color value
