@@ -542,4 +542,7 @@ std::wstring Scroller(const std::wstring &str, size_t &pos, size_t width);
 void writeCyclicBuffer(const NC::WBuffer &buf, NC::Window &w, size_t &start_pos,
                        size_t width, const std::wstring &separator);
 
+
+boost::optional<size_t> GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song);
+
 #endif // NCMPCPP_HELPERS_H
