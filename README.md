@@ -32,6 +32,7 @@ new, incompatible versions of dependencies, it will be fixed.
 #### Optional libraries
 * [fftw](http://www.fftw.org), for frequency spectrum music visualization mode
 * [taglib](https://taglib.org/), for tag editing
+* [magick++](https://www.imagemagick.org/Magick++/), for album artwork display
 
 ### Known issues:
 * No full support for handling encodings other than UTF-8.
@@ -58,7 +59,7 @@ The simplest way to compile this package is:
   6. You can remove the program binaries and object files from the
      source code directory by typing `make clean`.
 
-Detailed intallation instructions can be found in the `INSTALL` file. 
+Detailed installation instructions can be found in the `INSTALL` file. 
 
 ### Optional features:
 Optional features can be enable by specifying them during configure. For

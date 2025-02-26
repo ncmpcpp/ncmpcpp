@@ -568,6 +568,8 @@ private:
 	int m_reverse_counter;
 	int m_alt_charset_counter;
 	int m_italic_counter;
+
+	void finalize_print() const;
 };
 
 }

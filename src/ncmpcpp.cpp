@@ -33,6 +33,7 @@
 
 #include "actions.h"
 #include "bindings.h"
+#include "screens/artwork.h"
 #include "screens/browser.h"
 #include "charset.h"
 #include "configuration.h"
@@ -47,6 +48,7 @@
 #include "screens/visualizer.h"
 #include "title.h"
 #include "utility/conversion.h"
+#include "screens/screen.h"
 
 namespace ph = std::placeholders;
 
@@ -57,7 +59,7 @@ std::streambuf *cerr_buffer;
 std::streambuf *clog_buffer;
 
 volatile bool run_resize_screen = false;
-	
+
 void sighandler(int sig)
 {
 	if (sig == SIGWINCH)
@@ -77,6 +79,9 @@ void do_at_exit()
 	Mpd.Disconnect();
 	NC::destroyScreen();
 	windowTitle("");
+#	ifdef ENABLE_ARTWORK
+	delete myArtwork;
+#	endif
 }
 
 }
@@ -180,6 +185,12 @@ int main(int argc, char **argv)
 				Status::clear();
 				// clear mpd callback
 				wFooter->clearFDCallbacksList();
+#	ifdef ENABLE_ARTWORK
+				// add artwork callback
+				if (Config.albumart)
+					Global::wFooter->addFDCallback(myArtwork->pipefd_read, ArtworkHelper::drawToScreen);
+#	endif
+
 				try
 				{
 					Mpd.Connect();
@@ -223,6 +234,10 @@ int main(int argc, char **argv)
 					k.first,
 					k.second,
 					std::bind(&Binding::execute, ph::_1));
+#	ifdef ENABLE_ARTWORK
+				// Reset artwork position if a window scrolls
+				myArtwork->resetArtworkPosition();
+#	endif
 			}
 			catch (ConversionError &e)
 			{

@@ -22,6 +22,7 @@ ncmpcpp_SOURCES = \
 	screens/tag_editor.cpp \
 	screens/tiny_tag_editor.cpp \
 	screens/visualizer.cpp \
+	screens/artwork.cpp \
 	utility/comparators.cpp \
 	utility/html.cpp \
 	utility/option_parser.cpp \
@@ -84,6 +85,7 @@ noinst_HEADERS = \
 	screens/tag_editor.h \
 	screens/tiny_tag_editor.h \
 	screens/visualizer.h \
+	screens/artwork.h \
 	utility/comparators.h \
 	utility/const.h \
 	utility/conversion.h \

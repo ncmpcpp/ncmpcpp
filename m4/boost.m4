@@ -856,6 +856,17 @@ BOOST_DEFUN([Hash],
 [BOOST_FIND_HEADER([boost/functional/hash.hpp])])
 
 
+# BOOST_JSON([PREFERRED-RT-OPT])
+# -----------------------------------
+# Look for Boost.JSON.  For the documentation of PREFERRED-RT-OPT, see the
+# documentation of BOOST_FIND_LIB above.
+BOOST_DEFUN([JSON],
+[BOOST_FIND_LIB([json], [$1],
+                [boost/json.hpp],
+                [boost::json::value v;])
+])# BOOST_JSON
+
+
 # BOOST_LAMBDA()
 # --------------
 # Look for Boost.Lambda
@@ -994,6 +1005,20 @@ BOOST_DEFUN([Optional],
 # Look for Boost.Preprocessor
 BOOST_DEFUN([Preprocessor],
 [BOOST_FIND_HEADER([boost/preprocessor/repeat.hpp])])
+
+
+# BOOST_PROCESS()
+# ------------
+# Look for Boost.Process
+BOOST_DEFUN([Process],
+[BOOST_FIND_HEADER([boost/process.hpp])])
+
+
+# BOOST_PROPERTY_TREE()
+# ------------
+# Look for Boost.PropertyTree
+BOOST_DEFUN([Property_Tree],
+[BOOST_FIND_HEADER([boost/property_tree/ptree.hpp])])
 
 
 # BOOST_RANGE()
