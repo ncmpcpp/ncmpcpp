@@ -67,6 +67,12 @@ const NC::FormattedColor &toColor(size_t number, size_t max, bool wrap)
 
 }
 
+VisualizerCacheBuffer::VisualizerCacheBuffer() :
+buf(),
+samples(0),
+is_stereo(false)
+{}
+
 Visualizer::Visualizer()
 : Screen(NC::Window(0, MainStartY, COLS, MainHeight, "", NC::Color::Default, NC::Border()))
 , m_output_id(-1)
@@ -86,6 +92,8 @@ Visualizer::Visualizer()
   SMOOTH_CHARS(ToWString("▁▂▃▄▅▆▇█")),
   SMOOTH_CHARS_FLIPPED(ToWString("▔🮂🮃🮄🬎🮅🮆█")) // https://unicode.org/charts/PDF/U1FB00.pdf
 #endif
+, vis_cache_buffers()
+, vis_cache_buffers_offset(0)
 {
 	InitDataSource();
 	InitVisualization();
@@ -99,6 +107,8 @@ Visualizer::Visualizer()
 	m_dft_freqspace.reserve(500);
 	m_bar_heights.reserve(100);
 #	endif // HAVE_FFTW3_H
+
+	vis_cache_buffers.resize(Config.visualizer_buffer_size > 0 ? Config.visualizer_buffer_size : 1);
 }
 
 void Visualizer::switchTo()
@@ -218,20 +228,46 @@ void Visualizer::update()
 	w.clear();
 	if (Config.visualizer_in_stereo)
 	{
-		auto chan_samples = m_rendered_samples.size()/2;
-		int16_t buf_left[chan_samples], buf_right[chan_samples];
-		for (size_t i = 0, j = 0; i < m_rendered_samples.size(); i += 2, ++j)
-		{
-			buf_left[j] = m_rendered_samples[i];
-			buf_right[j] = m_rendered_samples[i+1];
+		vis_cache_buffers.at(vis_cache_buffers_offset).buf.resize(m_rendered_samples.size());
+		vis_cache_buffers.at(vis_cache_buffers_offset).samples = m_rendered_samples.size() / 2;
+		vis_cache_buffers.at(vis_cache_buffers_offset).is_stereo = true;
+
+		for (size_t i = 0, idx = 0; i < m_rendered_samples.size(); i += 2, ++idx) {
+			vis_cache_buffers.at(vis_cache_buffers_offset).buf.at(idx) = m_rendered_samples[i];
+			vis_cache_buffers.at(vis_cache_buffers_offset).buf.at(idx + m_rendered_samples.size() / 2)
+				= m_rendered_samples[i + 1];
 		}
 		size_t half_height = w.getHeight()/2;
 
-		(this->*drawStereo)(buf_left, buf_right, chan_samples, half_height);
+		vis_cache_buffers_offset = (vis_cache_buffers_offset + 1) % vis_cache_buffers.size();
+
+		if (vis_cache_buffers.at(vis_cache_buffers_offset).samples != 0) {
+			(this->*drawStereo)
+				(&vis_cache_buffers.at(vis_cache_buffers_offset).buf.at(0),
+				 &vis_cache_buffers.at(vis_cache_buffers_offset).buf.at(m_rendered_samples.size() / 2),
+				 vis_cache_buffers.at(vis_cache_buffers_offset).samples,
+				 half_height);
+		}
 	}
 	else
 	{
-		(this->*draw)(m_rendered_samples.data(), m_rendered_samples.size(), 0, w.getHeight());
+		vis_cache_buffers.at(vis_cache_buffers_offset).buf.clear();
+		vis_cache_buffers.at(vis_cache_buffers_offset).samples = m_rendered_samples.size();
+		vis_cache_buffers.at(vis_cache_buffers_offset).is_stereo = false;
+
+		for (size_t i = 0; i < m_rendered_samples.size(); ++i) {
+			vis_cache_buffers.at(vis_cache_buffers_offset).buf.push_back(m_rendered_samples[i]);
+		}
+
+		vis_cache_buffers_offset = (vis_cache_buffers_offset + 1) % vis_cache_buffers.size();
+
+		if (vis_cache_buffers.at(vis_cache_buffers_offset).samples != 0) {
+			(this->*draw)
+				(&vis_cache_buffers.at(vis_cache_buffers_offset).buf.at(0),
+				 m_rendered_samples.size(),
+				 0,
+				 w.getHeight());
+		}
 	}
 	w.refresh();
 }
@@ -765,6 +801,11 @@ void Visualizer::InitVisualization()
 		buffered_samples *= 2;
 	m_incoming_samples.resize(buffered_samples);
 	m_buffered_samples.resize(buffered_samples);
+
+	// Mark the cached-buffers as invalid.
+	for (auto &cache_buffer : vis_cache_buffers) {
+		cache_buffer.samples = 0;
+	}
 }
 
 /**********************************************************************/
