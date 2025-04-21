@@ -20,16 +20,29 @@
 
 #include <algorithm>
 #include <boost/algorithm/string/replace.hpp>
+#include <cstdlib>
 #include "utility/html.h"
 
 std::string unescapeHtmlUtf8(const std::string &data)
 {
+	int base;
+	size_t offset;
 	std::string result;
 	for (size_t i = 0, j; i < data.length(); ++i)
 	{
 		if (data[i] == '&' && data[i+1] == '#' && (j = data.find(';', i)) != std::string::npos)
 		{
-			int n = atoi(&data.c_str()[i+2]);
+			if (data[i+2] == 'x')
+			{
+				offset = 3;
+				base = 16;
+			}
+			else
+			{
+				offset = 2;
+				base = 10;
+			}
+			int n = strtol(&data.c_str()[i+offset], nullptr, base);
 			if (n >= 0x800)
 			{
 				result += (0xe0 | ((n >> 12) & 0x0f));
