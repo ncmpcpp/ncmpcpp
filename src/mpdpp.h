@@ -36,7 +36,7 @@ namespace MPD {
 void checkConnectionErrors(mpd_connection *conn);
 
 enum PlayerState { psUnknown, psStop, psPlay, psPause };
-enum ReplayGainMode { rgmOff, rgmTrack, rgmAlbum };
+enum ReplayGainMode { rgmOff, rgmTrack, rgmAlbum, rgmAuto };
 
 struct Error: public std::exception
 {
