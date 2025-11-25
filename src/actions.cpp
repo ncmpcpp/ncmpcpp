@@ -25,10 +25,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/locale/conversion.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/process/child.hpp>
-#include <boost/process/io.hpp>
-#include <boost/process/pipe.hpp>
-#include <boost/process/search_path.hpp>
 #include <boost/property_tree/exceptions.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -36,6 +32,14 @@
 #include <algorithm>
 #include <iostream>
 #include <mpd/tag.h>
+
+#include <cstdio>
+#include <cstdlib>
+#include <sstream>
+#include <string>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "actions.h"
 #include "charset.h"
