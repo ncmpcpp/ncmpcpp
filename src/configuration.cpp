@@ -196,9 +196,9 @@ bool configure(int argc, char **argv)
 		std::for_each(bindings_paths.begin(), bindings_paths.end(), expand_home);
 		if (Bindings.read(bindings_paths) == false)
 			exit(1);
-		if (vm.count("no-default-bindings") == false ){
+
+		if ((vm.count("no-default-bindings") == false) && (Config.default_bindings == true))
 			Bindings.generateDefaults();
-		}
 
 		// create directories
 		boost::filesystem::create_directories(Config.ncmpcpp_directory);

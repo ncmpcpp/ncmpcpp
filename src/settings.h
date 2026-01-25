@@ -192,6 +192,7 @@ struct Configuration
 	bool allow_for_physical_item_deletion;
 	bool media_library_albums_split_by_date;
 	bool startup_slave_screen_focus;
+	bool default_bindings;
 
 	unsigned mpd_connection_timeout;
 	unsigned crossfade_time;
