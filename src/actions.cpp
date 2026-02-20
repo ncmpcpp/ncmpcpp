@@ -2156,8 +2156,9 @@ void ToggleReplayGainMode::run()
 		<< "[" << NC::Format::Bold << 'o' << NC::Format::NoBold << "ff"
 		<< "/" << NC::Format::Bold << 't' << NC::Format::NoBold << "rack"
 		<< "/" << NC::Format::Bold << 'a' << NC::Format::NoBold << "lbum"
+		<< "/" << 'a' << NC::Format::Bold << 'u' << NC::Format::NoBold << "to"
 		<< "] ";
-		rgm = Statusbar::Helpers::promptReturnOneOf({'t', 'a', 'o'});
+		rgm = Statusbar::Helpers::promptReturnOneOf({'t', 'a', 'o', 'u'});
 	}
 	switch (rgm)
 	{
@@ -2169,6 +2170,9 @@ void ToggleReplayGainMode::run()
 			break;
 		case 'o':
 			Mpd.SetReplayGainMode(MPD::rgmOff);
+			break;
+		case 'u':
+			Mpd.SetReplayGainMode(MPD::rgmAuto);
 			break;
 		default: // impossible
 			throw std::runtime_error(
