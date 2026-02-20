@@ -25,8 +25,17 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/locale/conversion.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/process/child.hpp>
+#include <boost/process/io.hpp>
+#include <boost/process/pipe.hpp>
+#include <boost/process/search_path.hpp>
+#include <boost/property_tree/exceptions.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ptree_fwd.hpp>
 #include <algorithm>
 #include <iostream>
+#include <mpd/tag.h>
 
 #include "actions.h"
 #include "charset.h"
@@ -2748,6 +2757,99 @@ void ShowServerInfo::run()
 	myServerInfo->switchTo();
 }
 
+bool AddYoutubeDLItem::canBeRun()
+{
+	return myScreen == myPlaylist;
+}
+
+void AddYoutubeDLItem::run()
+{
+	using Global::wFooter;
+	namespace bp = boost::process;
+	namespace pt = boost::property_tree;
+
+	std::string url;
+	{
+		Statusbar::ScopedLock slock;
+		Statusbar::put() << "Add via youtube-dl: ";
+		url = wFooter->prompt();
+	}
+
+	// do nothing if no url is given
+	if (url.empty())
+		return;
+
+	// search the youtube-dl executable in the PATH
+	auto ydl_path = bp::search_path("youtube-dl");
+	if (ydl_path.empty()) {
+		Statusbar::print("youtube-dl was not found in PATH");
+		return;
+	}
+
+	Statusbar::printf("Calling youtube-dl with '%1%' ...", url);
+
+	// start youtube-dl in a child process
+	// -j: output as JSON, each playlist item on a separate line
+	// -f bestaudio/best: selects the best available audio-only stream, or
+	//                    alternatively the best audio+video stream
+	bp::ipstream output;
+	bp::child child_process(ydl_path, url, "-j", "-f", "bestaudio/best", bp::std_out > output,
+	                        bp::std_err > bp::null);
+
+	// extract the URL and metadata from a ptree object and add
+	auto add_song = [] (const pt::ptree& ptree) {
+		auto download_url = ptree.get<std::string>("url");
+		auto title = ptree.get_optional<std::string>("title");
+		auto artist = ptree.get_optional<std::string>("creator");
+		if (!artist.has_value()) {
+			artist = ptree.get_optional<std::string>("uploader");
+		}
+		auto album = ptree.get_optional<std::string>("album");
+		auto id = Mpd.AddSong(download_url);
+		if (id == -1) {
+			return 0;
+		}
+		if (title.has_value()) {
+			Mpd.AddTag(id, MPD_TAG_TITLE, *title);
+		}
+		if (artist.has_value()) {
+			Mpd.AddTag(id, MPD_TAG_ARTIST, *artist);
+		}
+		if (album.has_value()) {
+			Mpd.AddTag(id, MPD_TAG_ALBUM, *album);
+		}
+		return 1;
+	};
+
+	std::string line;
+	pt::ptree ptree;
+	unsigned num_songs_added = 0;
+
+	while (std::getline(output, line)) {
+		try {
+			std::istringstream line_stream(line);
+			pt::read_json(line_stream, ptree);
+			num_songs_added += add_song(ptree);
+		} catch (pt::ptree_error &e) {
+			Statusbar::print("An error occurred while parsing the output of youtube-dl");
+			continue;
+		}
+		Statusbar::printf("Added %1% item(s) to playlist", num_songs_added);
+	}
+
+	if (child_process.running()) {
+		child_process.terminate();
+	}
+	child_process.wait();
+
+	auto ec = child_process.exit_code();
+	if (ec == 0) {
+		Statusbar::printf("Added %1% item(s) to playlist", num_songs_added);
+	} else {
+		Statusbar::printf("Added %1% item(s) to playlist (youtube-dl exited with exit code %2%)", num_songs_added, ec);
+	}
+}
+
 }
 
 namespace {
@@ -2886,6 +2988,7 @@ void populateActions()
 	insert_action(new Actions::ShowVisualizer());
 	insert_action(new Actions::ShowClock());
 	insert_action(new Actions::ShowServerInfo());
+	insert_action(new Actions::AddYoutubeDLItem());
 	for (size_t i = 0; i < AvailableActions.size(); ++i)
 	{
 		if (AvailableActions[i] == nullptr)
