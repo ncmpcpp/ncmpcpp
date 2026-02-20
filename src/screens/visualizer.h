@@ -35,6 +35,13 @@
 # include <fftw3.h>
 #endif
 
+struct VisualizerCacheBuffer {
+	VisualizerCacheBuffer();
+
+	std::vector<int16_t> buf;
+	size_t samples;
+	bool is_stereo;
+};
 
 struct Visualizer: Screen<NC::Window>, Tabbable
 {
@@ -122,6 +129,9 @@ private:
 
 	std::vector<double> m_freq_magnitudes;
 #	endif // HAVE_FFTW3_H
+
+	std::vector<VisualizerCacheBuffer> vis_cache_buffers;
+	size_t vis_cache_buffers_offset;
 };
 
 extern Visualizer *myVisualizer;

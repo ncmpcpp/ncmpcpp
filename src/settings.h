@@ -201,6 +201,7 @@ struct Configuration
 	unsigned lyrics_db;
 	unsigned lines_scrolled;
 	unsigned search_engine_default_search_mode;
+	unsigned visualizer_buffer_size;
 
 	boost::regex::flag_type regex_type;
 

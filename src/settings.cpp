@@ -282,6 +282,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("visualizer_spectrum_log_scale_y", &visualizer_spectrum_log_scale_y, "yes", yes_no);
 	p.add("visualizer_color", &visualizer_colors,
 	      "blue, cyan, green, yellow, magenta, red", list_of<NC::FormattedColor>);
+	p.add("visualizer_buffer_size", &visualizer_buffer_size, "1");
 	p.add("system_encoding", &system_encoding, "", [](std::string encoding) {
 #ifdef HAVE_LANGINFO_H
 			// try to autodetect system encoding
