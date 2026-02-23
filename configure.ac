@@ -14,10 +14,12 @@ LT_INIT
 AC_ARG_ENABLE(outputs, AS_HELP_STRING([--enable-outputs], [Enable outputs screen @<:@default=no@:>@]), [outputs=$enableval], [outputs=no])
 AC_ARG_ENABLE(visualizer, AS_HELP_STRING([--enable-visualizer], [Enable music visualizer screen @<:@default=no@:>@]), [visualizer=$enableval], [visualizer=no])
 AC_ARG_ENABLE(clock, AS_HELP_STRING([--enable-clock], [Enable clock screen @<:@default=no@:>@]), [clock=$enableval], [clock=no])
+AC_ARG_ENABLE(dbus_mpris, AS_HELP_STRING([--enable-dbus-mpris], [Enable MPRIS2 D-Bus interface (for playerctl) @<:@default=auto@:>@]), [dbus_mpris=$enableval], [dbus_mpris=auto])
 
 AC_ARG_WITH(fftw, AS_HELP_STRING([--with-fftw], [Enable fftw support (required for frequency spectrum vizualization) @<:@default=auto@:>@]), [fftw=$withval], [fftw=auto])
 AC_ARG_WITH(taglib, AS_HELP_STRING([--with-taglib], [Enable tag editor @<:@default=auto@:>@]), [taglib=$withval], [taglib=auto])
 AC_ARG_WITH(lto, AS_HELP_STRING([--with-lto], [Enable LTO (link time optimization) @<:@default=yes@:>@]), [lto=$withval], [lto=yes])
+
 
 if test "$outputs" = "yes"; then
 	AC_DEFINE([ENABLE_OUTPUTS], [1], [enables outputs screen])
@@ -257,6 +259,21 @@ PKG_CHECK_MODULES([libcurl], [libcurl], [
 ],
 	AC_MSG_ERROR([libcurl is required!])
 )
+
+# dbus-1 (optional, for MPRIS)
+if test "$dbus_mpris" != "no"; then
+	PKG_CHECK_MODULES([dbus1], [dbus-1], [
+		AC_SUBST(dbus1_CFLAGS)
+		AC_SUBST(dbus1_LIBS)
+		CPPFLAGS="$CPPFLAGS $dbus1_CFLAGS"
+		LIBS="$LIBS $dbus1_LIBS"
+		AC_DEFINE([ENABLE_DBUS_MPRIS], [1], [enable MPRIS2 D-Bus interface])
+	], [
+		if test "$dbus_mpris" = "yes"; then
+			AC_MSG_ERROR([dbus-1 is required when --enable-dbus-mpris is requested])
+		fi
+	])
+fi
 
 # taglib
 if test "$taglib" != "no" ; then
