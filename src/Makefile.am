@@ -44,6 +44,7 @@ ncmpcpp_SOURCES = \
 	macro_utilities.cpp \
 	mpdpp.cpp \
 	mutable_song.cpp \
+	mpris_dbus.cpp \
 	ncmpcpp.cpp \
 	settings.cpp \
 	song.cpp \
@@ -115,6 +116,7 @@ noinst_HEADERS = \
 	macro_utilities.h \
 	mpdpp.h \
 	mutable_song.h \
+	mpris_dbus.h \
 	regex_filter.h \
 	runnable_item.h \
 	settings.h \
