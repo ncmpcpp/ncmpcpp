@@ -79,14 +79,6 @@ protected:
 	virtual const char *regex() const override { return "<div class=\"content.*?</div>(.*?)See also"; }
 };
 
-struct GeniusFetcher : public GoogleLyricsFetcher
-{
-	virtual const char *name() const override { return "genius.com"; }
-
-protected:
-	virtual const char *regex() const override { return "<div data-lyrics-container.*?>(.*?)</div>"; }
-};
-
 struct JahLyricsFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const override { return "jah-lyrics.com"; }

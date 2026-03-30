@@ -44,9 +44,7 @@ std::istream &operator>>(std::istream &is, LyricsFetcher_ &fetcher)
 {
 	std::string s;
 	is >> s;
-	if (s == "genius")
-		fetcher = std::make_unique<GeniusFetcher>();
-	else if (s == "justsomelyrics")
+	if (s == "justsomelyrics")
 		fetcher = std::make_unique<JustSomeLyricsFetcher>();
 	else if (s == "jahlyrics")
 		fetcher = std::make_unique<JahLyricsFetcher>();
@@ -123,7 +121,7 @@ std::vector<std::string> LyricsFetcher::getContent(const char *regex_,
                                                    const std::string &data)
 {
 	std::vector<std::string> result;
-	boost::regex rx(regex_);
+	boost::regex rx(regex_, boost::regex::perl);
 	auto first = boost::sregex_iterator(data.begin(), data.end(), rx);
 	auto last = boost::sregex_iterator();
 	for (; first != last; ++first)

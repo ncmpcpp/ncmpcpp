@@ -465,7 +465,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 #ifdef HAVE_TAGLIB_H
 	      "tags, "
 #endif
-	      "genius, tekstowo, plyrics, justsomelyrics, jahlyrics, zeneszoveg, internet", [this](std::string v) {
+	      "tekstowo, plyrics, justsomelyrics, jahlyrics, zeneszoveg, internet", [this](std::string v) {
 		      lyrics_fetchers = list_of<LyricsFetcher_>(v, [](std::string s) {
 			      LyricsFetcher_ fetcher;
 			      try {
