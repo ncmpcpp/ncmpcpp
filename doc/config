@@ -627,3 +627,14 @@
 #
 #active_window_border = red
 #
+## By default all default key bindings are loaded unless explicitly override in
+## local bindings in ~/.ncmpcpp/bindings or $XDG_CONFIG_HOME/ncmpcpp/bindings
+##
+## This config will disable that behaviour when set to no
+##
+## Note: with this config enabled it is required to have atlease one
+## key defined in bindings file
+## i.e ncmpcpp crashes if bindings file is empty or not found in expected
+## path
+# default_bindings = yes
+#

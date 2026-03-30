@@ -95,6 +95,7 @@ bool configure(int argc, char **argv)
 		("ignore-config-errors", "ignore unknown and invalid options in configuration files")
 		("test-lyrics-fetchers", "check if lyrics fetchers work")
 		("bindings,b", po::value<std::vector<std::string>>(&bindings_paths)->value_name("PATH")->default_value(default_bindings_paths, join<std::string>(default_bindings_paths, " AND ")), "specify bindings file(s)")
+		("no-default-bindings", "disable default keybindings")
 		("screen,s", po::value<std::string>()->value_name("SCREEN"), "specify the startup screen")
 		("slave-screen,S", po::value<std::string>()->value_name("SCREEN"), "specify the startup slave screen")
 		("help,?", "show help message")
@@ -194,7 +195,9 @@ bool configure(int argc, char **argv)
 		std::for_each(bindings_paths.begin(), bindings_paths.end(), expand_home);
 		if (Bindings.read(bindings_paths) == false)
 			exit(1);
-		Bindings.generateDefaults();
+
+		if ((vm.count("no-default-bindings") == false) && (Config.default_bindings == true))
+			Bindings.generateDefaults();
 
 		// create directories
 		boost::filesystem::create_directories(Config.ncmpcpp_directory);
@@ -270,3 +273,4 @@ bool configure(int argc, char **argv)
 	}
 	return true;
 }
+
