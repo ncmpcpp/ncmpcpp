@@ -111,6 +111,28 @@ protected:
 	virtual const char *regex() const override { return "<div class=\"lyrics-plain-text trans_original\">(.*?)</div>"; }
 };
 
+struct AzLyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() const override { return "azlyrics.com"; }
+protected:
+	virtual const char *regex() const override { return "(?s)<!-- Usage of azlyrics\\.com content.*?-->(.*?)</div>"; }
+};
+
+struct DarkLyricsFetcher : public GoogleLyricsFetcher
+{
+	virtual const char *name() const override { return "darklyrics.com"; }
+	virtual Result fetch(const std::string &artist, const std::string &title, const MPD::Song &song) override;
+
+protected:
+	virtual const char *regex() const override { 
+		return "(?s)<div class=\"lyrics\">(.*?)(?:<div class=\"thanks\"|<div class=\"note\"|</div>)"; 
+	}
+	virtual void postProcess(std::string &data) const override;
+
+private:
+	std::string current_title;
+};
+
 struct InternetLyricsFetcher : public GoogleLyricsFetcher
 {
 	virtual const char *name() const override { return "the Internet"; }
