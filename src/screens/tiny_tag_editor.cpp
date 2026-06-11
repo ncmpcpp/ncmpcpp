@@ -145,8 +145,12 @@ void TinyTagEditor::runAction()
 		Statusbar::put() << NC::Format::Bold << "Filename: " << NC::Format::NoBold;
 		std::string filename = itsEdited.getNewName().empty() ? itsEdited.getName() : itsEdited.getNewName();
 		size_t dot = filename.rfind(".");
-		std::string extension = filename.substr(dot);
-		filename = filename.substr(0, dot);
+		std::string extension;
+		if (dot != std::string::npos)
+		{
+			extension = filename.substr(dot);
+			filename = filename.substr(0, dot);
+		}
 		std::string new_name = Global::wFooter->prompt(filename);
 		if (!new_name.empty())
 		{
