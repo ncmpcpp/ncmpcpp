@@ -33,6 +33,7 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <cassert>
+#include <vector>
 
 #include "global.h"
 #include "settings.h"
@@ -219,7 +220,7 @@ void Visualizer::update()
 	if (Config.visualizer_in_stereo)
 	{
 		auto chan_samples = m_rendered_samples.size()/2;
-		int16_t buf_left[chan_samples], buf_right[chan_samples];
+		std::vector<int16_t> buf_left(chan_samples), buf_right(chan_samples);
 		for (size_t i = 0, j = 0; i < m_rendered_samples.size(); i += 2, ++j)
 		{
 			buf_left[j] = m_rendered_samples[i];
@@ -227,7 +228,7 @@ void Visualizer::update()
 		}
 		size_t half_height = w.getHeight()/2;
 
-		(this->*drawStereo)(buf_left, buf_right, chan_samples, half_height);
+		(this->*drawStereo)(buf_left.data(), buf_right.data(), chan_samples, half_height);
 	}
 	else
 	{
