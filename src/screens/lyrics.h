@@ -99,7 +99,7 @@ private:
 
 	MPD::Song m_song;
 	LyricsFetcher *m_fetcher;
-	boost::BOOST_THREAD_FUTURE<boost::optional<std::string>> m_worker;
+	boost::BOOST_THREAD_FUTURE<LyricsFetcher::Result> m_worker;
 
 	Shared<ConsumerState> m_consumer_state;
 };
