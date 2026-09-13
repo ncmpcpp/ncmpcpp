@@ -65,13 +65,11 @@ public:
 		return m_cmp(a.getName(), b.getName()) < 0;
 	}
 	
-	template <typename A, typename B>
-	bool operator()(const std::pair<A, B> &a, const std::pair<A, B> &b) const {
+	bool operator()(const std::pair<std::string, std::string> &a, const std::pair<std::string, std::string> &b) const {
 		return m_cmp(a.first, b.first) < 0;
 	}
 	
-	template <typename ItemT, typename FunT>
-	bool operator()(const RunnableItem<ItemT, FunT> &a, const RunnableItem<ItemT, FunT> &b) const {
+	bool operator()(const RunnableItem<std::string, void()> &a, const RunnableItem<std::string, void()> &b) const {
 		return m_cmp(a.item(), b.item()) < 0;
 	}
 };
