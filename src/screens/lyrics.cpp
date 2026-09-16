@@ -119,7 +119,7 @@ bool saveLyrics(const std::string &filename, const std::string &lyrics)
 		return false;
 }
 
-boost::optional<std::string> downloadLyrics(
+LyricsFetcher::Result downloadLyrics(
 	const MPD::Song &s,
 	std::shared_ptr<Shared<NC::Buffer>> shared_buffer,
 	std::shared_ptr<std::atomic<bool>> download_stopper,
@@ -172,7 +172,7 @@ boost::optional<std::string> downloadLyrics(
 		for (auto &fetcher : Config.lyrics_fetchers)
 		{
 			if (download_stopper && download_stopper->load())
-				return boost::none;
+				return std::make_pair(false, "");
 			fetcher_result = fetch_lyrics(fetcher);
 			if (fetcher_result.first)
 				break;
@@ -181,10 +181,7 @@ boost::optional<std::string> downloadLyrics(
 	else
 		fetcher_result = fetch_lyrics(current_fetcher);
 
-	boost::optional<std::string> result;
-	if (fetcher_result.first)
-		result = std::move(fetcher_result.second);
-	return result;
+	return fetcher_result;
 }
 
 }
@@ -219,13 +216,13 @@ void Lyrics::update()
 
 		if (m_worker.is_ready())
 		{
-			auto lyrics = m_worker.get();
-			if (lyrics)
+      LyricsFetcher::Result lyrics = m_worker.get();
+			if (lyrics.first)
 			{
 				w.clear();
-				w << Charset::utf8ToLocale(*lyrics);
+				w << Charset::utf8ToLocale(lyrics.second);
 				std::string filename = lyricsFilename(m_song);
-				if (!saveLyrics(filename, *lyrics))
+				if (!saveLyrics(filename, lyrics.second))
 					Statusbar::printf("Couldn't save lyrics as \"%1%\": %2%",
 					                  filename, strerror(errno));
 			}
@@ -414,8 +411,8 @@ void Lyrics::fetchInBackground(const MPD::Song &s, bool notify_)
 			if (!cs.song().empty() && !cs.song().isStream())
 			{
 				auto lyrics = downloadLyrics(cs.song(), nullptr, nullptr, m_fetcher);
-				if (lyrics)
-					saveLyrics(lyrics_file, *lyrics);
+				if (lyrics.first)
+					saveLyrics(lyrics_file, lyrics.second);
 			}
 		}
 	};
@@ -446,7 +443,7 @@ boost::optional<std::string> Lyrics::tryTakeConsumerMessage()
 void Lyrics::clearWorker()
 {
 	m_shared_buffer.reset();
-	m_worker = boost::BOOST_THREAD_FUTURE<boost::optional<std::string>>();
+	m_worker = boost::BOOST_THREAD_FUTURE<LyricsFetcher::Result>();
 }
 
 void Lyrics::stopDownload()
