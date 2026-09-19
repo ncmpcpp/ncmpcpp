@@ -594,6 +594,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 		      return --mode;
 	      });
 	p.add("external_editor", &external_editor, "nano", adjust_path);
+    p.add("sync_lyrics_to_tags", &sync_lyrics_to_tags, "no", yes_no);
 	p.add("use_console_editor", &use_console_editor, "yes", yes_no);
 	p.add("colors_enabled", &colors_enabled, "yes", yes_no);
 	p.add("empty_tag_color", &empty_tags_color, "cyan");

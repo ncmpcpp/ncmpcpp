@@ -77,6 +77,7 @@ struct Configuration
 	Format::AST<wchar_t> new_header_second_line;
 
 	std::string external_editor;
+	bool sync_lyrics_to_tags;
 	std::string system_encoding;
 	std::string execute_on_song_change;
 	std::string execute_on_player_state_change;
