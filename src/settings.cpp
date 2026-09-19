@@ -546,6 +546,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 	p.add("ask_before_shuffling_playlists", &ask_before_shuffling_playlists,
 	      "yes", yes_no);
 	p.add("clock_display_seconds", &clock_display_seconds, "no", yes_no);
+	p.add("clock_time_format", &clock_time_format, "+x");
 	p.add("display_volume_level", &display_volume_level, "yes", yes_no);
 	p.add("display_bitrate", &display_bitrate, "no", yes_no);
 	p.add("display_remaining_time", &display_remaining_time, "no", yes_no);
