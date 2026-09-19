@@ -515,6 +515,9 @@ void Connection::SetReplayGainMode(ReplayGainMode mode)
 		case rgmAlbum:
 			rg_mode = "album";
 			break;
+		case rgmAuto:
+			rg_mode = "auto";
+			break;
 		default:
 			rg_mode = "";
 			break;
