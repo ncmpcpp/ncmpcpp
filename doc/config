@@ -37,8 +37,17 @@
 #
 #mpd_crossfade_time = 5
 #
-# Exclude pattern for random song action
-# http://www.boost.org/doc/libs/1_46_1/libs/regex/doc/html/boost_regex/syntax/perl_syntax.html
+## Random default type add (*s*ongs/*a*rtists/album*A*rtists/al*b*ums)
+##
+#random_default_type = "s"
+#
+## Number of random songs/artists/albumArtists/albums to add
+##
+#random_default_number = 20
+#
+## Exclude pattern for random song action
+## http://www.boost.org/doc/libs/1_46_1/libs/regex/doc/html/boost_regex/syntax/perl_syntax.html
+##
 #random_exclude_pattern = "^(temp|midi_songs).*"
 #
 ##### music visualizer #####
