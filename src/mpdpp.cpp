@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <map>
+#include <random>
 #include <boost/regex.hpp>
 
 #include "charset.h"
@@ -596,14 +597,97 @@ bool Connection::AddRandomTag(mpd_tag_type tag, size_t number, std::mt19937 &rng
 	{
 		StartSearch(true);
 		AddSearch(tag, *it++);
-		std::vector<std::string> paths;
 		MPD::SongIterator s = CommitSearchSongs(), end;
-		for (; s != end; ++s)
-			paths.push_back(s->getURI());
-		StartCommandsList();
-		for (const auto &path : paths)
-			AddSong(path);
-		CommitCommandsList();
+		if (tag != MPD_TAG_ALBUM)
+		{
+			std::vector<std::string> paths;
+			for (; s != end; ++s)
+				paths.push_back(s->getURI());
+			StartCommandsList();
+			for (const auto &path : paths)
+				AddSong(path);
+			CommitCommandsList();
+		}
+		else
+		{
+			// Treat (album, album artist) as the identifier when picking albums.
+			// So pick a single album artist.
+			// Limitations of this approach:
+			// - The way this is done here makes it slightly less probable for an album
+			//   that shares its name with others to be picked, compared to an album that
+			//   has a unique name. This is an acceptable compromise, since ensuring equal
+			//   probabilities would require requesting data for all songs from MPD.
+			// - Albums with identical names count as only one album for the check
+			//   `numbers > tags.size()` above. This does not matter much.
+			// - If one album has album artist A, and another identically named album has
+			//   album artists A and B, then picking the first album will also add the
+			//   second album. This is very unlikely to happen in real life.
+			// - Not having an album artist is treated as having the empty string as
+			//   an album artist since they are indistinguishable for us. This way even
+			//   albums without album artists have a chance to be chosen.
+			// - If there are two or more albums with the same name and without album
+			//   artists, we treat them as one since we cannot distinguish between them.
+			std::vector<Song> songs;
+			std::set<std::string> album_artists;
+			for (; s != end; ++s)
+			{
+				songs.push_back(*s);
+				for (unsigned idx = 0; ; ++idx)
+				{
+					std::string aa = s->getAlbumArtist(idx);
+					if (aa.empty())
+					{
+						if (idx == 0)
+						{
+							// The song has no album artists.
+							album_artists.insert("");
+						}
+						break;
+					}
+					album_artists.insert(aa);
+				}
+			}
+			std::string selected_album_artist;
+			if (album_artists.size() > 1)
+			{
+				std::uniform_int_distribution<size_t> udist(0, album_artists.size() - 1);
+				auto aait = album_artists.begin();
+				std::advance(aait, udist(rng));
+				selected_album_artist = *aait;
+			}
+			StartCommandsList();
+			for (const auto &song : songs)
+			{
+				bool add = false;
+				if (album_artists.size() <= 1)
+					add = true;
+				else
+				{
+					for (unsigned idx = 0; ; ++idx)
+					{
+						std::string aa = song.getAlbumArtist(idx);
+						if (aa.empty())
+						{
+							if (idx == 0 && selected_album_artist == "")
+							{
+								// The song has no album artists and the selected album
+								// artist is empty, so add the song anyway.
+								add = true;
+							}
+							break;
+						}
+						if (aa == selected_album_artist)
+						{
+							add = true;
+							break;
+						}
+					}
+				}
+				if (add)
+					AddSong(song.getURI());
+			}
+			CommitCommandsList();
+		}
 	}
 	return true;
 }
