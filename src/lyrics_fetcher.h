@@ -39,6 +39,7 @@ struct LyricsFetcher
 	
 protected:
 	virtual const char *urlTemplate() const = 0;
+	virtual std::string buildURL(const std::string &artist, const std::string &title) const;
 	virtual const char *regex() const = 0;
 	
 	virtual bool notLyrics(const std::string &) const { return false; }
@@ -109,6 +110,16 @@ struct ZeneszovegFetcher : public GoogleLyricsFetcher
 
 protected:
 	virtual const char *regex() const override { return "<div class=\"lyrics-plain-text trans_original\">(.*?)</div>"; }
+};
+
+struct LetrasFetcher : public LyricsFetcher
+{
+	virtual const char *name() const override { return "letras.com"; }
+
+protected:
+	virtual const char *urlTemplate() const override { return ""; }
+	virtual std::string buildURL(const std::string &artist, const std::string &title) const override;
+	virtual const char *regex() const override { return "<div class=\"[^\"]*lyric-original[^\"]*\">(.*?)</div>"; }
 };
 
 struct InternetLyricsFetcher : public GoogleLyricsFetcher
