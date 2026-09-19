@@ -164,6 +164,7 @@ enum class Type
 	ShowVisualizer,
 	ShowClock,
 	ShowServerInfo,
+	AddYoutubeDLItem,
 	_numberOfActions // needed to dynamically calculate size of action array
 };
 
@@ -1422,6 +1423,15 @@ private:
 #	ifdef HAVE_TAGLIB_H
 	virtual bool canBeRun() override;
 #	endif // HAVE_TAGLIB_H
+	virtual void run() override;
+};
+
+struct AddYoutubeDLItem: BaseAction
+{
+	AddYoutubeDLItem(): BaseAction(Type::AddYoutubeDLItem, "add_youtube-dl_item") { }
+
+private:
+	virtual bool canBeRun() override;
 	virtual void run() override;
 };
 
