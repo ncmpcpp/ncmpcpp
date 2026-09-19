@@ -19,3 +19,5 @@ missing
 **/.deps/
 src/ncmpcpp
 stamp-h1
+.cache/
+compile_commands.json
