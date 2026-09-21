@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 #include <algorithm>
-#include <boost/optional.hpp>
+#include <optional>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <cassert>
 
@@ -58,7 +58,7 @@ size_t RightColumnWidth;
 std::string SongToString(const MPD::Song &s);
 bool PlaylistEntryMatcher(const Regex::Regex &rx, const MPD::Playlist &playlist);
 bool SongEntryMatcher(const Regex::Regex &rx, const MPD::Song &s);
-boost::optional<size_t> GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song);
+std::optional<size_t> GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song);
 }
 
 PlaylistEditor::PlaylistEditor()
@@ -587,7 +587,7 @@ bool SongEntryMatcher(const Regex::Regex &rx, const MPD::Song &s)
 	return Regex::search(SongToString(s), rx, Config.ignore_diacritics);
 }
 
-boost::optional<size_t> GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song)
+std::optional<size_t> GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD::Song &song)
 {
 	size_t index = 0;
 	MPD::SongIterator it = Mpd.GetPlaylistContentNoInfo(playlist.path()), end;
@@ -595,7 +595,7 @@ boost::optional<size_t> GetSongIndexInPlaylist(MPD::Playlist playlist, const MPD
 	for (;;)
 	{
 		if (it == end)
-			return boost::none;
+			return std::nullopt;
 		if (*it == song)
 			return index;
 

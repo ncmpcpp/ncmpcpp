@@ -22,7 +22,7 @@
 #define NCMPCPP_SETTINGS_H
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <boost/regex.hpp>
 #include <cassert>
 #include <vector>
@@ -218,7 +218,7 @@ struct Configuration
 	size_t current_item_inactive_column_suffix_length;
 
 	ScreenType startup_screen_type;
-	boost::optional<ScreenType> startup_slave_screen_type;
+	std::optional<ScreenType> startup_slave_screen_type;
 	std::vector<ScreenType> screen_sequence;
 
 	std::string random_exclude_pattern;

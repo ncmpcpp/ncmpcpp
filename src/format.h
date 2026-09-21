@@ -71,7 +71,7 @@ inline bool operator!=(const SongTag &lhs, const SongTag &rhs) {
 template <typename CharT>
 using TagVector = std::vector<
 	std::pair<
-		boost::optional<SongTag>,
+		std::optional<SongTag>,
 		std::basic_string<CharT>
 		>
 	>;

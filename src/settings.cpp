@@ -517,7 +517,7 @@ bool Configuration::read(const std::vector<std::string> &config_paths, bool igno
 			return screen;
 		});
 	p.add("startup_slave_screen", &startup_slave_screen_type, "", [](std::string v) {
-			boost::optional<ScreenType> screen;
+			std::optional<ScreenType> screen;
 			if (!v.empty())
 			{
 				screen = stringtoStartupScreenType(v);

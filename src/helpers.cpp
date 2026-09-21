@@ -45,23 +45,23 @@ const MPD::Song *currentSong(const BaseScreen *screen)
 void deleteSelectedSongsFromPlaylist(NC::Menu<MPD::Song> &playlist)
 {
 	selectCurrentIfNoneSelected(playlist);
-	boost::optional<int> range_end;
+	std::optional<int> range_end;
 	Mpd.StartCommandsList();
 	for (auto &s : boost::adaptors::reverse(playlist))
 	{
 		if (s.isSelected())
 		{
 			s.setSelected(false);
-			if (range_end == boost::none)
+			if (!range_end.has_value())
 				range_end = s.value().getPosition() + 1;
 		}
-		else if (range_end != boost::none)
+		else if (range_end.has_value())
 		{
 			Mpd.DeleteRange(s.value().getPosition() + 1, *range_end);
 			range_end.reset();
 		}
 	}
-	if (range_end != boost::none)
+	if (range_end.has_value())
 		Mpd.DeleteRange(0, *range_end);
 	Mpd.CommitCommandsList();
 }

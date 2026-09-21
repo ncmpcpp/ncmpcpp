@@ -201,7 +201,7 @@ MPD::Song::GetFunction charToGetFunction(char c)
 	}
 }
 
-boost::optional<mpd_tag_type> getFunctionToTagType(MPD::Song::GetFunction f)
+std::optional<mpd_tag_type> getFunctionToTagType(MPD::Song::GetFunction f)
 {
 	if (f == &MPD::Song::getArtist)
 		return MPD_TAG_ARTIST;
@@ -228,7 +228,7 @@ boost::optional<mpd_tag_type> getFunctionToTagType(MPD::Song::GetFunction f)
 	else if (f == &MPD::Song::getComment)
 		return MPD_TAG_COMMENT;
 	else
-		return boost::none;
+		return std::nullopt;
 }
 
 std::string itemTypeToString(MPD::Item::Type type)

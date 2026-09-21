@@ -219,7 +219,7 @@ private:
 			if (st != nullptr)
 				acc.emplace_back(*st, s);
 			else
-				acc.emplace_back(boost::none, s);
+				acc.emplace_back(std::nullopt, s);
 		}
 	};
 	// When extracting tags from a song all the other properties should be

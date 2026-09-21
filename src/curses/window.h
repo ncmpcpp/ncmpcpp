@@ -27,11 +27,12 @@
 
 #include "curses.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <functional>
 #include <list>
 #include <stack>
 #include <vector>
+#include <stdexcept>
 #include <string>
 #include <tuple>
 #include <queue>
@@ -189,7 +190,7 @@ private:
 
 std::istream &operator>>(std::istream &is, Color &f);
 
-typedef boost::optional<Color> Border;
+using Border = std::optional<Color>;
 
 /// Terminal manipulation functions
 enum class TermManip { ClearToEOL };

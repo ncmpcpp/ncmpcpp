@@ -21,7 +21,7 @@
 #ifndef NCMPCPP_UTILITY_TYPE_CONVERSIONS_H
 #define NCMPCPP_UTILITY_TYPE_CONVERSIONS_H
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "curses/window.h"
 #include "mpdpp.h"
@@ -38,7 +38,7 @@ MPD::MutableSong::SetFunction tagTypeToSetFunction(mpd_tag_type tag);
 mpd_tag_type charToTagType(char c);
 MPD::Song::GetFunction charToGetFunction(char c);
 
-boost::optional<mpd_tag_type> getFunctionToTagType(MPD::Song::GetFunction f);
+std::optional<mpd_tag_type> getFunctionToTagType(MPD::Song::GetFunction f);
 
 std::string itemTypeToString(MPD::Item::Type type);
 

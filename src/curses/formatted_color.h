@@ -21,7 +21,7 @@
 #ifndef NCMPCPP_FORMATTED_COLOR_H
 #define NCMPCPP_FORMATTED_COLOR_H
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <boost/range/adaptor/reversed.hpp>
 #include "curses/window.h"
 #include "utility/storage_kind.h"
