@@ -203,7 +203,27 @@ LyricsFetcher::Result GoogleLyricsFetcher::fetch(const std::string &artist,
 
 bool GoogleLyricsFetcher::isURLOk(const std::string &url)
 {
-	return url.find(siteKeyword()) != std::string::npos;
+	const char *keyword = siteKeyword();
+	if (keyword == nullptr || *keyword == '\0')
+		return false;
+	size_t scheme = url.find("://");
+	if (scheme == std::string::npos)
+		return false;
+	size_t host_start = scheme + 3;
+	size_t host_end = url.find('/', host_start);
+	if (host_end == std::string::npos)
+		host_end = url.length();
+	size_t port = url.find(':', host_start);
+	if (port != std::string::npos && port < host_end)
+		host_end = port;
+	std::string host = url.substr(host_start, host_end - host_start);
+	size_t klen = std::strlen(keyword);
+	if (host.size() < klen)
+		return false;
+	if (host.compare(host.size() - klen, klen, keyword) != 0)
+		return false;
+	// Keyword must be the whole host or be preceded by a subdomain separator.
+	return host.size() == klen || host[host.size() - klen - 1] == '.';
 }
 
 /**********************************************************************/
