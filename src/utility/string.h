@@ -61,4 +61,9 @@ void removeInvalidCharsFromFilename(std::string &filename, bool win32_compatible
 
 void escapeSingleQuotes(std::string &filename);
 
+// Collapse "." and ".." path segments. Relative paths cannot escape above
+// their root via ".."; absolute paths keep their leading slash. Used to
+// confine MPD-supplied URIs/directories under mpd_music_dir before joining.
+std::string normalizePath(const std::string &path);
+
 #endif // NCMPCPP_UTILITY_STRING_H

@@ -21,6 +21,9 @@
 #include <cassert>
 #include <cwctype>
 #include <algorithm>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include "utility/string.h"
 
 std::string getBasename(const std::string &path)
@@ -107,4 +110,28 @@ void escapeSingleQuotes(std::string &filename)
 			i += 3;
 		}
 	}
+}
+
+std::string normalizePath(const std::string &path)
+{
+	std::vector<std::string> parts;
+	boost::split(parts, path, boost::is_any_of("/"));
+	bool absolute = !path.empty() && path[0] == '/';
+	std::vector<std::string> kept;
+	for (auto &part : parts)
+	{
+		if (part.empty() || part == ".")
+			continue;
+		if (part == "..")
+		{
+			if (!kept.empty())
+				kept.pop_back();
+			continue;
+		}
+		kept.push_back(std::move(part));
+	}
+	std::string result = boost::join(kept, "/");
+	if (absolute)
+		result = "/" + result;
+	return result;
 }

@@ -237,7 +237,7 @@ LyricsFetcher::Result TagsLyricsFetcher::fetch([[maybe_unused]] const std::strin
 	std::string path;
 	if (song.isFromDatabase())
 		path += Config.mpd_music_dir;
-	path += song.getURI();
+	path += normalizePath(song.getURI());
 
 	TagLib::FileRef f(path.c_str());
 	if (f.isNull())

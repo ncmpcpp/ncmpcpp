@@ -198,7 +198,7 @@ bool TinyTagEditor::getTags()
 	std::string path_to_file;
 	if (itsEdited.isFromDatabase())
 		path_to_file += Config.mpd_music_dir;
-	path_to_file += itsEdited.getURI();
+	path_to_file += normalizePath(itsEdited.getURI());
 	
 	TagLib::FileRef f(path_to_file.c_str());
 	if (f.isNull())

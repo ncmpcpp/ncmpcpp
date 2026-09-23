@@ -1509,7 +1509,7 @@ void EditLibraryAlbum::run()
 		for (size_t i = 0;  i < myLibrary->Songs.size(); ++i)
 		{
 			Statusbar::printf("Updating tags in \"%1%\"...", myLibrary->Songs[i].value().getName());
-			std::string path = Config.mpd_music_dir + myLibrary->Songs[i].value().getURI();
+			std::string path = Config.mpd_music_dir + normalizePath(myLibrary->Songs[i].value().getURI());
 			TagLib::FileRef f(path.c_str());
 			if (f.isNull())
 			{
@@ -1566,11 +1566,11 @@ void EditDirectoryName::run()
 			std::string full_old_dir;
 			if (!myBrowser->isLocal())
 				full_old_dir += Config.mpd_music_dir;
-			full_old_dir += old_dir;
+			full_old_dir += normalizePath(old_dir);
 			std::string full_new_dir;
 			if (!myBrowser->isLocal())
 				full_new_dir += Config.mpd_music_dir;
-			full_new_dir += new_dir;
+			full_new_dir += normalizePath(new_dir);
 			boost::filesystem::rename(full_old_dir, full_new_dir);
 			const char msg[] = "Directory renamed to \"%1%\"";
 			Statusbar::printf(msg, wideShorten(new_dir, COLS-const_strlen(msg)));
@@ -1590,8 +1590,8 @@ void EditDirectoryName::run()
 		}
 		if (!new_dir.empty() && new_dir != old_dir)
 		{
-			std::string full_old_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + old_dir;
-			std::string full_new_dir = Config.mpd_music_dir + myTagEditor->CurrentDir() + "/" + new_dir;
+			std::string full_old_dir = Config.mpd_music_dir + normalizePath(myTagEditor->CurrentDir() + "/" + old_dir);
+			std::string full_new_dir = Config.mpd_music_dir + normalizePath(myTagEditor->CurrentDir() + "/" + new_dir);
 			if (rename(full_old_dir.c_str(), full_new_dir.c_str()) == 0)
 			{
 				const char msg[] = "Directory renamed to \"%1%\"";

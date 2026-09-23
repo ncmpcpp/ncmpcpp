@@ -25,6 +25,7 @@
 #include "tags.h"
 #include "title.h"
 #include "screens/screen_switcher.h"
+#include "utility/string.h"
 
 #ifdef HAVE_TAGLIB_H
 # include "fileref.h"
@@ -120,7 +121,7 @@ void SongInfo::PrepareSong(const MPD::Song &s)
 		std::string path_to_file;
 		if (s.isFromDatabase())
 			path_to_file += Config.mpd_music_dir;
-		path_to_file += s.getURI();
+		path_to_file += normalizePath(s.getURI());
 		TagLib::FileRef f(path_to_file.c_str());
 		if (!f.isNull())
 		{

@@ -296,7 +296,7 @@ bool write(MPD::MutableSong &s)
 	std::string old_name;
 	if (s.isFromDatabase())
 		old_name += Config.mpd_music_dir;
-	old_name += s.getURI();
+	old_name += normalizePath(s.getURI());
 	
 	TagLib::FileRef f(old_name.c_str());
 	if (f.isNull())
@@ -330,9 +330,9 @@ bool write(MPD::MutableSong &s)
 		std::string new_name;
 		if (s.isFromDatabase())
 			new_name += Config.mpd_music_dir;
-		new_name += s.getDirectory();
+		new_name += normalizePath(s.getDirectory());
 		new_name += "/";
-		new_name += s.getNewName();
+		new_name += normalizePath(s.getNewName());
 		boost::filesystem::rename(old_name, new_name);
 	}
 	return true;
