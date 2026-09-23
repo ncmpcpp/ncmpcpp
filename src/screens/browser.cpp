@@ -609,10 +609,48 @@ void Browser::fetchSupportedExtensions()
 
 namespace {
 
+// Collapse "." and ".." path segments so an MPD-supplied path cannot escape
+// mpd_music_dir via traversal. Relative paths cannot escape above their root
+// via ".."; absolute paths keep their leading slash.
+std::string normalizePath(const std::string &path)
+{
+	bool absolute = !path.empty() && path[0] == '/';
+	std::vector<std::string> kept;
+	size_t start = 0;
+	while (start <= path.length())
+	{
+		size_t end = path.find('/', start);
+		if (end == std::string::npos)
+			end = path.length();
+		std::string seg = path.substr(start, end - start);
+		if (!seg.empty() && seg != ".")
+		{
+			if (seg == "..")
+			{
+				if (!kept.empty())
+					kept.pop_back();
+			}
+			else
+				kept.push_back(seg);
+		}
+		start = end + 1;
+	}
+	std::string result;
+	for (size_t i = 0; i < kept.size(); ++i)
+	{
+		if (i)
+			result += "/";
+		result += kept[i];
+	}
+	if (absolute)
+		result = "/" + result;
+	return result;
+}
+
 std::string realPath(bool local_browser, std::string path)
 {
 	if (!local_browser)
-		path = Config.mpd_music_dir + path;
+		path = Config.mpd_music_dir + normalizePath(path);
 	return path;
 }
 
