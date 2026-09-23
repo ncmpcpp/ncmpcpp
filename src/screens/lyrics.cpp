@@ -19,6 +19,8 @@
  ***************************************************************************/
 
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
 #include <cassert>
@@ -26,6 +28,7 @@
 #include <cstring>
 #include <fstream>
 #include <thread>
+#include <vector>
 
 #include "curses/scrollpad.h"
 #include "screens/browser.h"
@@ -59,6 +62,22 @@ std::string removeExtension(std::string filename)
 	return filename;
 }
 
+// Strip "." and ".." path components and any leading separators so a song URI
+// cannot escape the directory it is joined into.
+std::string stripPathTraversal(std::string path)
+{
+	std::vector<std::string> parts;
+	boost::split(parts, path, boost::is_any_of("/"));
+	std::vector<std::string> kept;
+	for (auto &part : parts)
+	{
+		if (part == ".." || part == "." || part.empty())
+			continue;
+		kept.push_back(std::move(part));
+	}
+	return boost::join(kept, "/");
+}
+
 std::string lyricsFilename(const MPD::Song &s)
 {
 	std::string filename;
@@ -66,8 +85,7 @@ std::string lyricsFilename(const MPD::Song &s)
 	{
 		if (s.isFromDatabase())
 			filename = Config.mpd_music_dir + "/";
-		filename += removeExtension(s.getURI());
-		removeExtension(filename);
+		filename += stripPathTraversal(removeExtension(s.getURI()));
 	}
 	else
 	{
