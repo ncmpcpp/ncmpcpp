@@ -450,6 +450,10 @@ struct Window
 	/// Scrolls the window by amount of lines given in its parameter
 	/// @param where indicates how many lines it has to scroll
 	virtual void scroll(Scroll where);
+
+	/// This checks if the current position is in the middle of a wide character
+	/// Can be used to fix line overshoot with Japanese characters
+	bool isInsideWideChar() const;
 	
 	Window &operator<<(TermManip tm);
 	Window &operator<<(const Color &color);

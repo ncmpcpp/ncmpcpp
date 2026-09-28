@@ -1347,6 +1347,34 @@ void Window::scroll(Scroll where)
 	scrollok(m_window, 0);
 }
 
+bool Window::isInsideWideChar() const
+{
+	const int y = getcury(m_window);
+	const int x = getcurx(m_window);
+	const int max_cols = getWidth();
+	int i = 0;
+	for (; (i + x) < max_cols; i++)
+	{
+		cchar_t cell{};
+		wchar_t characters[CCHARW_MAX]{};
+		attr_t attributes{};
+		short colorPair{};
+		if (mvwin_wch(m_window,y,x + i,&cell) == OK && getcchar(&cell,characters,&attributes,&colorPair,nullptr) != ERR)
+		{
+			//check if it is not 2 col wide
+			if (wcwidth(characters[0]) != 2)
+			{
+				//it is not a 2 col wide char, break
+				break;
+			}
+		}
+	}
+	wmove(m_window, y, x);
+	if ((i % 2) == 1) {
+		return true;
+	}
+	return false;
+}
 
 Window &Window::operator<<(const Color &c)
 {
@@ -1498,7 +1526,14 @@ Window &Window::operator<<(double d)
 
 Window &Window::operator<<(const std::string &s)
 {
-	waddnstr(m_window, s.c_str(), s.length());
+	if (isInsideWideChar())
+	{
+		wmove(m_window, getY(), getX() - 1);
+		const std::string output = "…" + s;
+		waddnstr(m_window, output.c_str(), output.length());
+	} else {
+		waddnstr(m_window, s.c_str(), s.length());
+	}
 	return *this;
 }
 
