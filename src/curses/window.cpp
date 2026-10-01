@@ -450,7 +450,7 @@ void initScreen(bool enable_colors, bool enable_mouse)
 		rl_done = 1;
 		return 0;
 	};
-	// if ctrl-c or ctrl-g is pressed, abort the prompt
+	// if ctrl-c, ctrl-g, or escape is pressed, abort the prompt
 	rl_bind_key('\3', abort_prompt);
 	rl_bind_key('\7', abort_prompt);
 	rl_bind_keyseq("\\e", abort_prompt);
