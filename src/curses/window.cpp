@@ -49,15 +49,6 @@ size_t width;
 bool encrypted;
 const char *base;
 
-bool input_pending(int ms)
-{
-	fd_set fds;
-	FD_ZERO(&fds);
-	FD_SET(STDIN_FILENO, &fds);
-	timeval tv = { 0, ms*1000 };
-	return select(STDIN_FILENO+1, &fds, nullptr, nullptr, &tv) > 0;
-}
-
 int read_key(FILE *)
 {
 	size_t x;
@@ -87,8 +78,6 @@ int read_key(FILE *)
 		}
 	}
 	while (result == ERR);
-	if (result == NC::Key::Escape && !input_pending(25))
-		return '\3';
 	return result;
 }
 
@@ -464,6 +453,8 @@ void initScreen(bool enable_colors, bool enable_mouse)
 	// if ctrl-c or ctrl-g is pressed, abort the prompt
 	rl_bind_key('\3', abort_prompt);
 	rl_bind_key('\7', abort_prompt);
+	rl_bind_keyseq("\\e", abort_prompt);
+	rl_variable_bind("keyseq-timeout", "25");
 	// do not change the state of the terminal
 	rl_prep_term_function = nullptr;
 	rl_deprep_term_function = nullptr;
