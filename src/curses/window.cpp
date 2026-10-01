@@ -49,6 +49,15 @@ size_t width;
 bool encrypted;
 const char *base;
 
+bool input_pending(int ms)
+{
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(STDIN_FILENO, &fds);
+	timeval tv = { 0, ms*1000 };
+	return select(STDIN_FILENO+1, &fds, nullptr, nullptr, &tv) > 0;
+}
+
 int read_key(FILE *)
 {
 	size_t x;
@@ -78,6 +87,8 @@ int read_key(FILE *)
 		}
 	}
 	while (result == ERR);
+	if (result == NC::Key::Escape && !input_pending(25))
+		return '\3';
 	return result;
 }
 
