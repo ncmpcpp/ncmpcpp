@@ -127,7 +127,7 @@ const Type EoF      = Special | 279;
 
 }
 
-/// Thrown if Ctrl-C or Ctrl-G is pressed during the call to Window::getString()
+/// Thrown if Ctrl-C, Ctrl-G, or Escape is pressed during the call to Window::getString()
 /// @see Window::getString()
 struct PromptAborted : std::exception
 {

@@ -450,9 +450,11 @@ void initScreen(bool enable_colors, bool enable_mouse)
 		rl_done = 1;
 		return 0;
 	};
-	// if ctrl-c or ctrl-g is pressed, abort the prompt
+	// if ctrl-c, ctrl-g, or escape is pressed, abort the prompt
 	rl_bind_key('\3', abort_prompt);
 	rl_bind_key('\7', abort_prompt);
+	rl_bind_keyseq("\\e", abort_prompt);
+	rl_variable_bind("keyseq-timeout", "25");
 	// do not change the state of the terminal
 	rl_prep_term_function = nullptr;
 	rl_deprep_term_function = nullptr;

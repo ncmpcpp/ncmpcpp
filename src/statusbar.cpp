@@ -207,7 +207,7 @@ char Statusbar::Helpers::promptReturnOneOf(const std::vector<char> &values)
 	{
 		wFooter->refresh();
 		result = wFooter->readKey();
-		if (result == NC::Key::Ctrl_C || result == NC::Key::Ctrl_G)
+		if (result == NC::Key::Ctrl_C || result == NC::Key::Ctrl_G || result == NC::Key::Escape)
 			throw NC::PromptAborted();
 	}
 	while (std::find(values.begin(), values.end(), result) == values.end());
