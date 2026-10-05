@@ -1376,6 +1376,16 @@ bool Window::isInsideWideChar() const
 	return false;
 }
 
+void Window::fixWideChar() {
+	if (isInsideWideChar()) {
+		const int y = getcury(m_window);
+		const int x = getcurx(m_window);
+		wmove(m_window, y, x - 1);
+		waddstr(m_window, " ");
+		wmove(m_window, y, x);
+	}
+}
+
 Window &Window::operator<<(const Color &c)
 {
 	if (c.isDefault())
@@ -1526,14 +1536,8 @@ Window &Window::operator<<(double d)
 
 Window &Window::operator<<(const std::string &s)
 {
-	if (isInsideWideChar())
-	{
-		wmove(m_window, getY(), getX() - 1);
-		const std::string output = "…" + s;
-		waddnstr(m_window, output.c_str(), output.length());
-	} else {
-		waddnstr(m_window, s.c_str(), s.length());
-	}
+	fixWideChar();
+	waddnstr(m_window, s.c_str(), s.length());
 	return *this;
 }
 

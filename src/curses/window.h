@@ -454,6 +454,9 @@ struct Window
 	/// This checks if the current position is in the middle of a wide character
 	/// Can be used to fix line overshoot with Japanese characters
 	bool isInsideWideChar() const;
+
+	/// This fixes rendering issues when printing on top of wide characters
+	void fixWideChar();
 	
 	Window &operator<<(TermManip tm);
 	Window &operator<<(const Color &color);
