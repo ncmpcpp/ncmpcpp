@@ -71,6 +71,54 @@ std::string Date_(std::string date)
 	return date;
 }
 
+typedef std::map<std::tuple<std::string, std::string, std::string>, time_t> AlbumsWithMTime;
+
+// Modification times are only available from per-song data, which is slow to fetch for the whole database.
+AlbumsWithMTime listAlbumsWithMTime()
+{
+	AlbumsWithMTime albums;
+	for (MPD::SongIterator s = Mpd.GetDirectoryRecursive("/"), end; s != end; ++s)
+	{
+		std::string tag;
+		unsigned idx = 0;
+		while (!(tag = s->get(Config.media_lib_primary_tag, idx++)).empty())
+		{
+			auto key = std::make_tuple(
+				isAlbumOnly ? "" : std::move(tag),
+				s->getAlbum(),
+				Date_(s->getDate()));
+			auto it = albums.find(key);
+			if (it == albums.end())
+				albums[std::move(key)] = s->getMTime();
+			else
+				it->second = s->getMTime();
+		}
+	}
+	return albums;
+}
+
+AlbumsWithMTime listAlbums()
+{
+	std::vector<mpd_tag_type> group_by{Config.media_lib_primary_tag};
+	if (Config.media_library_albums_split_by_date)
+		group_by.push_back(MPD_TAG_DATE);
+
+	AlbumsWithMTime albums;
+	for (auto a = Mpd.GetListGrouped(MPD_TAG_ALBUM, group_by), end = decltype(a)(); a != end; ++a)
+	{
+		auto &tag = (*a)[0];
+		if (tag.empty())
+			continue;
+		albums.emplace(
+			std::make_tuple(
+				isAlbumOnly ? "" : std::move(tag),
+				std::move(a->back()),
+				Config.media_library_albums_split_by_date ? std::move((*a)[1]) : ""),
+			0);
+	}
+	return albums;
+}
+
 MPD::SongIterator getSongsFromAlbum(const AlbumEntry &album)
 {
 	Mpd.StartSearch(true);
@@ -303,34 +351,19 @@ void MediaLibrary::update()
 		{
 			m_albums_update_request = false;
 			sunfilter_albums.set(ReapplyFilter::Yes, true);
-			std::map<std::tuple<std::string, std::string, std::string>, time_t> albums;
-			MPD::SongIterator s, end;
+			AlbumsWithMTime albums;
 			try
 			{
-				s = Mpd.GetDirectoryRecursive("/");
+				if (Config.media_library_sort_by_mtime)
+					albums = listAlbumsWithMTime();
+				else
+					albums = listAlbums();
 			}
 			catch (MPD::Error &e)
 			{
 				// If there was a problem, fall back to a different column mode.
 				toggleColumnsMode();
 				throw;
-			}
-			for (; s != end; ++s)
-			{
-				std::string tag;
-				unsigned idx = 0;
-				while (!(tag = s->get(Config.media_lib_primary_tag, idx++)).empty())
-				{
-					auto key = std::make_tuple(
-						isAlbumOnly ? "" : std::move(tag),
-						s->getAlbum(),
-						Date_(s->getDate()));
-					auto it = albums.find(key);
-					if (it == albums.end())
-						albums[std::move(key)] = s->getMTime();
-					else
-						it->second = s->getMTime();
-				}
 			}
 			size_t idx = 0;
 			for (const auto &album : albums)
