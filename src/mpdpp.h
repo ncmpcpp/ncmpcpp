@@ -490,6 +490,7 @@ typedef Iterator<Output> OutputIterator;
 typedef Iterator<Playlist> PlaylistIterator;
 typedef Iterator<Song> SongIterator;
 typedef Iterator<std::string> StringIterator;
+typedef Iterator<std::vector<std::string>> StringVectorIterator;
 
 struct Connection
 {
@@ -585,6 +586,8 @@ struct Connection
 	
 	PlaylistIterator GetPlaylists();
 	StringIterator GetList(mpd_tag_type type);
+	// Each element holds the value of every group_by tag, in order, followed by the listed value.
+	StringVectorIterator GetListGrouped(mpd_tag_type type, const std::vector<mpd_tag_type> &group_by);
 	ItemIterator GetDirectory(const std::string &directory);
 	SongIterator GetDirectoryRecursive(const std::string &directory);
 	SongIterator GetSongs(const std::string &directory);

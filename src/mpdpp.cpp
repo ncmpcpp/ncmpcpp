@@ -745,6 +745,43 @@ StringIterator Connection::GetList(mpd_tag_type type)
 	});
 }
 
+StringVectorIterator Connection::GetListGrouped(mpd_tag_type type, const std::vector<mpd_tag_type> &group_by)
+{
+	prechecksNoCommandsList();
+	mpd_search_db_tags(m_connection.get(), type);
+	for (auto tag : group_by)
+		mpd_search_add_group_tag(m_connection.get(), tag);
+	mpd_search_commit(m_connection.get());
+	checkErrors();
+	// A group tag is only sent when its value changes, so remember the current ones.
+	std::vector<std::string> current(group_by.size() + 1);
+	return StringVectorIterator(m_connection.get(), [type, group_by, current](StringVectorIterator::State &state) mutable {
+		while (auto pair = mpd_recv_pair(state.connection()))
+		{
+			auto pair_type = mpd_tag_name_iparse(pair->name);
+			bool found = false;
+			if (pair_type == type)
+			{
+				current.back() = pair->value;
+				found = true;
+			}
+			else
+			{
+				auto it = std::find(group_by.begin(), group_by.end(), pair_type);
+				if (it != group_by.end())
+					current[it - group_by.begin()] = pair->value;
+			}
+			mpd_return_pair(state.connection(), pair);
+			if (found)
+			{
+				state.setObject(current);
+				return true;
+			}
+		}
+		return false;
+	});
+}
+
 void Connection::StartSearch(bool exact_match)
 {
 	prechecksNoCommandsList();
